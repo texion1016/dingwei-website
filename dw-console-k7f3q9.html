@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>鼎瑋物件管理後台</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #FBFAF7; --card: #fff; --ink: #241A20; --ink-soft: #6E6067;
+  --plum: #55002B; --plum-deep: #38001C; --plum-tint: #F4E9EF;
+  --gold: #A9803D; --sell: #B33A2B; --rent: #1D5A74; --hairline: #E6DFDB;
+  --ok: #2E7D4F; --warn: #A05A00;
+  --radius: 10px; --shadow: 0 1px 2px rgba(36,26,32,.06), 0 8px 24px rgba(36,26,32,.07);
+}
+* { box-sizing: border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; font-size:15px; line-height:1.7; }
+button { font:inherit; cursor:pointer; }
+img { display:block; }
+:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+
+.topbar { position:sticky; top:0; z-index:30; background:var(--plum); color:#fff; display:flex; align-items:center; gap:14px; padding:12px 22px; }
+.topbar .seal { width:34px; height:34px; display:grid; place-items:center; background:#fff; color:var(--plum); font-family:"Noto Serif TC",serif; font-weight:900; font-size:17px; border-radius:7px; }
+.topbar h1 { font-family:"Noto Serif TC",serif; font-weight:900; font-size:19px; margin:0; letter-spacing:.06em; }
+.topbar .hint { font-size:12.5px; opacity:.75; }
+.topbar a { color:#fff; margin-left:auto; font-size:14px; }
+
+.wrap { max-width:1120px; margin:0 auto; padding:26px 22px 80px; }
+
+/* 登入 */
+.login-mask { position:fixed; inset:0; background:var(--paper); z-index:50; display:grid; place-items:center; }
+.login-box { background:var(--card); border:1px solid var(--hairline); border-top:5px solid var(--plum); border-radius:var(--radius); box-shadow:var(--shadow); padding:36px 40px; width:min(92vw,360px); text-align:center; }
+.login-box h2 { font-family:"Noto Serif TC",serif; font-weight:900; font-size:23px; margin:0 0 6px; letter-spacing:.08em; }
+.login-box p { color:var(--ink-soft); font-size:13.5px; margin:0 0 20px; }
+.login-box input { width:100%; font:inherit; padding:11px 14px; border:1px solid var(--hairline); border-radius:8px; text-align:center; letter-spacing:.2em; }
+.login-box .err { color:var(--sell); font-size:13.5px; display:none; margin:10px 0 0; }
+
+.btn { display:inline-flex; align-items:center; gap:6px; border:1.5px solid transparent; border-radius:999px; font-weight:700; padding:9px 20px; text-decoration:none; }
+.btn-primary { background:var(--plum); color:#fff; }
+.btn-primary:hover { background:var(--plum-deep); }
+.btn-ghost { border-color:var(--plum); color:var(--plum); background:none; }
+.btn-ghost:hover { background:var(--plum-tint); }
+.btn-sm { padding:5px 13px; font-size:13.5px; border-radius:8px; }
+.btn-danger { border-color:var(--sell); color:var(--sell); background:none; }
+.btn-danger:hover { background:#F9ECEA; }
+.btn[disabled] { opacity:.5; cursor:default; }
+
+/* 工具列 */
+.toolbar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:20px; }
+.toolbar .tabs { display:inline-flex; border:1.5px solid var(--plum); border-radius:999px; overflow:hidden; }
+.toolbar .tabs button { border:0; background:none; padding:7px 18px; font-weight:700; color:var(--plum); }
+.toolbar .tabs button.on { background:var(--plum); color:#fff; }
+.toolbar .count { color:var(--ink-soft); font-size:13.5px; }
+.toolbar .spacer { flex:1; }
+
+/* 物件列 */
+.rows { display:flex; flex-direction:column; gap:12px; }
+.row { display:grid; grid-template-columns:96px 1fr auto; gap:16px; align-items:center; background:var(--card); border:1px solid var(--hairline); border-radius:var(--radius); padding:12px 16px; }
+.row.unlisted { opacity:.62; background:#F5F2EF; }
+.row .thumb { width:96px; height:72px; border-radius:7px; object-fit:cover; background:var(--plum-tint); }
+.row .nophoto { width:96px; height:72px; border-radius:7px; background:var(--plum-tint); display:grid; place-items:center; color:var(--plum); font-size:12px; }
+.row .t { display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-weight:700; font-size:17px; }
+.row .t .seal-mini { width:24px; height:24px; display:grid; place-items:center; border-radius:5px; color:#fff; font-family:"Noto Serif TC",serif; font-weight:900; font-size:13px; }
+.seal-sell { background:var(--sell); } .seal-rent { background:var(--rent); }
+.row .sub { color:var(--ink-soft); font-size:13.5px; }
+.row .price { font-family:"Noto Serif TC",serif; font-weight:900; font-size:19px; }
+.row .price.s { color:var(--sell); } .row .price.r { color:var(--rent); }
+.badge { font-size:12px; font-weight:700; border-radius:6px; padding:2px 9px; }
+.badge.on { background:#E7F2EB; color:var(--ok); }
+.badge.off { background:#F3E9DC; color:var(--warn); }
+.row .acts { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+
+.empty { text-align:center; color:var(--ink-soft); background:var(--card); border:1px dashed var(--hairline); border-radius:var(--radius); padding:60px 20px; }
+.notice { background:#FDF6EC; border:1px solid #EAD9BC; color:#7A5A22; border-radius:var(--radius); padding:14px 18px; font-size:14px; margin-bottom:18px; display:none; }
+
+/* 表單彈窗 */
+.modal-mask { position:fixed; inset:0; background:rgba(36,26,32,.5); z-index:40; display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:30px 14px; }
+.modal-mask.open { display:flex; }
+.modal { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); width:min(100%,720px); padding:28px 30px 26px; }
+.modal h2 { font-family:"Noto Serif TC",serif; font-weight:900; font-size:23px; margin:0 0 18px; letter-spacing:.06em; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px 16px; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field.full { grid-column:1 / -1; }
+.field label { font-size:13px; font-weight:700; color:var(--ink-soft); }
+.field label .req { color:var(--sell); }
+.field input, .field select, .field textarea { font:inherit; padding:9px 12px; border:1px solid var(--hairline); border-radius:8px; background:#fff; color:var(--ink); }
+.field textarea { resize:vertical; }
+.field .tip { font-size:12px; color:var(--ink-soft); }
+.deal-radio { display:flex; gap:10px; }
+.deal-radio label { flex:1; display:grid; place-items:center; border:1.5px solid var(--hairline); border-radius:8px; padding:9px; font-weight:700; cursor:pointer; }
+.deal-radio input { display:none; }
+.deal-radio label.sel-s { border-color:var(--sell); color:var(--sell); background:#FBF0EE; }
+.deal-radio label.sel-r { border-color:var(--rent); color:var(--rent); background:#EDF4F8; }
+.photo-list { display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
+.photo-chip { position:relative; width:104px; }
+.photo-chip img { width:104px; height:78px; object-fit:cover; border-radius:7px; border:1px solid var(--hairline); }
+.photo-chip .rm { position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; border:0; background:var(--sell); color:#fff; font-weight:700; line-height:1; }
+.photo-chip .mv { position:absolute; bottom:4px; left:4px; width:24px; height:22px; border-radius:5px; border:0; background:rgba(0,0,0,.55); color:#fff; font-size:12px; }
+.modal .foot { display:flex; gap:12px; justify-content:flex-end; margin-top:22px; padding-top:16px; border-top:1px solid var(--hairline); }
+.modal .foot .status { margin-right:auto; color:var(--ink-soft); font-size:13.5px; align-self:center; }
+
+@media (max-width:720px) {
+  .row { grid-template-columns:72px 1fr; }
+  .row .thumb, .row .nophoto { width:72px; height:56px; }
+  .row .acts { grid-column:1 / -1; justify-content:flex-start; }
+  .grid2, .grid3 { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- 登入 -->
+<div class="login-mask" id="loginMask">
+  <div class="login-box">
+    <h2>鼎瑋物件管理後台</h2>
+    <p>請輸入管理密碼</p>
+    <input type="password" id="pwd" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <p class="err" id="pwdErr">密碼不正確</p>
+    <p style="margin-top:16px"><button class="btn btn-primary" onclick="doLogin()" style="width:100%">登入</button></p>
+  </div>
+</div>
+
+<header class="topbar">
+  <span class="seal">鼎</span>
+  <h1>物件管理後台</h1>
+  <span class="hint">刊登、下架即時同步官網</span>
+  <a href="index.html" target="_blank">開啟官網 ↗</a>
+</header>
+
+<div class="wrap">
+  <div class="notice" id="dbNotice"></div>
+
+  <div class="toolbar">
+    <div class="tabs" id="tabs">
+      <button data-f="all" class="on">全部</button>
+      <button data-f="sell">出售</button>
+      <button data-f="rent">出租</button>
+      <button data-f="unlisted">已下架</button>
+    </div>
+    <span class="count" id="count"></span>
+    <span class="spacer"></span>
+    <button class="btn btn-ghost" id="importBtn" style="display:none" onclick="importOld()">匯入舊站 37 筆物件</button>
+    <button class="btn btn-primary" onclick="openForm(null)">＋ 刊登新物件</button>
+  </div>
+
+  <div class="rows" id="rows"></div>
+</div>
+
+<!-- 新增 / 編輯表單 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <h2 id="formTitle">刊登新物件</h2>
+    <div class="grid2">
+      <div class="field">
+        <label>刊登類型 <span class="req">＊</span></label>
+        <div class="deal-radio" id="dealRadio">
+          <label id="dealS" class="sel-s"><input type="radio" name="deal" value="sell" checked>售</label>
+          <label id="dealR"><input type="radio" name="deal" value="rent">租</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>案名 <span class="req">＊</span></label>
+        <input id="f_name" placeholder="例：合雄悅園">
+      </div>
+      <div class="field">
+        <label>區域</label>
+        <input id="f_district" list="districtList" placeholder="例：蘆竹">
+        <datalist id="districtList">
+          <option>蘆竹</option><option>桃園</option><option>龜山</option><option>大園</option>
+          <option>中壢</option><option>八德</option><option>大溪</option><option>平鎮</option>
+          <option>楊梅</option><option>新屋</option><option>觀音</option><option>龍潭</option>
+        </datalist>
+      </div>
+      <div class="field">
+        <label>種類</label>
+        <input id="f_kind" list="kindList" placeholder="例：住宅大樓">
+        <datalist id="kindList">
+          <option>住宅大樓</option><option>電梯華廈</option><option>透天厝</option><option>別墅</option>
+          <option>公寓</option><option>套房</option><option>店面</option><option>土地</option>
+          <option>廠房</option><option>辦公</option><option>車位</option>
+        </datalist>
+      </div>
+      <div class="field">
+        <label id="priceLabel">總價（萬） <span class="req">＊</span></label>
+        <input id="f_price" type="number" step="0.01" min="0" placeholder="例：1280">
+      </div>
+      <div class="field">
+        <label>坪數</label>
+        <input id="f_size" type="number" step="0.01" min="0" placeholder="例：45.6">
+      </div>
+      <div class="field">
+        <label>格局</label>
+        <input id="f_layout" placeholder="例：3房2廳2衛">
+      </div>
+      <div class="field">
+        <label>樓別</label>
+        <input id="f_floor" placeholder="例：8／14樓">
+      </div>
+      <div class="field">
+        <label>屋齡</label>
+        <input id="f_age" placeholder="例：12年">
+      </div>
+      <div class="field">
+        <label>含車位</label>
+        <select id="f_parking"><option value="false">否</option><option value="true">是</option></select>
+      </div>
+      <div class="field full">
+        <label>案址</label>
+        <input id="f_address" placeholder="例：桃園市蘆竹區南昌路">
+      </div>
+      <div class="field full">
+        <label>訴求重點（一行一句，顯示在物件頁特色卡）</label>
+        <textarea id="f_pitch" rows="4" placeholder="例：&#10;近南崁市區生活機能佳&#10;邊間採光通風好&#10;全天保全管理嚴謹"></textarea>
+      </div>
+      <div class="field full">
+        <label>其他規格（一行一項，格式「標籤:內容」，選填）</label>
+        <textarea id="f_spec" rows="4" placeholder="例：&#10;物況:空屋&#10;管理:3500元/月&#10;建材:鋼筋混凝土(RC)&#10;學區1:光明學區"></textarea>
+        <span class="tip">常用標籤：物況、管理、建材、外牆、地板、用途、警衛、中庭、公比、主建、附屬、公設、學區1、押金</span>
+      </div>
+      <div class="field full">
+        <label>照片（第一張為封面，可拖入多張）</label>
+        <input type="file" id="f_photos" accept="image/*" multiple>
+        <div class="photo-list" id="photoList"></div>
+      </div>
+    </div>
+    <div class="foot">
+      <span class="status" id="formStatus"></span>
+      <button class="btn btn-ghost" onclick="closeForm()">取消</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveForm()">儲存並刊登</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+<script src="assets/data.js"></script>
+<script>
+const _SB_CFG = window.DW_SB || { url: '', key: '' };
+const _sb = _SB_CFG.url ? supabase.createClient(_SB_CFG.url, _SB_CFG.key) : null;
+
+const ADMIN_PWD = 'dingwei1381';   // ← 管理密碼改這裡
+
+let ALL = [];          // 資料庫全部物件
+let FILTER = 'all';
+let editingRow = null; // null = 新增
+let formPhotos = [];   // 表單目前的照片（檔名或網址）
+
+/* ---------- 登入 ---------- */
+function doLogin() {
+  if (document.getElementById('pwd').value === ADMIN_PWD) {
+    document.getElementById('loginMask').style.display = 'none';
+    loadAll();
+  } else {
+    document.getElementById('pwdErr').style.display = 'block';
+  }
+}
+
+/* ---------- 工具 ---------- */
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function photoUrl(p) { return /^https?:\/\//.test(p) ? p : 'assets/photos/' + p; }
+
+/* ---------- 載入與列表 ---------- */
+async function loadAll() {
+  const notice = document.getElementById('dbNotice');
+  if (!_sb) {
+    notice.style.display = 'block';
+    notice.innerHTML = '⚠ 尚未設定資料庫連線。<br>請先建立鼎瑋專用的 Supabase 專案，' +
+      '把 Project URL 與 anon key 填入 <b>assets/config.js</b>，並在 SQL Editor 執行 <b>dingwei_setup.sql</b>。';
+    return;
+  }
+  const { data, error } = await _sb.from('dw_listings').select('*')
+    .order('created_at', { ascending: false });
+  if (error) {
+    notice.style.display = 'block';
+    notice.innerHTML = '⚠ 讀取資料庫失敗：' + esc(error.message) +
+      '<br>若是第一次使用，請先到 Supabase → SQL Editor 執行專案資料夾裡的 <b>dingwei_setup.sql</b>。';
+    return;
+  }
+  notice.style.display = 'none';
+  ALL = (data || []).sort((a, b) => Number(b.sno) - Number(a.sno));
+  document.getElementById('importBtn').style.display = ALL.length ? 'none' : '';
+  render();
+}
+
+function render() {
+  const rows = document.getElementById('rows');
+  let items = ALL.filter(r =>
+    FILTER === 'all' ? r.status === 'active' :
+    FILTER === 'unlisted' ? r.status !== 'active' :
+    r.status === 'active' && r.deal === FILTER);
+  document.getElementById('count').textContent =
+    '上架中 ' + ALL.filter(r => r.status === 'active').length + ' 筆／已下架 ' +
+    ALL.filter(r => r.status !== 'active').length + ' 筆';
+  if (!items.length) {
+    rows.innerHTML = '<div class="empty">這個分類目前沒有物件</div>';
+    return;
+  }
+  rows.innerHTML = items.map(r => {
+    const photos = r.photos || [];
+    const thumb = photos.length
+      ? '<img class="thumb" loading="lazy" src="' + esc(photoUrl(photos[0])) + '" alt="">'
+      : '<div class="nophoto">無照片</div>';
+    const active = r.status === 'active';
+    return '<div class="row' + (active ? '' : ' unlisted') + '">' +
+      thumb +
+      '<div><div class="t"><span class="seal-mini ' + (r.deal === 'rent' ? 'seal-rent' : 'seal-sell') + '">' +
+      (r.deal === 'rent' ? '租' : '售') + '</span>' + esc(r.name) +
+      '<span class="badge ' + (active ? 'on' : 'off') + '">' + (active ? '上架中' : '已下架') + '</span></div>' +
+      '<div class="sub">' + esc(r.district || '—') + '・' + esc(r.kind || '—') +
+      (r.layout ? '・' + esc(r.layout) : '') + '・' + (r.size || '?') + '坪　編號 ' + esc(r.sno) + '</div>' +
+      '<div class="price ' + (r.deal === 'rent' ? 'r' : 's') + '">' +
+      (r.deal === 'rent' ? Number(r.price) + ' 萬/月' : Number(r.price).toLocaleString('zh-TW') + ' 萬') + '</div></div>' +
+      '<div class="acts">' +
+      '<button class="btn btn-ghost btn-sm" onclick="toggleStatus(\'' + r.id + '\')">' + (active ? '下架' : '重新上架') + '</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="openFormById(\'' + r.id + '\')">編輯</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="delRow(\'' + r.id + '\')">刪除</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  FILTER = b.dataset.f;
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+  render();
+});
+
+/* ---------- 上下架 / 刪除 ---------- */
+async function toggleStatus(id) {
+  const r = ALL.find(x => x.id === id); if (!r) return;
+  const next = r.status === 'active' ? 'unlisted' : 'active';
+  const { error } = await _sb.from('dw_listings')
+    .update({ status: next, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { alert('更新失敗：' + error.message); return; }
+  r.status = next;
+  render();
+}
+
+async function delRow(id) {
+  const r = ALL.find(x => x.id === id); if (!r) return;
+  if (!confirm('確定要永久刪除「' + r.name + '」？\n（若只是成交或暫停刊登，建議用「下架」即可）')) return;
+  const { error } = await _sb.from('dw_listings').delete().eq('id', id);
+  if (error) { alert('刪除失敗：' + error.message); return; }
+  ALL = ALL.filter(x => x.id !== id);
+  render();
+}
+
+/* ---------- 匯入舊資料 ---------- */
+async function importOld() {
+  if (!_sb) { alert('尚未設定資料庫連線（assets/config.js）'); return; }
+  if (!window.LISTINGS || !window.LISTINGS.length) { alert('找不到內建的舊站資料 (data.js)'); return; }
+  if (!confirm('將匯入 ' + window.LISTINGS.length + ' 筆舊站物件到資料庫，繼續？')) return;
+  const rows = window.LISTINGS.map(l => ({
+    sno: String(l.sno), deal: l.deal, status: 'active',
+    name: l.name, district: l.district || '', kind: l.kind || '',
+    price: l.price || 0, size: l.size || 0, unit: l.unit || '',
+    parking: !!l.parking, address: l.address || '', layout: l.layout || '',
+    floor: l.floor || '', age: l.age || '',
+    pitch: l.pitch || [], spec: l.spec || {},
+    lat: l.lat || '', lng: l.lng || '', photos: l.photos || []
+  }));
+  const { error } = await _sb.from('dw_listings').upsert(rows, { onConflict: 'sno' });
+  if (error) { alert('匯入失敗：' + error.message); return; }
+  alert('匯入完成！');
+  loadAll();
+}
+
+/* ---------- 表單 ---------- */
+const F = id => document.getElementById(id);
+
+document.querySelectorAll('#dealRadio input').forEach(i => {
+  i.addEventListener('change', () => {
+    F('dealS').className = i.value === 'sell' && i.checked ? 'sel-s' : '';
+    F('dealR').className = i.value === 'rent' && i.checked ? 'sel-r' : '';
+    if (F('dealS').querySelector('input').checked) { F('dealS').className = 'sel-s'; F('dealR').className = ''; }
+    else { F('dealR').className = 'sel-r'; F('dealS').className = ''; }
+    F('priceLabel').innerHTML = F('dealR').querySelector('input').checked
+      ? '月租（萬） <span class="req">＊</span>' : '總價（萬） <span class="req">＊</span>';
+  });
+});
+
+function openFormById(id) { openForm(ALL.find(x => x.id === id) || null); }
+
+function openForm(row) {
+  editingRow = row;
+  F('formTitle').textContent = row ? '編輯物件：' + row.name : '刊登新物件';
+  F('saveBtn').textContent = row ? '儲存變更' : '儲存並刊登';
+  F('formStatus').textContent = '';
+  const dealRent = row && row.deal === 'rent';
+  F(dealRent ? 'dealR' : 'dealS').querySelector('input').checked = true;
+  F('dealS').className = dealRent ? '' : 'sel-s';
+  F('dealR').className = dealRent ? 'sel-r' : '';
+  F('priceLabel').innerHTML = dealRent ? '月租（萬） <span class="req">＊</span>' : '總價（萬） <span class="req">＊</span>';
+  F('f_name').value = row ? row.name : '';
+  F('f_district').value = row ? row.district || '' : '';
+  F('f_kind').value = row ? row.kind || '' : '';
+  F('f_price').value = row ? row.price : '';
+  F('f_size').value = row ? row.size : '';
+  F('f_layout').value = row ? row.layout || '' : '';
+  F('f_floor').value = row ? row.floor || '' : '';
+  F('f_age').value = row ? row.age || '' : '';
+  F('f_parking').value = row && row.parking ? 'true' : 'false';
+  F('f_address').value = row ? row.address || '' : '';
+  F('f_pitch').value = row ? (row.pitch || []).join('\n') : '';
+  F('f_spec').value = row ? Object.entries(row.spec || {}).map(([k, v]) => k + ':' + v).join('\n') : '';
+  F('f_photos').value = '';
+  formPhotos = row ? (row.photos || []).slice() : [];
+  renderPhotoChips();
+  document.getElementById('modalMask').classList.add('open');
+}
+
+function closeForm() { document.getElementById('modalMask').classList.remove('open'); }
+
+function renderPhotoChips() {
+  F('photoList').innerHTML = formPhotos.map((p, i) =>
+    '<div class="photo-chip"><img src="' + esc(photoUrl(p)) + '" alt="">' +
+    '<button type="button" class="rm" title="移除" onclick="rmPhoto(' + i + ')">✕</button>' +
+    (i > 0 ? '<button type="button" class="mv" title="移到最前(設為封面)" onclick="mvPhoto(' + i + ')">↖</button>' : '') +
+    '</div>').join('');
+}
+function rmPhoto(i) { formPhotos.splice(i, 1); renderPhotoChips(); }
+function mvPhoto(i) { formPhotos.unshift(formPhotos.splice(i, 1)[0]); renderPhotoChips(); }
+
+F('f_photos').addEventListener('change', async e => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  if (!_sb) { alert('尚未設定資料庫連線（assets/config.js）'); e.target.value = ''; return; }
+  F('formStatus').textContent = '照片上傳中…';
+  F('saveBtn').disabled = true;
+  for (const file of files) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = 'listing/' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
+    const { error } = await _sb.storage.from('dw-photos').upload(path, file);
+    if (error) { alert('照片上傳失敗：' + error.message); break; }
+    const { data } = _sb.storage.from('dw-photos').getPublicUrl(path);
+    formPhotos.push(data.publicUrl);
+  }
+  renderPhotoChips();
+  F('formStatus').textContent = '';
+  F('saveBtn').disabled = false;
+  e.target.value = '';
+});
+
+async function saveForm() {
+  if (!_sb) { alert('尚未設定資料庫連線（assets/config.js）'); return; }
+  const name = F('f_name').value.trim();
+  const price = parseFloat(F('f_price').value);
+  if (!name) { alert('請填寫案名'); return; }
+  if (!(price > 0)) { alert('請填寫價格'); return; }
+
+  const spec = {};
+  F('f_spec').value.split('\n').forEach(line => {
+    const m = line.trim().match(/^([^:：]+)[:：](.+)$/);
+    if (m) spec[m[1].trim()] = m[2].trim();
+  });
+
+  const row = {
+    deal: document.querySelector('#dealRadio input:checked').value,
+    name,
+    district: F('f_district').value.trim(),
+    kind: F('f_kind').value.trim(),
+    price,
+    size: parseFloat(F('f_size').value) || 0,
+    parking: F('f_parking').value === 'true',
+    address: F('f_address').value.trim(),
+    layout: F('f_layout').value.trim(),
+    floor: F('f_floor').value.trim(),
+    age: F('f_age').value.trim(),
+    pitch: F('f_pitch').value.split('\n').map(s => s.trim()).filter(Boolean),
+    spec,
+    photos: formPhotos,
+    updated_at: new Date().toISOString()
+  };
+  if (row.deal === 'sell' && row.size > 0) row.unit = (price / row.size).toFixed(1);
+
+  F('saveBtn').disabled = true;
+  F('formStatus').textContent = '儲存中…';
+  let error;
+  if (editingRow) {
+    ({ error } = await _sb.from('dw_listings').update(row).eq('id', editingRow.id));
+  } else {
+    row.sno = String(Math.floor(Date.now() / 1000));  // 新編號：時間戳，永遠排最新
+    row.status = 'active';
+    ({ error } = await _sb.from('dw_listings').insert(row));
+  }
+  F('saveBtn').disabled = false;
+  if (error) { F('formStatus').textContent = ''; alert('儲存失敗：' + error.message); return; }
+  closeForm();
+  loadAll();
+}
+</script>
+</body>
+</html>
