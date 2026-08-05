@@ -4,7 +4,7 @@
    ============================================================ */
 
 :root {
-  --paper: #FBF9F7;
+  --paper: #F3EDE5;
   --card: #FFFFFF;
   --ink: #261B19;
   --ink-soft: #6E605D;
@@ -79,7 +79,7 @@ img { max-width: 100%; display: block; }
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(251, 250, 247, .94);
+  background: rgba(243, 237, 229, .94);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--hairline);
 }
