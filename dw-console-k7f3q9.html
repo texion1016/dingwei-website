@@ -134,6 +134,14 @@ img { display:block; }
 <div class="wrap">
   <div class="notice" id="dbNotice"></div>
 
+  <div class="toolbar" style="margin-bottom:8px">
+    <div class="tabs" id="pageTabs">
+      <button data-p="listings" class="on">物件管理</button>
+      <button data-p="messages">需求留言 <span id="msgBadge"></span></button>
+    </div>
+  </div>
+
+  <div id="panelListings">
   <div class="toolbar">
     <div class="tabs" id="tabs">
       <button data-f="all" class="on">全部</button>
@@ -148,6 +156,19 @@ img { display:block; }
   </div>
 
   <div class="rows" id="rows"></div>
+  </div>
+
+  <div id="panelMessages" style="display:none">
+    <div class="toolbar">
+      <div class="tabs" id="msgTabs">
+        <button data-m="open" class="on">待處理</button>
+        <button data-m="done">已處理</button>
+        <button data-m="all">全部</button>
+      </div>
+      <span class="count" id="msgCount"></span>
+    </div>
+    <div class="rows" id="msgRows"></div>
+  </div>
 </div>
 
 <!-- 新增 / 編輯表單 -->
@@ -254,6 +275,7 @@ function doLogin() {
   if (document.getElementById('pwd').value === ADMIN_PWD) {
     document.getElementById('loginMask').style.display = 'none';
     loadAll();
+    loadMsgs();
   } else {
     document.getElementById('pwdErr').style.display = 'block';
   }
@@ -367,6 +389,81 @@ async function importOld() {
   if (error) { alert('匯入失敗：' + error.message); return; }
   alert('匯入完成！');
   loadAll();
+}
+
+/* ---------- 需求留言管理 ---------- */
+let MSGS = [];
+let MSG_FILTER = 'open';
+
+document.getElementById('pageTabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#pageTabs button').forEach(x => x.classList.toggle('on', x === b));
+  const showMsgs = b.dataset.p === 'messages';
+  document.getElementById('panelListings').style.display = showMsgs ? 'none' : '';
+  document.getElementById('panelMessages').style.display = showMsgs ? '' : 'none';
+  if (showMsgs) loadMsgs();
+});
+
+document.getElementById('msgTabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  MSG_FILTER = b.dataset.m;
+  document.querySelectorAll('#msgTabs button').forEach(x => x.classList.toggle('on', x === b));
+  renderMsgs();
+});
+
+async function loadMsgs() {
+  if (!_sb) return;
+  const { data, error } = await _sb.from('dw_messages').select('*').order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('msgRows').innerHTML = '<div class="empty">讀取失敗：' + esc(error.message) +
+      '<br>若尚未建立留言表，請在 Supabase SQL Editor 執行 dw_messages.sql</div>';
+    return;
+  }
+  MSGS = data || [];
+  document.getElementById('msgBadge').textContent = MSGS.filter(m => m.status === 'open').length || '';
+  renderMsgs();
+}
+
+function renderMsgs() {
+  const el = document.getElementById('msgRows');
+  const kinds = { buy: ['想買', 'seal-sell'], rent: ['想租', 'seal-rent'], sell: ['委託', 'seal-sell'] };
+  const items = MSGS.filter(m => MSG_FILTER === 'all' || m.status === (MSG_FILTER === 'done' ? 'done' : 'open'));
+  document.getElementById('msgCount').textContent =
+    '待處理 ' + MSGS.filter(m => m.status === 'open').length + ' 則／已處理 ' + MSGS.filter(m => m.status === 'done').length + ' 則';
+  if (!items.length) { el.innerHTML = '<div class="empty">這個分類目前沒有留言</div>'; return; }
+  el.innerHTML = items.map(m => {
+    const k = kinds[m.kind] || ['留言', 'seal-sell'];
+    const done = m.status === 'done';
+    return '<div class="row' + (done ? ' unlisted' : '') + '" style="grid-template-columns:1fr auto">' +
+      '<div><div class="t"><span class="seal-mini ' + k[1] + '" style="width:auto;padding:0 8px;font-size:12px">' + k[0] + '</span>' +
+      esc(m.name) + '　<a href="tel:' + esc(m.phone) + '">' + esc(m.phone) + '</a>' +
+      '<span class="badge ' + (done ? 'off' : 'on') + '">' + (done ? '已處理' : '待處理') + '</span></div>' +
+      '<div class="sub">' + (m.created_at || '').slice(0, 16).replace('T', ' ') + '</div>' +
+      '<div style="white-space:pre-wrap">' + esc(m.content) + '</div></div>' +
+      '<div class="acts">' +
+      '<button class="btn btn-ghost btn-sm" onclick="toggleMsg(\'' + m.id + '\')">' + (done ? '改回待處理' : '標記已處理') + '</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="delMsg(\'' + m.id + '\')">刪除</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+async function toggleMsg(id) {
+  const m = MSGS.find(x => x.id === id); if (!m) return;
+  const next = m.status === 'done' ? 'open' : 'done';
+  const { error } = await _sb.from('dw_messages').update({ status: next }).eq('id', id);
+  if (error) { alert('更新失敗：' + error.message); return; }
+  m.status = next;
+  document.getElementById('msgBadge').textContent = MSGS.filter(x => x.status === 'open').length || '';
+  renderMsgs();
+}
+
+async function delMsg(id) {
+  if (!confirm('確定刪除這則留言？')) return;
+  const { error } = await _sb.from('dw_messages').delete().eq('id', id);
+  if (error) { alert('刪除失敗：' + error.message); return; }
+  MSGS = MSGS.filter(x => x.id !== id);
+  document.getElementById('msgBadge').textContent = MSGS.filter(x => x.status === 'open').length || '';
+  renderMsgs();
 }
 
 /* ---------- 表單 ---------- */

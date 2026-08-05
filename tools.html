@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試算工具｜鼎瑋不動產經紀有限公司</title>
+<meta name="description" content="房貸試算、土地增值稅、契稅、遺產稅、贈與稅、房地合一稅試算，依台灣現行稅法（民國115年）計算，鼎瑋不動產免費提供。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="tools">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="brand-seal">鼎</span>
+      <span class="brand-name">鼎瑋不動產
+        <span class="brand-sub">大南崁在地・買賣租賃</span>
+      </span>
+    </a>
+    <nav class="site-nav" aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="listings.html?deal=sell">出售物件</a>
+      <a href="listings.html?deal=rent">出租物件</a>
+      <a href="tools.html" aria-current="page">試算工具</a>
+      <a href="knowledge.html">買賣需知</a>
+      <a href="needs.html">需求留言</a>
+      <a class="tel-btn" href="tel:033121381">☎ 03-3121381</a>
+    </nav>
+  </div>
+</header>
+
+<main class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>試算工具</h2><span class="en">Calculators</span>
+    </div>
+    <p class="page-lede">六種常用試算，依<strong>民國 115 年（2026）現行規定</strong>計算。試算結果僅供參考，實際稅費以政府機關核定為準，歡迎來電 03-3121381 由專人為您免費估算。</p>
+
+    <nav class="subnav" aria-label="試算項目">
+      <a href="#loan">房貸試算</a>
+      <a href="#lvit">土地增值稅</a>
+      <a href="#deed">契稅</a>
+      <a href="#estate">遺產稅</a>
+      <a href="#gift">贈與稅</a>
+      <a href="#house">房地合一稅</a>
+      <a href="https://www.landbank.com.tw/" target="_blank" rel="noopener">理財試算(土銀) ↗</a>
+    </nav>
+
+    <!-- 房貸 -->
+    <section id="loan" class="calc-card">
+      <h3><span class="calc-no">壹</span>房屋貸款試算</h3>
+      <div class="calc-grid">
+        <label>貸款金額（萬元）<input type="number" id="loan_amt" min="0" placeholder="例：1000"></label>
+        <label>貸款年限（年）<input type="number" id="loan_years" min="1" placeholder="例：30"></label>
+        <label>年利率（%）<input type="number" id="loan_rate" step="0.001" min="0" placeholder="例：2.2"></label>
+        <label>寬限期（年，可留空）<input type="number" id="loan_grace" min="0" placeholder="0"></label>
+      </div>
+      <button class="btn btn-primary" onclick="calcLoan()">計算</button>
+      <div class="calc-result" id="loan_result"></div>
+    </section>
+
+    <!-- 土增稅 -->
+    <section id="lvit" class="calc-card">
+      <h3><span class="calc-no">貳</span>土地增值稅</h3>
+      <div class="calc-grid">
+        <label>申報移轉現值總額（元）<input type="number" id="lvit_now" min="0" placeholder="本次公告土地現值總額"></label>
+        <label>前次移轉現值總額（元）<input type="number" id="lvit_prev" min="0" placeholder="取得時申報之現值總額"></label>
+        <label>臺灣地區消費者物價指數（%）<input type="number" id="lvit_cpi" placeholder="預設 100，可查稅單"></label>
+        <label>持有年數
+          <select id="lvit_hold">
+            <option value="0">未滿 20 年</option>
+            <option value="20">20 年以上</option>
+            <option value="30">30 年以上</option>
+            <option value="40">40 年以上</option>
+          </select>
+        </label>
+        <label>用地類別
+          <select id="lvit_use">
+            <option value="general">一般用地（20%／30%／40%）</option>
+            <option value="self">自用住宅用地（10%）</option>
+          </select>
+        </label>
+      </div>
+      <button class="btn btn-primary" onclick="calcLvit()">計算</button>
+      <div class="calc-result" id="lvit_result"></div>
+    </section>
+
+    <!-- 契稅 -->
+    <section id="deed" class="calc-card">
+      <h3><span class="calc-no">參</span>契稅</h3>
+      <div class="calc-grid">
+        <label>房屋評定標準價格（元）<input type="number" id="deed_value" min="0" placeholder="申報契價，非市價"></label>
+        <label>契約種類
+          <select id="deed_kind">
+            <option value="sale">買賣（6%）</option>
+            <option value="gift">贈與（6%）</option>
+            <option value="occupy">占有（6%）</option>
+            <option value="dian">典權（4%）</option>
+            <option value="exchange">交換（2%）</option>
+            <option value="split">分割（2%）</option>
+          </select>
+        </label>
+      </div>
+      <button class="btn btn-primary" onclick="calcDeed()">計算</button>
+      <div class="calc-result" id="deed_result"></div>
+    </section>
+
+    <!-- 遺產稅 -->
+    <section id="estate" class="calc-card">
+      <h3><span class="calc-no">肆</span>遺產稅</h3>
+      <div class="calc-grid">
+        <label>遺產總額（萬元）<input type="number" id="es_total" min="0" placeholder="例：6000"></label>
+        <label class="chk"><input type="checkbox" id="es_spouse">有配偶（扣除 553 萬）</label>
+        <label>直系血親卑親屬人數<input type="number" id="es_kids" min="0" placeholder="每人扣 56 萬"></label>
+        <label>未成年加扣年數合計<input type="number" id="es_minor_years" min="0" placeholder="距成年年數×每年56萬"></label>
+        <label>父母人數<input type="number" id="es_parents" min="0" max="2" placeholder="每人扣 138 萬"></label>
+        <label>重度以上身心障礙人數<input type="number" id="es_disabled" min="0" placeholder="每人加扣 693 萬"></label>
+        <label>受扶養兄弟姊妹／祖父母人數<input type="number" id="es_others" min="0" placeholder="每人扣 56 萬"></label>
+      </div>
+      <button class="btn btn-primary" onclick="calcEstate()">計算</button>
+      <div class="calc-result" id="es_result"></div>
+    </section>
+
+    <!-- 贈與稅 -->
+    <section id="gift" class="calc-card">
+      <h3><span class="calc-no">伍</span>贈與稅</h3>
+      <div class="calc-grid">
+        <label>本年度贈與總額（萬元）<input type="number" id="gift_total" min="0" placeholder="同一贈與人全年合計"></label>
+      </div>
+      <button class="btn btn-primary" onclick="calcGift()">計算</button>
+      <div class="calc-result" id="gift_result"></div>
+    </section>
+
+    <!-- 房地合一 -->
+    <section id="house" class="calc-card">
+      <h3><span class="calc-no">陸</span>房地合一稅 2.0（境內個人）</h3>
+      <div class="calc-grid">
+        <label>成交價額（萬元）<input type="number" id="hl_price" min="0" placeholder="例：1500"></label>
+        <label>取得成本（萬元）<input type="number" id="hl_cost" min="0" placeholder="含當初買價與必要費用"></label>
+        <label>移轉費用（萬元，可留空）<input type="number" id="hl_fee" min="0" placeholder="留空按 3% 推計(上限30萬)"></label>
+        <label>土地漲價總數額（萬元，可留空）<input type="number" id="hl_land" min="0" placeholder="已課土增稅部分可減除"></label>
+        <label>持有期間
+          <select id="hl_hold">
+            <option value="2">2 年以內（45%）</option>
+            <option value="5">超過 2 年～5 年（35%）</option>
+            <option value="10">超過 5 年～10 年（20%）</option>
+            <option value="99">超過 10 年（15%）</option>
+            <option value="force">非自願出售（20%）</option>
+          </select>
+        </label>
+        <label class="chk"><input type="checkbox" id="hl_self">符合自住優惠（設籍滿6年，400萬免稅+10%）</label>
+      </div>
+      <button class="btn btn-primary" onclick="calcHouse()">計算</button>
+      <div class="calc-result" id="hl_result"></div>
+    </section>
+
+    <p class="tools-disclaimer">※ 稅率與免稅額依財政部公告之民國 115 年（2026）標準；各項優惠適用要件繁多，本頁試算僅供初步參考，正式申報請洽各地國稅局、稅捐稽徵處，或來電本公司免費諮詢。（頁面更新：2026 年 8 月）</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div>
+      <h3>鼎瑋不動產經紀有限公司</h3>
+      <p>桃園市蘆竹區南昌路146號1樓</p>
+      <p>電話：<a href="tel:033121381">03-3121381</a></p>
+      <p>信箱：<a href="mailto:cmc610217@gmail.com">cmc610217@gmail.com</a></p>
+      <div class="sns-row">
+        <a id="sns-line" class="sns-btn pending" href="#" target="_blank" rel="noopener">LINE 官方帳號</a>
+        <a id="sns-fb" class="sns-btn pending" href="#" target="_blank" rel="noopener">Facebook 粉絲專頁</a>
+      </div>
+    </div>
+    <div>
+      <h3>快速前往</h3>
+      <ul>
+        <li><a href="listings.html?deal=sell">出售物件</a></li>
+        <li><a href="listings.html?deal=rent">出租物件</a></li>
+        <li><a href="tools.html">試算工具</a></li>
+        <li><a href="knowledge.html">買賣需知</a></li>
+        <li><a href="needs.html">需求留言</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>營業資訊</h3>
+      <p>經紀人：翁淳宏</p>
+      <p>證書字號：(106)桃市經字第001615號</p>
+      <p>服務區域：桃園市蘆竹、南崁地區</p>
+    </div>
+  </div>
+  <div class="footer-legal">© 2026 鼎瑋不動產經紀有限公司　All rights reserved.</div>
+</footer>
+
+<script src="assets/config.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/site.js"></script>
+<script src="assets/tools.js"></script>
+</body>
+</html>

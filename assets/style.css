@@ -843,9 +843,313 @@ img { max-width: 100%; display: block; }
   padding: 16px 24px;
 }
 
+/* ---------- 內頁通用（試算/需知/留言） ---------- */
+
+.page-lede {
+  color: var(--ink-soft);
+  max-width: 46em;
+  margin: -10px 0 28px;
+}
+
+.subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 34px;
+}
+
+.subnav a {
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--plum);
+  border: 1.5px solid var(--plum);
+  border-radius: 999px;
+  padding: 7px 16px;
+}
+.subnav a:hover, .subnav a.on { background: var(--plum); color: #fff; }
+
+/* ---------- 試算卡片 ---------- */
+
+.calc-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  margin-bottom: 26px;
+  scroll-margin-top: 90px;
+}
+
+.calc-card h3 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: .06em;
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calc-no {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--plum);
+  color: #fff;
+  font-size: 15px;
+  border-radius: 8px;
+  flex: none;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px 18px;
+  margin-bottom: 18px;
+}
+
+.calc-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.calc-grid input, .calc-grid select {
+  font: inherit;
+  font-weight: 500;
+  color: var(--ink);
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.calc-grid label.chk {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  padding-bottom: 10px;
+}
+.calc-grid label.chk input { width: 18px; height: 18px; }
+
+.calc-result { margin-top: 16px; }
+.calc-result.has-result {
+  background: var(--plum-tint);
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+
+.rs-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+  font-size: 15px;
+}
+.rs-row span { color: var(--ink-soft); }
+.rs-row b { text-align: right; }
+.rs-row.total {
+  border-top: 1.5px dashed var(--plum);
+  margin-top: 6px;
+  padding-top: 12px;
+}
+.rs-row.total b {
+  font-family: var(--font-display);
+  font-size: 21px;
+  color: var(--plum);
+}
+.rs-note { font-size: 12.5px; color: var(--ink-soft); margin: 10px 0 0; }
+
+.tools-disclaimer {
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--hairline);
+  padding-top: 18px;
+  margin-top: 10px;
+}
+
+/* ---------- 買賣需知 ---------- */
+
+.kn-article {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 30px 34px;
+  margin-bottom: 26px;
+  scroll-margin-top: 90px;
+  max-width: 100%;
+}
+
+.kn-article h3 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: .08em;
+  margin: 0 0 6px;
+  color: var(--plum);
+}
+
+.kn-article .kn-en {
+  font-size: 12px;
+  letter-spacing: .22em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.kn-article h4 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 24px 0 8px;
+  padding-left: 12px;
+  border-left: 4px solid var(--gold);
+}
+
+.kn-article p { margin: 0 0 12px; color: #4A4046; }
+.kn-article ol, .kn-article ul { margin: 0 0 12px; padding-left: 24px; color: #4A4046; }
+.kn-article li { margin-bottom: 4px; }
+
+.fee-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 12px 0 16px;
+}
+
+.fee-col {
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fee-col h5 {
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: .2em;
+}
+.fee-col.buyer h5 { background: var(--sell); }
+.fee-col.seller h5 { background: var(--rent); }
+.fee-col ul { list-style: none; margin: 0; padding: 10px 16px; }
+.fee-col li { padding: 5px 0; border-bottom: 1px dashed var(--hairline); font-size: 14.5px; }
+.fee-col li:last-child { border-bottom: 0; }
+
+.kn-table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 8px 0 14px; }
+.kn-table th { background: var(--plum-tint); color: var(--plum); text-align: left; padding: 8px 14px; }
+.kn-table td { padding: 8px 14px; border-top: 1px solid var(--hairline); }
+
+.link-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.link-card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.link-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.link-card b { display: block; font-size: 16px; margin-bottom: 4px; color: var(--plum); }
+.link-card span { font-size: 13px; color: var(--ink-soft); }
+
+/* ---------- 需求留言 ---------- */
+
+.needs-grid {
+  display: grid;
+  grid-template-columns: .9fr 1.1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.form-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-top: 5px solid var(--plum);
+  border-radius: var(--radius);
+  padding: 26px 28px;
+}
+
+.form-card h3 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 21px;
+  margin: 0 0 16px;
+  letter-spacing: .06em;
+}
+
+.form-card .fields { display: flex; flex-direction: column; gap: 12px; }
+.form-card label { display: flex; flex-direction: column; gap: 5px; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); }
+.form-card input, .form-card select, .form-card textarea {
+  font: inherit;
+  font-weight: 500;
+  color: var(--ink);
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: #fff;
+}
+.form-card textarea { resize: vertical; }
+.form-card .form-note { font-size: 12.5px; color: var(--ink-soft); margin: 10px 0 14px; }
+.form-card .ok-msg { color: #2E7D4F; font-weight: 700; margin-top: 12px; display: none; }
+
+.board-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.board-head h3 { font-family: var(--font-display); font-weight: 900; font-size: 21px; margin: 0; letter-spacing: .06em; }
+.board-head span { font-size: 13px; color: var(--ink-soft); }
+
+.msg-list { display: flex; flex-direction: column; gap: 12px; }
+
+.msg-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+}
+
+.msg-card .msg-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.kind-chip {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 10px;
+}
+.kind-buy { background: var(--sell); }
+.kind-rent { background: var(--rent); }
+.kind-sell { background: var(--gold); }
+.msg-card .msg-name { font-weight: 700; }
+.msg-card .msg-date { margin-left: auto; font-size: 12.5px; color: var(--ink-soft); }
+.msg-card .msg-body { font-size: 14.5px; color: #4A4046; white-space: pre-wrap; }
+
+.msg-empty {
+  text-align: center;
+  color: var(--ink-soft);
+  border: 1px dashed var(--hairline);
+  border-radius: var(--radius);
+  padding: 40px 20px;
+}
+
 /* ---------- 響應式 ---------- */
 
 @media (max-width: 960px) {
+  .needs-grid { grid-template-columns: 1fr; }
+  .fee-cols { grid-template-columns: 1fr; }
   .hero .wrap { grid-template-columns: 1fr; padding-top: 48px; padding-bottom: 48px; }
   .hero-rail { display: none; }
   .hero-feature img { height: 300px; }

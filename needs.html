@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>需求留言｜鼎瑋不動產經紀有限公司</title>
+<meta name="description" content="想在桃園蘆竹南崁買房、租房或委託出售？留下您的需求，鼎瑋不動產專人為您服務。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="needs">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="brand-seal">鼎</span>
+      <span class="brand-name">鼎瑋不動產
+        <span class="brand-sub">大南崁在地・買賣租賃</span>
+      </span>
+    </a>
+    <nav class="site-nav" aria-label="主選單">
+      <a href="index.html">首頁</a>
+      <a href="listings.html?deal=sell">出售物件</a>
+      <a href="listings.html?deal=rent">出租物件</a>
+      <a href="tools.html">試算工具</a>
+      <a href="knowledge.html">買賣需知</a>
+      <a href="needs.html" aria-current="page">需求留言</a>
+      <a class="tel-btn" href="tel:033121381">☎ 03-3121381</a>
+    </nav>
+  </div>
+</header>
+
+<main class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>需求留言</h2><span class="en">Requests</span>
+    </div>
+    <p class="page-lede">想找房子？想賣房子？留下您的需求，我們會盡快與您聯絡。留言將顯示在下方「商機看板」（姓名與電話會自動隱碼，保護您的隱私）。</p>
+
+    <div class="needs-grid">
+      <div class="form-card">
+        <h3>我要留言</h3>
+        <div class="fields">
+          <label>需求類型
+            <select id="n_kind">
+              <option value="buy">我想買房</option>
+              <option value="rent">我想租房</option>
+              <option value="sell">我要賣房／出租（委託）</option>
+            </select>
+          </label>
+          <label>稱呼 <input id="n_name" maxlength="20" placeholder="例：王先生／林小姐"></label>
+          <label>聯絡電話 <input id="n_phone" maxlength="15" placeholder="例：0912345678"></label>
+          <label>需求內容
+            <textarea id="n_content" rows="5" maxlength="500" placeholder="例：想找南崁市區 3 房電梯大樓，預算 1500 萬內，需要車位"></textarea>
+          </label>
+        </div>
+        <p class="form-note">送出即表示同意本公司為服務目的與您聯絡。</p>
+        <button class="btn btn-primary" id="n_submit" onclick="submitNeed()">送出留言</button>
+        <p class="ok-msg" id="n_ok">✓ 已收到您的留言，我們會盡快與您聯絡！</p>
+      </div>
+
+      <div>
+        <div class="board-head">
+          <h3>商機看板</h3>
+          <span id="board_count"></span>
+        </div>
+        <div class="subnav" id="board_tabs" style="margin-bottom:16px">
+          <a href="#" data-k="all" class="on">全部</a>
+          <a href="#" data-k="buy">想買</a>
+          <a href="#" data-k="rent">想租</a>
+          <a href="#" data-k="sell">委託出售</a>
+        </div>
+        <div class="msg-list" id="msg_list"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div>
+      <h3>鼎瑋不動產經紀有限公司</h3>
+      <p>桃園市蘆竹區南昌路146號1樓</p>
+      <p>電話：<a href="tel:033121381">03-3121381</a></p>
+      <p>信箱：<a href="mailto:cmc610217@gmail.com">cmc610217@gmail.com</a></p>
+      <div class="sns-row">
+        <a id="sns-line" class="sns-btn pending" href="#" target="_blank" rel="noopener">LINE 官方帳號</a>
+        <a id="sns-fb" class="sns-btn pending" href="#" target="_blank" rel="noopener">Facebook 粉絲專頁</a>
+      </div>
+    </div>
+    <div>
+      <h3>快速前往</h3>
+      <ul>
+        <li><a href="listings.html?deal=sell">出售物件</a></li>
+        <li><a href="listings.html?deal=rent">出租物件</a></li>
+        <li><a href="tools.html">試算工具</a></li>
+        <li><a href="knowledge.html">買賣需知</a></li>
+        <li><a href="needs.html">需求留言</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>營業資訊</h3>
+      <p>經紀人：翁淳宏</p>
+      <p>證書字號：(106)桃市經字第001615號</p>
+      <p>服務區域：桃園市蘆竹、南崁地區</p>
+    </div>
+  </div>
+  <div class="footer-legal">© 2026 鼎瑋不動產經紀有限公司　All rights reserved.</div>
+</footer>
+
+<script src="assets/config.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/site.js"></script>
+<script>
+(function () {
+  "use strict";
+  var SB = window.DW_SB || { url: "", key: "" };
+  var KINDS = { buy: ["想買", "kind-buy"], rent: ["想租", "kind-rent"], sell: ["委託出售", "kind-sell"] };
+  var ALLMSG = [];
+  var FILTER = "all";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function maskName(n) {
+    n = (n || "").trim();
+    if (!n) return "訪客";
+    if (n.length <= 1) return n;
+    if (n.length === 2) return n.charAt(0) + "○";
+    return n.charAt(0) + "○" + n.slice(-1);
+  }
+
+  function headers() {
+    return { apikey: SB.key, Authorization: "Bearer " + SB.key, "Content-Type": "application/json" };
+  }
+
+  function loadBoard() {
+    var list = document.getElementById("msg_list");
+    if (!SB.url) { list.innerHTML = '<div class="msg-empty">留言板尚未開通</div>'; return; }
+    fetch(SB.url + "/rest/v1/dw_messages?select=kind,name,content,created_at&order=created_at.desc&limit=50", { headers: headers() })
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (rows) { ALLMSG = rows; renderBoard(); })
+      .catch(function () { list.innerHTML = '<div class="msg-empty">留言板尚未開通，歡迎直接來電 03-3121381</div>'; });
+  }
+
+  function renderBoard() {
+    var list = document.getElementById("msg_list");
+    var items = ALLMSG.filter(function (m) { return FILTER === "all" || m.kind === FILTER; });
+    document.getElementById("board_count").textContent = "共 " + items.length + " 則";
+    if (!items.length) { list.innerHTML = '<div class="msg-empty">目前沒有留言，歡迎搶頭香！</div>'; return; }
+    list.innerHTML = items.map(function (m) {
+      var k = KINDS[m.kind] || ["留言", "kind-buy"];
+      var d = (m.created_at || "").slice(0, 10);
+      return '<div class="msg-card"><div class="msg-top">' +
+        '<span class="kind-chip ' + k[1] + '">' + k[0] + "</span>" +
+        '<span class="msg-name">' + esc(maskName(m.name)) + "</span>" +
+        '<span class="msg-date">' + d + "</span></div>" +
+        '<div class="msg-body">' + esc(m.content) + "</div></div>";
+    }).join("");
+  }
+
+  document.getElementById("board_tabs").addEventListener("click", function (e) {
+    var a = e.target.closest("a"); if (!a) return;
+    e.preventDefault();
+    FILTER = a.dataset.k;
+    this.querySelectorAll("a").forEach(function (x) { x.classList.toggle("on", x === a); });
+    renderBoard();
+  });
+
+  window.submitNeed = function () {
+    var name = document.getElementById("n_name").value.trim();
+    var phone = document.getElementById("n_phone").value.trim();
+    var content = document.getElementById("n_content").value.trim();
+    if (!name || !phone || !content) { alert("請填寫稱呼、電話與需求內容"); return; }
+    if (!SB.url) { alert("留言板尚未開通，請直接來電 03-3121381"); return; }
+    var btn = document.getElementById("n_submit");
+    btn.disabled = true;
+    fetch(SB.url + "/rest/v1/dw_messages", {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({ kind: document.getElementById("n_kind").value, name: name, phone: phone, content: content })
+    }).then(function (r) {
+      btn.disabled = false;
+      if (!r.ok) { alert("送出失敗，請直接來電 03-3121381"); return; }
+      document.getElementById("n_ok").style.display = "block";
+      document.getElementById("n_name").value = "";
+      document.getElementById("n_phone").value = "";
+      document.getElementById("n_content").value = "";
+      loadBoard();
+    }).catch(function () { btn.disabled = false; alert("送出失敗，請直接來電 03-3121381"); });
+  };
+
+  loadBoard();
+})();
+</script>
+</body>
+</html>
