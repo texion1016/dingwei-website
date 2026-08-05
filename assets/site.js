@@ -303,16 +303,17 @@
   /* ---------- 試配色切換器（選定後可移除） ---------- */
 
   var THEMES = [
-    { id: "wine", label: "酒紅", color: "#55002B" },
-    { id: "jade", label: "墨綠", color: "#17534A" },
-    { id: "navy", label: "藏藍", color: "#1E3A63" },
-    { id: "earth", label: "暖棕", color: "#6B4423" }
+    { id: "sign", label: "正紅", color: "#BE2418" },
+    { id: "crimson", label: "深紅", color: "#971A1A" },
+    { id: "brick", label: "磚紅", color: "#B0402A" },
+    { id: "rose", label: "胭脂紅", color: "#8F1F3E" }
   ];
 
   function initThemePicker() {
     var saved = null;
     try { saved = localStorage.getItem("dw-theme"); } catch (e) {}
-    if (saved && saved !== "wine") document.documentElement.setAttribute("data-theme", saved);
+    var valid = THEMES.some(function (t) { return t.id === saved; });
+    if (valid && saved !== "sign") document.documentElement.setAttribute("data-theme", saved);
 
     var box = document.createElement("div");
     box.className = "theme-picker";
@@ -325,7 +326,7 @@
     document.body.appendChild(box);
 
     function mark() {
-      var cur = document.documentElement.getAttribute("data-theme") || "wine";
+      var cur = document.documentElement.getAttribute("data-theme") || "sign";
       box.querySelectorAll("button").forEach(function (b) {
         b.classList.toggle("active", b.dataset.themeId === cur);
       });
@@ -334,7 +335,7 @@
       var b = e.target.closest("button");
       if (!b) return;
       var id = b.dataset.themeId;
-      if (id === "wine") document.documentElement.removeAttribute("data-theme");
+      if (id === "sign") document.documentElement.removeAttribute("data-theme");
       else document.documentElement.setAttribute("data-theme", id);
       try { localStorage.setItem("dw-theme", id); } catch (err) {}
       mark();

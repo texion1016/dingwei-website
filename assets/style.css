@@ -4,44 +4,41 @@
    ============================================================ */
 
 :root {
-  --paper: #FBFAF7;
+  --paper: #FBF9F7;
   --card: #FFFFFF;
-  --ink: #241A20;
-  --ink-soft: #6E6067;
-  --plum: #55002B;
-  --plum-deep: #38001C;
-  --plum-tint: #F4E9EF;
+  --ink: #261B19;
+  --ink-soft: #6E605D;
+  --plum: #BE2418;
+  --plum-deep: #8C1710;
+  --plum-tint: #FBEBE9;
   --gold: #A9803D;
   --sell: #B33A2B;
   --rent: #1D5A74;
-  --hairline: #E6DFDB;
+  --hairline: #E8DFDB;
   --radius: 10px;
   --shadow: 0 1px 2px rgba(36, 26, 32, .06), 0 8px 24px rgba(36, 26, 32, .07);
   --font-display: "Noto Serif TC", "PMingLiU", serif;
   --font-body: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
 }
 
-/* ---------- 備選配色（右下角「試配色」切換） ---------- */
+/* ---------- 備選紅色配色（右下角「試配色」切換，預設＝正紅） ---------- */
 
-:root[data-theme="jade"] {
-  --plum: #17534A;
-  --plum-deep: #0D3A33;
-  --plum-tint: #E5F0ED;
-  --gold: #B08A3E;
+:root[data-theme="crimson"] {
+  --plum: #971A1A;
+  --plum-deep: #6B1010;
+  --plum-tint: #F7EAEA;
 }
 
-:root[data-theme="navy"] {
-  --plum: #1E3A63;
-  --plum-deep: #122647;
-  --plum-tint: #E8EDF6;
-  --gold: #C19A4B;
+:root[data-theme="brick"] {
+  --plum: #B0402A;
+  --plum-deep: #7F2B1B;
+  --plum-tint: #F8EDE9;
 }
 
-:root[data-theme="earth"] {
-  --plum: #6B4423;
-  --plum-deep: #452A11;
-  --plum-tint: #F3EAE0;
-  --gold: #9C7A3C;
+:root[data-theme="rose"] {
+  --plum: #8F1F3E;
+  --plum-deep: #611229;
+  --plum-tint: #F6EAEE;
 }
 
 * { box-sizing: border-box; }
@@ -115,6 +112,12 @@ img { max-width: 100%; display: block; }
   font-size: 20px;
   border-radius: 8px;
   letter-spacing: 0;
+}
+
+.brand-logo {
+  height: 46px;
+  width: auto;
+  flex: none;
 }
 
 .brand-name {
