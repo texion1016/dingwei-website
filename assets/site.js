@@ -265,6 +265,11 @@
       '<div class="cc-name">' + esc(C.storeName) + "</div>" +
       '<a class="cc-tel" href="tel:' + C.tel.replace(/-/g, "") + '">' + C.tel + "</a>" +
       '<a class="btn btn-primary" href="tel:' + C.tel.replace(/-/g, "") + '">來電洽詢這個物件</a>' +
+      '<div class="cc-links">' +
+      '<a class="btn btn-ghost btn-line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=' +
+      encodeURIComponent(location.origin + location.pathname + "?sno=" + encodeURIComponent(l.sno)) + '">LINE 傳給好友</a>' +
+      '<a class="btn btn-ghost" target="_blank" href="print.html?sno=' + encodeURIComponent(l.sno) + '">列印 DM</a>' +
+      "</div>" +
       '<div class="cc-note">經紀人：' + esc(C.broker) + "｜" + esc(C.brokerLicense) + "</div>" +
       "</div>" +
       "</div></div>" +

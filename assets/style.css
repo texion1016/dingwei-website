@@ -783,6 +783,17 @@ img { max-width: 100%; display: block; }
 }
 .contact-card .cc-note { font-size: 13px; color: var(--ink-soft); margin-top: 12px; }
 
+.cc-links {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.cc-links .btn { padding: 9px 18px; font-size: 14.5px; }
+.btn-line { border-color: #06C755; color: #06A94A; }
+.btn-line:hover { background: #E8F9EF; }
+
 .map-link {
   display: inline-flex;
   align-items: center;
@@ -822,6 +833,17 @@ img { max-width: 100%; display: block; }
 .site-footer ul { list-style: none; margin: 0; padding: 0; }
 .site-footer a { color: #E9DCE3; text-decoration: none; }
 .site-footer a:hover { color: #fff; text-decoration: underline; }
+
+.qr-row { display: flex; gap: 16px; margin-top: 16px; }
+.qr-row figure { margin: 0; text-align: center; }
+.qr-row img {
+  width: 88px;
+  height: 88px;
+  background: #fff;
+  padding: 4px;
+  border-radius: 6px;
+}
+.qr-row figcaption { font-size: 12px; color: rgba(255, 255, 255, .75); margin-top: 5px; }
 
 .sns-row { display: flex; gap: 10px; margin-top: 14px; }
 .sns-btn {
