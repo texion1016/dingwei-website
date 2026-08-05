@@ -31,15 +31,12 @@ body {
   z-index: 10;
   background: #2B2320;
   color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 18px;
-  flex-wrap: wrap;
+  padding: 10px 18px 12px;
 }
+.ctrl .row1 { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .ctrl b { font-size: 15px; }
-.ctrl .tpl { display: inline-flex; border: 1.5px solid #fff; border-radius: 999px; overflow: hidden; }
-.ctrl .tpl button { border: 0; background: none; color: #fff; font: inherit; font-weight: 700; padding: 6px 16px; cursor: pointer; }
+.ctrl .tpl { display: inline-flex; border: 1.5px solid #fff; border-radius: 999px; overflow: hidden; flex-wrap: wrap; }
+.ctrl .tpl button { border: 0; background: none; color: #fff; font: inherit; font-weight: 700; padding: 6px 14px; cursor: pointer; white-space: nowrap; }
 .ctrl .tpl button.on { background: #fff; color: #2B2320; }
 .ctrl .go {
   margin-left: auto;
@@ -53,84 +50,92 @@ body {
   cursor: pointer;
 }
 .ctrl a { color: #ccc; font-size: 13.5px; }
+.ctrl .hint { font-size: 12.5px; color: #C9BFBA; margin: 8px 0 6px; }
+.pick { display: flex; gap: 8px; flex-wrap: wrap; }
+.pick .pk {
+  position: relative;
+  width: 74px;
+  height: 56px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  opacity: .55;
+}
+.pick .pk img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pick .pk.sel { border-color: #FFD24D; opacity: 1; }
+.pick .pk .no {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FFD24D;
+  color: #2B2320;
+  font-size: 13px;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+}
 
-/* ---------- 傳單本體 ---------- */
+/* ---------- 傳單本體：鎖定 A4 ---------- */
 .sheet {
   width: 210mm;
-  min-height: 295mm;
+  height: 297mm;
   margin: 16px auto;
   background: #fff;
-  padding: 9mm;
+  padding: 8mm;
   display: flex;
   flex-direction: column;
-  gap: 3mm;
+  gap: 2.5mm;
+  overflow: hidden;
 }
+
+[contenteditable]:hover { outline: 1.5px dashed #C0271B; outline-offset: 1px; cursor: text; }
+[contenteditable]:focus { outline: 2px solid #C0271B; outline-offset: 1px; }
 
 /* 頁首紅條 */
-.head {
-  display: grid;
-  grid-template-columns: 34mm 1fr 24mm;
-  gap: 3mm;
-  align-items: stretch;
-}
-.head .logo-box {
-  border: 1px solid var(--line);
-  display: grid;
-  place-items: center;
-  padding: 2mm;
-}
-.head .logo-box img { max-width: 100%; max-height: 17mm; }
-.head .band {
-  background: var(--red);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 2mm;
-}
-.head .band .co { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 24px; letter-spacing: .12em; }
-.head .band .url { font-size: 12.5px; letter-spacing: .05em; }
-.head .deal {
-  background: var(--red);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-family: "Noto Serif TC", serif;
-  font-weight: 900;
-  font-size: 46px;
-}
+.head { display: grid; grid-template-columns: 34mm 1fr 24mm; gap: 3mm; flex: none; }
+.head .logo-box { border: 1px solid var(--line); display: grid; place-items: center; padding: 2mm; }
+.head .logo-box img { max-width: 100%; max-height: 15mm; }
+.head .band { background: var(--red); color: #fff; display: grid; place-items: center; text-align: center; padding: 2mm; }
+.head .band .co { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 23px; letter-spacing: .12em; }
+.head .band .url { font-size: 12px; letter-spacing: .04em; }
+.head .deal { background: var(--red); color: #fff; display: grid; place-items: center; font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 44px; }
 
 .case-name {
+  flex: none;
   background: var(--pink);
   border: 1px solid var(--line);
   text-align: center;
   font-family: "Noto Serif TC", serif;
   font-weight: 900;
-  font-size: 30px;
+  font-size: 28px;
   letter-spacing: .3em;
-  padding: 2mm 0;
+  padding: 1.5mm 0;
 }
 
-/* 主區 */
-.main { flex: 1; display: grid; gap: 4mm; }
-.main.tplA { grid-template-columns: 1fr 88mm; }
-.main.tplB { grid-template-columns: 1fr; }
+/* 主區：吃掉剩餘高度 */
+.main { flex: 1; min-height: 0; display: grid; gap: 3mm; }
+.main.tplA { grid-template-columns: 1fr 86mm; }
+.main.tplB { grid-template-rows: auto 1fr; }
+.main.tplC { grid-template-rows: 1fr auto; }
+.main.tplD { grid-template-rows: 64mm 1fr; }
+
+.duo { display: grid; grid-template-columns: 1.15fr 1fr; gap: 3mm; min-height: 0; }
 
 /* 規格表 */
-.spec { display: flex; flex-direction: column; gap: 2mm; }
+.spec { display: flex; flex-direction: column; gap: 2mm; min-height: 0; }
 .spec .row { display: flex; gap: 2mm; }
-.spec .cell {
-  flex: 1;
-  border: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  min-height: 9mm;
-}
+.spec .cell { flex: 1; border: 1px solid var(--line); display: flex; align-items: center; min-height: 8.5mm; }
 .spec .k {
   background: var(--pink);
   font-weight: 900;
-  padding: 1mm 3mm;
-  min-width: 17mm;
+  padding: 1mm 2.5mm;
+  min-width: 16mm;
   text-align: center;
   align-self: stretch;
   display: grid;
@@ -138,86 +143,72 @@ body {
   border-right: 1px solid var(--line);
   flex: none;
 }
-.spec .v { flex: 1; text-align: center; font-weight: 700; font-size: 15px; padding: 1mm 2mm; }
-.spec .v.size { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 30px; color: #1440A0; }
-.spec .v.price { padding: 2mm; }
-.spec .v.price .big { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 40px; color: var(--red); line-height: 1.05; }
-.spec .v.price .big small { font-size: 20px; }
-.spec .v.price .unit { font-size: 13px; color: #333; }
+.spec .v { flex: 1; text-align: center; font-weight: 700; font-size: 14.5px; padding: 1mm 2mm; }
+.spec .v.size { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 27px; color: #1440A0; }
+.spec .v.price { padding: 1.5mm; }
+.spec .v.price .big { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 36px; color: var(--red); line-height: 1.05; }
+.spec .v.price .big small { font-size: 18px; }
+.spec .v.price .unit { font-size: 12.5px; color: #333; }
 
-.pitch-head {
-  background: var(--pink);
-  border: 1px solid var(--line);
-  text-align: center;
-  font-weight: 900;
-  letter-spacing: .5em;
-  padding: 1mm 0;
-}
-.pitch-box {
-  border: 1px solid var(--line);
-  flex: 1;
-  display: grid;
-  place-items: center;
-  padding: 3mm;
-}
+.pitch-head { background: var(--pink); border: 1px solid var(--line); text-align: center; font-weight: 900; letter-spacing: .5em; padding: 1mm 0; flex: none; }
+.pitch-box { border: 1px solid var(--line); flex: 1; min-height: 0; display: grid; place-items: center; padding: 2mm; overflow: hidden; }
 .pitch-box ul { margin: 0; padding: 0; list-style: none; text-align: center; }
-.pitch-box li {
-  font-family: "Noto Serif TC", serif;
-  font-weight: 900;
-  font-size: 23px;
-  letter-spacing: .18em;
-  line-height: 1.9;
-}
+.pitch-box li { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 21px; letter-spacing: .16em; line-height: 1.85; }
+.tplC .pitch-box li, .tplD .pitch-box li { font-size: 18px; line-height: 1.7; }
 
-/* 照片 */
-.photosA { display: flex; flex-direction: column; gap: 3mm; }
-.photosA .ph { border: 1px solid var(--line); height: 62mm; }
-.photosB { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
-.photosB .ph { border: 1px solid var(--line); height: 62mm; }
+/* 照片：全部彈性填滿，不會爆版 */
+.photosA { display: flex; flex-direction: column; gap: 2.5mm; min-height: 0; }
+.photosA .ph { flex: 1; min-height: 0; }
+.photosB { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 2.5mm; min-height: 0; }
+.photoC { min-height: 0; }
+.photoC .ph { height: 100%; }
+.photosD { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5mm; min-height: 0; }
+.ph { border: 1px solid var(--line); overflow: hidden; min-height: 0; }
 .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* 聯絡與 QR */
 .contact {
+  flex: none;
   display: grid;
-  grid-template-columns: 1fr 26mm 26mm;
+  grid-template-columns: 1fr 24mm 24mm;
   gap: 3mm;
   align-items: center;
   border: 1px solid var(--line);
-  padding: 2mm 4mm;
+  padding: 1.5mm 4mm;
 }
-.contact .tel { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 27px; letter-spacing: .04em; }
-.contact .lic { font-size: 12px; color: #333; margin-top: 1mm; }
-.qr { text-align: center; font-size: 11px; font-weight: 700; }
-.qr img, .qr canvas { width: 22mm; height: 22mm; display: block; margin: 0 auto 1mm; }
+.contact .tel { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 25px; letter-spacing: .04em; }
+.contact .lic { font-size: 11.5px; color: #333; }
+.qr { text-align: center; font-size: 10.5px; font-weight: 700; }
+.qr img, .qr canvas { width: 20mm; height: 20mm; display: block; margin: 0 auto .5mm; }
 
-.foot {
-  background: var(--pink);
-  border: 1px solid var(--line);
-  text-align: center;
-  font-weight: 700;
-  font-size: 13.5px;
-  padding: 1.5mm 0;
-}
+.foot { flex: none; background: var(--pink); border: 1px solid var(--line); text-align: center; font-weight: 700; font-size: 13px; padding: 1.2mm 0; }
 
 /* ---------- 列印 ---------- */
 @page { size: A4 portrait; margin: 0; }
 @media print {
   body { background: #fff; }
   .ctrl { display: none; }
-  .sheet { margin: 0; width: auto; min-height: auto; }
+  .sheet { margin: 0; }
+  [contenteditable]:hover, [contenteditable]:focus { outline: none; }
 }
 </style>
 </head>
 <body>
 
 <div class="ctrl">
-  <b>列印 DM</b>
-  <div class="tpl">
-    <button id="tplA" class="on" onclick="setTpl('A')">模板一（三圖側排）</button>
-    <button id="tplB" onclick="setTpl('B')">模板二（四圖下排）</button>
+  <div class="row1">
+    <b>列印 DM</b>
+    <div class="tpl" id="tplBtns">
+      <button data-t="A">模板一・三圖側排</button>
+      <button data-t="B">模板二・四圖下排</button>
+      <button data-t="C">模板三・大圖焦點</button>
+      <button data-t="D">模板四・雙圖橫排</button>
+    </div>
+    <button class="go" onclick="window.print()">🖨 列印</button>
+    <a href="#" id="backLink">← 回物件頁</a>
   </div>
-  <button class="go" onclick="window.print()">🖨 列印</button>
-  <a href="#" id="backLink">← 回物件頁</a>
+  <div class="hint" id="pickHint">選擇要放上傳單的照片（按順序點選）；傳單上所有文字都可以直接點擊修改。注意：切換模板或照片後，改過的文字會重置，建議最後再改字。</div>
+  <div class="pick" id="pick"></div>
 </div>
 
 <div class="sheet" id="sheet">載入中…</div>
@@ -230,8 +221,10 @@ body {
   "use strict";
   var C = window.COMPANY;
   var SB = window.DW_SB || { url: "", key: "" };
+  var CAP = { A: 3, B: 4, C: 1, D: 2 };
   var TPL = "A";
   var L = null;
+  var SEL = [];   // 已選照片（依點選順序）
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -249,13 +242,11 @@ body {
       address: r.address || "", layout: r.layout || "", floor: r.floor || "", age: r.age || "",
       pitch: r.pitch || [], photos: r.photos || [] };
   }
-
   function findLocal() {
     var hit = null;
     (window.LISTINGS || []).forEach(function (x) { if (String(x.sno) === sno) hit = x; });
     return hit;
   }
-
   function load() {
     if (!SB.url) return Promise.resolve(findLocal());
     return fetch(SB.url + "/rest/v1/dw_listings?sno=eq." + encodeURIComponent(sno) + "&select=*", {
@@ -265,45 +256,97 @@ body {
       .catch(function () { return findLocal(); });
   }
 
-  window.setTpl = function (t) {
-    TPL = t;
-    document.getElementById("tplA").classList.toggle("on", t === "A");
-    document.getElementById("tplB").classList.toggle("on", t === "B");
-    render();
-  };
+  /* ---------- 模板切換與照片選擇 ---------- */
 
-  function specHTML(l, compact) {
+  document.getElementById("tplBtns").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    TPL = b.dataset.t;
+    SEL = SEL.slice(0, CAP[TPL]);
+    fillSel();
+    markTpl();
+    renderPick();
+    render();
+  });
+
+  function markTpl() {
+    document.querySelectorAll("#tplBtns button").forEach(function (b) {
+      b.classList.toggle("on", b.dataset.t === TPL);
+    });
+  }
+
+  function fillSel() {
+    if (!L) return;
+    var i = 0;
+    while (SEL.length < Math.min(CAP[TPL], L.photos.length) && i < L.photos.length) {
+      if (SEL.indexOf(L.photos[i]) < 0) SEL.push(L.photos[i]);
+      i++;
+    }
+  }
+
+  function renderPick() {
+    var el = document.getElementById("pick");
+    if (!L || !L.photos.length) { el.innerHTML = ""; document.getElementById("pickHint").textContent = "此物件沒有照片；傳單上所有文字都可以直接點擊修改。"; return; }
+    el.innerHTML = L.photos.map(function (p) {
+      var idx = SEL.indexOf(p);
+      return '<button type="button" class="pk' + (idx >= 0 ? " sel" : "") + '" data-p="' + esc(p) + '">' +
+        '<img src="' + photoUrl(p) + '" alt="">' +
+        (idx >= 0 ? '<span class="no">' + (idx + 1) + "</span>" : "") +
+        "</button>";
+    }).join("");
+  }
+
+  document.getElementById("pick").addEventListener("click", function (e) {
+    var b = e.target.closest(".pk"); if (!b) return;
+    var p = b.dataset.p;
+    var idx = SEL.indexOf(p);
+    if (idx >= 0) SEL.splice(idx, 1);
+    else {
+      if (SEL.length >= CAP[TPL]) SEL.shift();  // 滿了就擠掉最早選的
+      SEL.push(p);
+    }
+    renderPick();
+    render();
+  });
+
+  /* ---------- 傳單渲染 ---------- */
+
+  function specHTML(l, twoCol) {
     var cnt = l.photos.length ? String(l.photos[0]).replace(/b\d+\.\w+$/, "") : l.sno;
     var age = (l.age || "").split(" ")[0];
     var priceHtml = l.deal === "rent"
-      ? '<div class="big">' + l.price + '<small> 萬/月</small></div>'
-      : '<div class="big">' + l.price.toLocaleString("zh-TW") + '<small> 萬</small></div>' +
-        (l.unit ? '<div class="unit">' + esc(l.unit) + '萬/坪</div>' : "");
-    return (
-      '<div class="row"><div class="cell"><span class="k">編號</span><span class="v">' + esc(cnt) + "</span></div>" +
-      (compact ? '<div class="cell"><span class="k">類別</span><span class="v">' + esc(l.kind) + "</span></div>" : "") + "</div>" +
-      (compact ? "" : '<div class="row"><div class="cell"><span class="k">類別</span><span class="v">' + esc(l.kind) + "</span></div></div>") +
-      '<div class="row"><div class="cell"><span class="k">位置</span><span class="v">' + esc(l.address || (l.district + "區")) + "</span></div></div>" +
-      '<div class="row"><div class="cell"><span class="k">建坪</span><span class="v size">' + l.size + " 坪</span></div></div>" +
-      '<div class="row"><div class="cell"><span class="k">格局</span><span class="v">' + esc(l.layout || "—") + "</span></div>" +
-      '<div class="cell"><span class="k">樓別</span><span class="v">' + esc(l.floor || "—") + "</span></div></div>" +
-      '<div class="row"><div class="cell"><span class="k">車位</span><span class="v">' + (l.parking ? "有" : "無") + "</span></div>" +
-      '<div class="cell"><span class="k">屋齡</span><span class="v">' + esc(age || "—") + "</span></div></div>" +
-      '<div class="row"><div class="cell"><span class="k">' + (l.deal === "rent" ? "租金" : "售價") + '</span><span class="v price">' + priceHtml + "</span></div></div>"
-    );
+      ? '<div class="big" contenteditable="true">' + l.price + '<small> 萬/月</small></div>'
+      : '<div class="big" contenteditable="true">' + l.price.toLocaleString("zh-TW") + '<small> 萬</small></div>' +
+        (l.unit ? '<div class="unit" contenteditable="true">' + esc(l.unit) + '萬/坪</div>' : "");
+    var ed = ' contenteditable="true"';
+    var rows =
+      '<div class="row"><div class="cell"><span class="k">編號</span><span class="v"' + ed + '>' + esc(cnt) + "</span></div>" +
+      '<div class="cell"><span class="k">類別</span><span class="v"' + ed + '>' + esc(l.kind) + "</span></div></div>" +
+      '<div class="row"><div class="cell"><span class="k">位置</span><span class="v"' + ed + '>' + esc(l.address || (l.district + "區")) + "</span></div>" +
+      (twoCol ? '<div class="cell"><span class="k">建坪</span><span class="v size"' + ed + '>' + l.size + " 坪</span></div>" : "") + "</div>" +
+      (twoCol ? "" : '<div class="row"><div class="cell"><span class="k">建坪</span><span class="v size"' + ed + '>' + l.size + " 坪</span></div></div>") +
+      '<div class="row"><div class="cell"><span class="k">格局</span><span class="v"' + ed + '>' + esc(l.layout || "—") + "</span></div>" +
+      '<div class="cell"><span class="k">樓別</span><span class="v"' + ed + '>' + esc(l.floor || "—") + "</span></div></div>" +
+      '<div class="row"><div class="cell"><span class="k">車位</span><span class="v"' + ed + '>' + (l.parking ? "有" : "無") + "</span></div>" +
+      '<div class="cell"><span class="k">屋齡</span><span class="v"' + ed + '>' + esc(age || "—") + "</span></div></div>" +
+      '<div class="row"><div class="cell"><span class="k">' + (l.deal === "rent" ? "租金" : "售價") + '</span><span class="v price">' + priceHtml + "</span></div></div>";
+    return '<div class="spec">' + rows + "</div>";
   }
 
   function pitchHTML(l) {
     if (!l.pitch.length) return "";
     return '<div class="pitch-head">訴 求 重 點</div><div class="pitch-box"><ul>' +
-      l.pitch.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ul></div>";
+      l.pitch.map(function (p) { return '<li contenteditable="true">' + esc(p) + "</li>"; }).join("") + "</ul></div>";
   }
 
-  function photosHTML(l, n, cls) {
-    var caption = C.tel + "　" + C.storeName;
-    return '<div class="' + cls + '">' + l.photos.slice(0, n).map(function (p) {
-      return '<div class="ph"><img src="' + photoUrl(p) + '" alt="' + esc(l.name) + '"></div>';
-    }).join("") + "</div>";
+  function phDiv(p) { return '<div class="ph"><img src="' + photoUrl(p) + '" alt=""></div>'; }
+  function photosOf(n, cls) {
+    return '<div class="' + cls + '">' + SEL.slice(0, n).map(phDiv).join("") + "</div>";
+  }
+
+  function siteUrl() {
+    return /^https?:/.test(location.origin)
+      ? location.origin + location.pathname.replace(/print\.html$/, "")
+      : "https://texion1016.github.io/dingwei-website/";
   }
 
   function render() {
@@ -311,42 +354,51 @@ body {
     if (!l) { document.getElementById("sheet").textContent = "找不到這筆物件"; return; }
     var listingUrl = new URL("listing.html?sno=" + encodeURIComponent(l.sno), location.href).href;
 
-    var mainHtml = TPL === "A"
-      ? '<div class="main tplA"><div class="spec">' + specHTML(l, false) + pitchHTML(l) + "</div>" + photosHTML(l, 3, "photosA") + "</div>"
-      : '<div class="main tplB"><div class="spec">' + specHTML(l, true) + pitchHTML(l) + "</div>" + photosHTML(l, 4, "photosB") + "</div>";
+    var mainHtml;
+    if (TPL === "A") {
+      mainHtml = '<div class="main tplA"><div class="spec-col" style="display:flex;flex-direction:column;gap:2mm;min-height:0">' +
+        specHTML(l, false) + pitchHTML(l) + "</div>" + photosOf(3, "photosA") + "</div>";
+    } else if (TPL === "B") {
+      mainHtml = '<div class="main tplB"><div class="duo">' + specHTML(l, true) +
+        '<div style="display:flex;flex-direction:column;gap:2mm;min-height:0">' + pitchHTML(l) + "</div></div>" +
+        photosOf(4, "photosB") + "</div>";
+    } else if (TPL === "C") {
+      mainHtml = '<div class="main tplC"><div class="photoC">' + (SEL.length ? phDiv(SEL[0]) : "") + "</div>" +
+        '<div class="duo">' + specHTML(l, true) +
+        '<div style="display:flex;flex-direction:column;gap:2mm;min-height:0">' + pitchHTML(l) + "</div></div></div>";
+    } else {
+      mainHtml = '<div class="main tplD">' + photosOf(2, "photosD") +
+        '<div class="duo">' + specHTML(l, true) +
+        '<div style="display:flex;flex-direction:column;gap:2mm;min-height:0">' + pitchHTML(l) + "</div></div></div>";
+    }
 
     document.getElementById("sheet").innerHTML =
       '<div class="head">' +
       '<div class="logo-box"><img src="assets/brand/logo_old.gif" alt="DING WEI REAL ESTATE"></div>' +
-      '<div class="band"><div><div class="co">' + esc(C.name) + '</div><div class="url">' + listingSiteUrl() + "</div></div></div>" +
-      '<div class="deal">' + (l.deal === "rent" ? "租" : "售") + "</div>" +
+      '<div class="band"><div><div class="co" contenteditable="true">' + esc(C.name) + '</div><div class="url" contenteditable="true">' + siteUrl() + "</div></div></div>" +
+      '<div class="deal" contenteditable="true">' + (l.deal === "rent" ? "租" : "售") + "</div>" +
       "</div>" +
-      '<div class="case-name">' + esc(l.name) + "</div>" +
+      '<div class="case-name" contenteditable="true">' + esc(l.name) + "</div>" +
       mainHtml +
       '<div class="contact">' +
-      '<div><span class="tel">' + esc(C.printPhone || C.tel) + "　" + esc(C.printName || "") + "</span>" +
-      '<div class="lic">經紀人：' + esc(C.broker) + "　證號：" + esc(C.brokerLicense) + "</div></div>" +
-      '<div class="qr"><canvas id="qrCase"></canvas>掃碼看本案</div>' +
-      '<div class="qr"><img src="assets/brand/line_qr.png" alt="LINE QR">LINE 諮詢</div>' +
+      '<div><span class="tel" contenteditable="true">' + esc(C.printPhone || C.tel) + "　" + esc(C.printName || "") + "</span>" +
+      '<div class="lic" contenteditable="true">經紀人：' + esc(C.broker) + "　證號：" + esc(C.brokerLicense) + "</div></div>" +
+      '<div class="qr"><canvas id="qrCase"></canvas><span contenteditable="true">掃碼看本案</span></div>' +
+      '<div class="qr"><img src="assets/brand/line_qr.png" alt="LINE QR"><span contenteditable="true">LINE 諮詢</span></div>' +
       "</div>" +
-      '<div class="foot">' + esc(C.name) + "　" + esc(C.address) + "　" + listingSiteUrl() + "</div>";
+      '<div class="foot" contenteditable="true">' + esc(C.name) + "　" + esc(C.address) + "　" + siteUrl() + "</div>";
 
     if (window.QRCode) {
-      QRCode.toCanvas(document.getElementById("qrCase"), listingUrl, { margin: 1, width: 168 }, function () {});
+      QRCode.toCanvas(document.getElementById("qrCase"), listingUrl, { margin: 1, width: 160 }, function () {});
     }
-  }
-
-  function listingSiteUrl() {
-    return location.origin.indexOf("github.io") >= 0 || location.origin.indexOf("http") === 0
-      ? location.origin + location.pathname.replace(/print\.html$/, "")
-      : "https://texion1016.github.io/dingwei-website/";
   }
 
   load().then(function (l) {
     L = l;
     if (l && l.photos.length >= 4) TPL = "B";
-    document.getElementById("tplA").classList.toggle("on", TPL === "A");
-    document.getElementById("tplB").classList.toggle("on", TPL === "B");
+    fillSel();
+    markTpl();
+    renderPick();
     render();
   });
 })();
