@@ -123,9 +123,10 @@
   /* ---------- 物件列表頁 ---------- */
 
   function initList() {
-    var state = { deal: "all", kind: "", district: "", sort: "new" };
+    var state = { deal: "all", kind: "", district: "", sort: "new", query: "" };
     var params = new URLSearchParams(location.search);
     if (params.get("deal") === "sell" || params.get("deal") === "rent") state.deal = params.get("deal");
+    state.query = (params.get("q") || "").trim();
 
     var kinds = [], districts = [];
     L.forEach(function (l) {
@@ -136,6 +137,8 @@
     var kindSel = document.getElementById("f-kind");
     var distSel = document.getElementById("f-district");
     var sortSel = document.getElementById("f-sort");
+    var queryInput = document.getElementById("f-query");
+    queryInput.value = state.query;
     kinds.forEach(function (k) { kindSel.add(new Option(k, k)); });
     districts.forEach(function (d) { distSel.add(new Option(d, d)); });
 
@@ -144,10 +147,13 @@
     var toggles = document.querySelectorAll(".deal-toggle button");
 
     function apply() {
+      var needle = state.query.toLocaleLowerCase("zh-Hant").replace(/\s+/g, "");
       var items = L.filter(function (l) {
+        var searchable = [l.name, l.district, l.kind, l.layout, l.address].concat(Object.values(l.spec || {})).join(" ").toLocaleLowerCase("zh-Hant").replace(/\s+/g, "");
         return (state.deal === "all" || l.deal === state.deal) &&
           (!state.kind || l.kind === state.kind) &&
-          (!state.district || l.district === state.district);
+          (!state.district || l.district === state.district) &&
+          (!needle || searchable.indexOf(needle) >= 0);
       });
       if (state.sort === "new") items.sort(byNewest);
       if (state.sort === "priceAsc") items.sort(function (a, b) { return a.price - b.price; });
@@ -166,6 +172,7 @@
     kindSel.addEventListener("change", function () { state.kind = kindSel.value; apply(); });
     distSel.addEventListener("change", function () { state.district = distSel.value; apply(); });
     sortSel.addEventListener("change", function () { state.sort = sortSel.value; apply(); });
+    queryInput.addEventListener("input", function () { state.query = queryInput.value.trim(); apply(); });
     apply();
   }
 

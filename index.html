@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=6">
+<link rel="stylesheet" href="assets/style.css?v=7">
 </head>
 <body data-page="home">
 
@@ -39,6 +39,11 @@
     <div>
       <h1>南崁房屋，<br>交給<em>在地的鼎瑋</em></h1>
       <p class="hero-lede">從蘆竹的巷弄行情到每一棟社區的管理品質，我們都瞭若指掌。買屋、賣屋、租屋、代書業務，一通電話，在地團隊為您服務。</p>
+      <form class="hero-search" action="listings.html" method="get">
+        <label for="home-query">查詢物件</label>
+        <input id="home-query" name="q" type="search" placeholder="輸入案名、縣市區、種類或格局">
+        <button type="submit">查詢</button>
+      </form>
       <div class="hero-actions">
         <a class="btn btn-primary" href="listings.html?deal=sell">瀏覽出售物件</a>
         <a class="btn btn-ghost" href="listings.html?deal=rent">瀏覽出租物件</a>
@@ -170,6 +175,6 @@
 
 <script src="assets/config.js?v=6"></script>
 <script src="assets/data.js?v=6"></script>
-<script src="assets/site.js?v=6"></script>
+<script src="assets/site.js?v=7"></script>
 </body>
 </html>

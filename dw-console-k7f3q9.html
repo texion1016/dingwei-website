@@ -55,6 +55,8 @@ img { display:block; }
 .toolbar .tabs button.on { background:var(--plum); color:#fff; }
 .toolbar .count { color:var(--ink-soft); font-size:13.5px; }
 .toolbar .spacer { flex:1; }
+.toolbar .search-input { min-width:260px; padding:8px 12px; border:1px solid var(--hairline); border-radius:8px; background:#fff; color:var(--ink); font:inherit; }
+.toolbar .search-input:focus { outline:3px solid #f2c3bd; border-color:var(--plum); }
 
 /* 物件列 */
 .rows { display:flex; flex-direction:column; gap:12px; }
@@ -110,6 +112,7 @@ img { display:block; }
   .row .thumb, .row .nophoto { width:72px; height:56px; }
   .row .acts { grid-column:1 / -1; justify-content:flex-start; }
   .grid2, .grid3 { grid-template-columns:1fr; }
+  .toolbar .search-input { width:100%; min-width:0; }
 }
 </style>
 </head>
@@ -140,6 +143,7 @@ img { display:block; }
       <button data-f="rent">出租</button>
       <button data-f="unlisted">已下架</button>
     </div>
+    <input class="search-input" id="listingSearch" type="search" placeholder="查詢案名、縣市區、種類或格局" aria-label="查詢物件">
     <span class="count" id="count"></span>
     <span class="spacer"></span>
     <button class="btn btn-ghost" id="importBtn" style="display:none" onclick="importOld()">匯入舊站 37 筆物件</button>
@@ -262,6 +266,7 @@ const _sb = _SB_CFG.url ? supabase.createClient(_SB_CFG.url, _SB_CFG.key) : null
 
 let ALL = [];          // 資料庫全部物件
 let FILTER = 'all';
+let SEARCH = '';
 let editingRow = null; // null = 新增
 let formPhotos = [];   // 表單目前的照片（檔名或網址）
 let formVideos = [];   // 表單目前的影片網址
@@ -295,10 +300,14 @@ async function loadAll() {
 
 function render() {
   const rows = document.getElementById('rows');
-  let items = ALL.filter(r =>
-    FILTER === 'all' ? r.status === 'active' :
-    FILTER === 'unlisted' ? r.status !== 'active' :
-    r.status === 'active' && r.deal === FILTER);
+  const needle = SEARCH.toLocaleLowerCase('zh-Hant').replace(/\s+/g, '');
+  let items = ALL.filter(r => {
+    const matchesStatus = FILTER === 'all' ? r.status === 'active' :
+      FILTER === 'unlisted' ? r.status !== 'active' : r.status === 'active' && r.deal === FILTER;
+    const haystack = [r.name, r.district, r.kind, r.layout, r.address]
+      .concat(Object.values(r.spec || {})).join(' ').toLocaleLowerCase('zh-Hant').replace(/\s+/g, '');
+    return matchesStatus && (!needle || haystack.includes(needle));
+  });
   document.getElementById('count').textContent =
     '上架中 ' + ALL.filter(r => r.status === 'active').length + ' 筆／已下架 ' +
     ALL.filter(r => r.status !== 'active').length + ' 筆';
@@ -333,6 +342,11 @@ document.getElementById('tabs').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   FILTER = b.dataset.f;
   document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+  render();
+});
+
+document.getElementById('listingSearch').addEventListener('input', e => {
+  SEARCH = e.target.value.trim();
   render();
 });
 
