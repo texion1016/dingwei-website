@@ -601,6 +601,24 @@ img { max-width: 100%; display: block; }
   text-align: right;
 }
 
+/* ---------- 代租代管 ---------- */
+
+.management-hero { padding: 92px 0 84px; background: linear-gradient(115deg, var(--plum) 0%, #5b1713 58%, #8e3028 100%); color: #fff; }
+.management-hero .wrap { max-width: 920px; }
+.management-label { margin: 0 0 16px; font-size: 14px; font-weight: 700; letter-spacing: .13em; color: #f4d0c9; }
+.management-hero h1 { max-width: 680px; margin: 0; font-family: var(--font-display); font-size: 48px; line-height: 1.3; letter-spacing: .05em; }
+.management-hero p:not(.management-label) { max-width: 630px; margin: 22px 0 28px; line-height: 1.9; color: #f8e9e5; }
+.management-hero .btn-primary { background: #fff; color: var(--plum); border-color: #fff; }
+.management-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.management-grid article { min-height: 208px; padding: 24px 20px; background: #fff; border-top: 3px solid var(--plum); box-shadow: 0 8px 22px rgba(40, 22, 18, .08); }
+.management-grid span { display: block; color: var(--plum); font-size: 13px; font-weight: 900; letter-spacing: .14em; }
+.management-grid h3 { margin: 18px 0 10px; font-family: var(--font-display); font-size: 20px; }
+.management-grid p { margin: 0; color: var(--ink-soft); line-height: 1.8; font-size: 14px; }
+.management-note { background: #efe4dc; }
+.management-note .wrap { display: flex; align-items: center; justify-content: space-between; gap: 36px; }
+.management-note h2 { margin: 0 0 10px; font-family: var(--font-display); font-size: 28px; }
+.management-note p { max-width: 650px; margin: 0; color: var(--ink-soft); line-height: 1.85; }
+
 /* ---------- 試配色浮動切換器 ---------- */
 
 .theme-picker {
@@ -712,6 +730,11 @@ img { max-width: 100%; display: block; }
 }
 .gallery-thumbs button.active { border-color: var(--plum); }
 .gallery-thumbs img { width: 100%; height: 100%; object-fit: cover; }
+
+.listing-videos { margin-top: 26px; }
+.listing-videos h2 { margin: 0 0 10px; font-size: 20px; }
+.listing-videos video { display: block; width: 100%; max-height: 520px; background: #1a1513; border: 1px solid var(--hairline); }
+.listing-videos video + video { margin-top: 12px; }
 
 .pitch-card {
   background: var(--plum);
@@ -1179,6 +1202,7 @@ img { max-width: 100%; display: block; }
   .hero-rail { display: none; }
   .hero-feature img { height: 300px; }
   .about-grid { grid-template-columns: 1fr; }
+  .management-grid { grid-template-columns: repeat(2, 1fr); }
   .detail-grid { grid-template-columns: 1fr; }
   .site-footer .wrap { grid-template-columns: 1fr; gap: 28px; }
 }
@@ -1187,6 +1211,11 @@ img { max-width: 100%; display: block; }
   .site-header .wrap { flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; gap: 8px; }
   .site-nav { order: 3; width: 100%; overflow-x: auto; }
   .brand-name { font-size: 17px; }
+  .management-hero { padding: 62px 0; }
+  .management-hero h1 { font-size: 35px; }
+  .management-grid { grid-template-columns: 1fr; }
+  .management-note .wrap { display: block; }
+  .management-note .btn { margin-top: 22px; }
   .section { padding: 48px 0; }
   .section-head { flex-wrap: wrap; gap: 8px 14px; }
   .filter-count { width: 100%; margin-left: 0; }

@@ -98,6 +98,8 @@ img { display:block; }
 .photo-list { display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
 .photo-chip { position:relative; width:104px; }
 .photo-chip img { width:104px; height:78px; object-fit:cover; border-radius:7px; border:1px solid var(--hairline); }
+.video-chip video { width:104px; height:78px; object-fit:cover; border-radius:7px; border:1px solid var(--hairline); background:#231b19; }
+.video-chip span { display:block; font-size:12px; color:var(--ink-soft); margin-top:3px; }
 .photo-chip .rm { position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; border:0; background:var(--sell); color:#fff; font-weight:700; line-height:1; }
 .photo-chip .mv { position:absolute; bottom:4px; left:4px; width:24px; height:22px; border-radius:5px; border:0; background:rgba(0,0,0,.55); color:#fff; font-size:12px; }
 .modal .foot { display:flex; gap:12px; justify-content:flex-end; margin-top:22px; padding-top:16px; border-top:1px solid var(--hairline); }
@@ -112,17 +114,6 @@ img { display:block; }
 </style>
 </head>
 <body>
-
-<!-- 登入 -->
-<div class="login-mask" id="loginMask">
-  <div class="login-box">
-    <h2>鼎瑋物件管理後台</h2>
-    <p>請輸入管理密碼</p>
-    <input type="password" id="pwd" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    <p class="err" id="pwdErr">密碼不正確</p>
-    <p style="margin-top:16px"><button class="btn btn-primary" onclick="doLogin()" style="width:100%">登入</button></p>
-  </div>
-</div>
 
 <header class="topbar">
   <span class="seal">鼎</span>
@@ -247,6 +238,12 @@ img { display:block; }
         <input type="file" id="f_photos" accept="image/*" multiple>
         <div class="photo-list" id="photoList"></div>
       </div>
+      <div class="field full">
+        <label>影片（選填，可上傳 MP4／MOV／WebM；建議單支 100MB 內）</label>
+        <input type="file" id="f_videos" accept="video/mp4,video/quicktime,video/webm" multiple>
+        <div class="photo-list video-list" id="videoList"></div>
+        <span class="tip">影片會顯示在物件詳情頁的「物件影片」區塊；第一支會優先顯示。</span>
+      </div>
     </div>
     <div class="foot">
       <span class="status" id="formStatus"></span>
@@ -257,29 +254,17 @@ img { display:block; }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/config.js?v=5"></script>
-<script src="assets/data.js?v=5"></script>
+<script src="assets/config.js?v=6"></script>
+<script src="assets/data.js?v=6"></script>
 <script>
 const _SB_CFG = window.DW_SB || { url: '', key: '' };
 const _sb = _SB_CFG.url ? supabase.createClient(_SB_CFG.url, _SB_CFG.key) : null;
-
-const ADMIN_PWD = 'dingwei1381';   // ← 管理密碼改這裡
 
 let ALL = [];          // 資料庫全部物件
 let FILTER = 'all';
 let editingRow = null; // null = 新增
 let formPhotos = [];   // 表單目前的照片（檔名或網址）
-
-/* ---------- 登入 ---------- */
-function doLogin() {
-  if (document.getElementById('pwd').value === ADMIN_PWD) {
-    document.getElementById('loginMask').style.display = 'none';
-    loadAll();
-    loadMsgs();
-  } else {
-    document.getElementById('pwdErr').style.display = 'block';
-  }
-}
+let formVideos = [];   // 表單目前的影片網址
 
 /* ---------- 工具 ---------- */
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -383,7 +368,7 @@ async function importOld() {
     parking: !!l.parking, address: l.address || '', layout: l.layout || '',
     floor: l.floor || '', age: l.age || '',
     pitch: l.pitch || [], spec: l.spec || {},
-    lat: l.lat || '', lng: l.lng || '', photos: l.photos || []
+    lat: l.lat || '', lng: l.lng || '', photos: l.photos || [], videos: l.videos || []
   }));
   const { error } = await _sb.from('dw_listings').upsert(rows, { onConflict: 'sno' });
   if (error) { alert('匯入失敗：' + error.message); return; }
@@ -505,8 +490,11 @@ function openForm(row) {
   F('f_pitch').value = row ? (row.pitch || []).join('\n') : '';
   F('f_spec').value = row ? Object.entries(row.spec || {}).map(([k, v]) => k + ':' + v).join('\n') : '';
   F('f_photos').value = '';
+  F('f_videos').value = '';
   formPhotos = row ? (row.photos || []).slice() : [];
+  formVideos = row ? (row.videos || []).slice() : [];
   renderPhotoChips();
+  renderVideoChips();
   document.getElementById('modalMask').classList.add('open');
 }
 
@@ -521,6 +509,14 @@ function renderPhotoChips() {
 }
 function rmPhoto(i) { formPhotos.splice(i, 1); renderPhotoChips(); }
 function mvPhoto(i) { formPhotos.unshift(formPhotos.splice(i, 1)[0]); renderPhotoChips(); }
+
+function renderVideoChips() {
+  F('videoList').innerHTML = formVideos.map((url, i) =>
+    '<div class="photo-chip video-chip"><video src="' + esc(url) + '" preload="metadata" muted></video>' +
+    '<button type="button" class="rm" title="移除影片" onclick="rmVideo(' + i + ')">✕</button>' +
+    '<span>影片 ' + (i + 1) + '</span></div>').join('');
+}
+function rmVideo(i) { formVideos.splice(i, 1); renderVideoChips(); }
 
 F('f_photos').addEventListener('change', async e => {
   const files = Array.from(e.target.files || []);
@@ -537,6 +533,28 @@ F('f_photos').addEventListener('change', async e => {
     formPhotos.push(data.publicUrl);
   }
   renderPhotoChips();
+  F('formStatus').textContent = '';
+  F('saveBtn').disabled = false;
+  e.target.value = '';
+});
+
+F('f_videos').addEventListener('change', async e => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  if (!_sb) { alert('尚未設定資料庫連線（assets/config.js）'); e.target.value = ''; return; }
+  const tooLarge = files.find(file => file.size > 100 * 1024 * 1024);
+  if (tooLarge && !confirm('「' + tooLarge.name + '」超過 100MB，上傳可能較久且會佔用雲端空間。仍要上傳嗎？')) { e.target.value = ''; return; }
+  F('formStatus').textContent = '影片上傳中…';
+  F('saveBtn').disabled = true;
+  for (const file of files) {
+    const ext = (file.name.split('.').pop() || 'mp4').toLowerCase();
+    const path = 'listing/video_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
+    const { error } = await _sb.storage.from('dw-photos').upload(path, file, { contentType: file.type, upsert: false });
+    if (error) { alert('影片上傳失敗：' + error.message); break; }
+    const { data } = _sb.storage.from('dw-photos').getPublicUrl(path);
+    formVideos.push(data.publicUrl);
+  }
+  renderVideoChips();
   F('formStatus').textContent = '';
   F('saveBtn').disabled = false;
   e.target.value = '';
@@ -570,6 +588,7 @@ async function saveForm() {
     pitch: F('f_pitch').value.split('\n').map(s => s.trim()).filter(Boolean),
     spec,
     photos: formPhotos,
+    videos: formVideos,
     updated_at: new Date().toISOString()
   };
   if (row.deal === 'sell' && row.size > 0) row.unit = (price / row.size).toFixed(1);
@@ -589,6 +608,9 @@ async function saveForm() {
   closeForm();
   loadAll();
 }
+
+/* 測試階段免登入：開啟後台即載入資料。正式上線前請改為 Supabase Auth。 */
+document.addEventListener('DOMContentLoaded', () => { loadAll(); loadMsgs(); });
 </script>
 </body>
 </html>

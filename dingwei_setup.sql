@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS dw_listings (
   lat TEXT DEFAULT '',
   lng TEXT DEFAULT '',
   photos JSONB DEFAULT '[]',          -- 照片（檔名=舊照片 / 完整網址=新上傳）
+  videos JSONB DEFAULT '[]',          -- 影片（Supabase Storage 公開網址）
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

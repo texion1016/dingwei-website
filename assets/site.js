@@ -28,7 +28,8 @@
       spec: r.spec || {},
       lat: r.lat || "",
       lng: r.lng || "",
-      photos: r.photos || []
+      photos: r.photos || [],
+      videos: r.videos || []
     };
   }
 
@@ -259,6 +260,9 @@
       "<div>" +
       '<div class="gallery-main">' + mainPhoto + "</div>" +
       (l.photos.length > 1 ? '<div class="gallery-thumbs">' + thumbs + "</div>" : "") +
+      (l.videos && l.videos.length ? '<section class="listing-videos"><h2>物件影片</h2>' +
+        l.videos.map(function (src) { return '<video controls preload="metadata" src="' + esc(src) + '">您的瀏覽器不支援影片播放。</video>'; }).join("") +
+        '</section>' : "") +
       "</div>" +
       "<div>" + pitch + specHTML +
       '<div class="contact-card">' +
