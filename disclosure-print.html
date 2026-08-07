@@ -328,6 +328,8 @@
         border: 0.35mm solid #111;
         padding: 0.75mm 1mm;
         vertical-align: middle;
+        overflow-wrap: anywhere;
+        word-break: break-all;
       }
       .rights-sheet .rights-head {
         height: 17mm;
@@ -469,6 +471,7 @@
       const company = () => window.COMPANY || {};
       function b() {
         const c = company();
+        const parkingYes = D.parking_registered === "有";
         return `<div class="brand"><img src="assets/brand/logo_old.gif" alt="鼎瑋不動產"><span class="co">${esc(c.name || "鼎瑋不動產經紀有限公司")}</span><small>不動產說明書</small></div>`;
       }
       function field(label, key) {
@@ -581,7 +584,7 @@
             <tr><td colspan="2" class="right-label">限制登記情形</td><td colspan="5">${mark("restriction_notice")}預告登記　${mark("restriction_seizure")}查封　${mark("restriction_fake_mortgage")}假扣押　${mark("restriction_fake_mortgage")}假處分　${mark("restriction_other")}其他　　<span style="float:right">（詳如登記簿謄本）</span><br>處理方式說明：${value("restriction_note")}</td></tr>
           </table>
           <div class="rights-section">四、停車位權利調查</div>
-          <table class="parking"><colgroup><col style="width:18%"><col style="width:40%"><col style="width:18%"><col style="width:24%"></colgroup><tr><td rowspan="2" class="parking-title">有否辦理獨<br>立區分所有<br>建物登記</td><td>${mark("parking_registered")}有　${D.parking_registered === "否" ? mark("parking_registered") : '<i class="check y"></i>'}無</td><td colspan="2"></td></tr><tr><td>使用約定：${value("parking_agreement")}</td><td>${value("parking_type") === "平面式" ? '<i class="check y"></i>' : '<i class="check"></i>'}平面式　${value("parking_type") === "機械式" ? '<i class="check y"></i>' : '<i class="check"></i>'}機械式</td><td>編號　${value("parking_no")}</td></tr></table>`,
+          <table class="parking"><colgroup><col style="width:18%"><col style="width:40%"><col style="width:18%"><col style="width:24%"></colgroup><tr><td rowspan="2" class="parking-title">有否辦理獨<br>立區分所有<br>建物登記</td><td>${parkingYes ? '<i class="check y"></i>' : '<i class="check"></i>'}有　${parkingYes ? '<i class="check"></i>' : '<i class="check y"></i>'}無</td><td colspan="2"></td></tr><tr><td>使用約定：${value("parking_agreement")}</td><td>${value("parking_type") === "平面式" ? '<i class="check y"></i>' : '<i class="check"></i>'}平面式　${value("parking_type") === "機械式" ? '<i class="check y"></i>' : '<i class="check"></i>'}機械式</td><td>編號　${value("parking_no")}</td></tr></table>`,
           "rights-sheet",
         );
       }
