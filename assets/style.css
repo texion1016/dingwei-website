@@ -168,6 +168,15 @@ img { max-width: 100%; display: block; }
 }
 .tel-btn:hover { background: var(--plum-deep) !important; color: #fff !important; }
 
+.login-link {
+  border: 1px solid var(--plum);
+  color: var(--plum) !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+.login-link:hover { background: var(--plum) !important; color: #fff !important; }
+.login-link:focus-visible { outline: 2px solid var(--plum); outline-offset: 2px; }
+
 /* ---------- 首頁主視覺 ---------- */
 
 .hero {
