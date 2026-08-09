@@ -57,8 +57,10 @@ def committed_bytes(path: Path) -> bytes:
 
 def site_files() -> dict[str, tuple[bytes, str]]:
     files: dict[str, tuple[bytes, str]] = {}
-    for path in sorted(ROOT.glob("*.html")):
-        files["/" + path.name] = (committed_bytes(path), "text/html; charset=utf-8")
+    root_assets = [*ROOT.glob("*.html"), ROOT / "robots.txt", ROOT / "sitemap.xml"]
+    for path in sorted(path for path in root_assets if path.is_file()):
+        mime = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        files["/" + path.name] = (committed_bytes(path), mime)
     for path in sorted((ROOT / "assets").rglob("*")):
         if not path.is_file():
             continue
