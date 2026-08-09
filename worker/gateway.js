@@ -5,6 +5,7 @@ const ADMIN_PAGES = new Set([
 ]);
 const COOKIE = "dw_admin_session";
 const TTL = 8 * 60 * 60;
+const ADMIN_API_PREFIX = "/api/admin/supabase";
 const enc = new TextEncoder();
 
 function b64url(bytes) {
@@ -62,9 +63,45 @@ function proxy(request, env) {
   return env.ORIGIN.fetch(new Request(target, request));
 }
 
+function permittedAdminApi(pathname) {
+  return [
+    "/rest/v1/dw_listings",
+    "/rest/v1/dw_messages",
+    "/rest/v1/dw_property_files",
+    "/storage/v1/object/dw-photos",
+  ].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+function supabaseProxy(request, env) {
+  const incoming = new URL(request.url);
+  const path = incoming.pathname.slice(ADMIN_API_PREFIX.length) || "/";
+  if (!permittedAdminApi(path)) return new Response("Not Found", { status: 404 });
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) return new Response("Admin data service is not configured", { status: 503 });
+
+  const target = new URL(env.SUPABASE_URL);
+  target.pathname = path;
+  target.search = incoming.search;
+  const headers = new Headers(request.headers);
+  headers.delete("Authorization");
+  headers.delete("apikey");
+  headers.delete("Cookie");
+  headers.set("Authorization", `Bearer ${env.SUPABASE_SERVICE_KEY}`);
+  headers.set("apikey", env.SUPABASE_SERVICE_KEY);
+  return fetch(new Request(target, {
+    method: request.method,
+    headers,
+    body: request.method === "GET" || request.method === "HEAD" ? undefined : request.body,
+    redirect: request.redirect,
+  }));
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === ADMIN_API_PREFIX || url.pathname.startsWith(`${ADMIN_API_PREFIX}/`)) {
+      if (!(await loggedIn(request, env))) return new Response("Unauthorized", { status: 401 });
+      return supabaseProxy(request, env);
+    }
     if (url.pathname === "/admin/login") {
       if (request.method === "GET") return new Response(loginHtml(nextPath(url.searchParams.get("next"))), { headers: { "content-type": "text/html; charset=UTF-8" } });
       if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });

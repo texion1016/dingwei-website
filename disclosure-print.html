@@ -461,7 +461,9 @@
     <script src="assets/disclosure-schema.js"></script>
     <script>
       const SB = window.DW_SB?.url
-          ? supabase.createClient(DW_SB.url, DW_SB.key)
+          ? supabase.createClient(location.origin + "/api/admin/supabase", "dw-admin-session", {
+              auth: { persistSession: false, autoRefreshToken: false },
+            })
           : null,
         Q = new URLSearchParams(location.search),
         SNO = Q.get("sno"),
@@ -483,7 +485,6 @@
       const company = () => window.COMPANY || {};
       function b() {
         const c = company();
-        const parkingYes = D.parking_registered === "有";
         return `<div class="brand"><img src="assets/brand/logo_old.gif" alt="鼎瑋不動產"><span class="co">${esc(c.name || "鼎瑋不動產經紀有限公司")}</span><small>不動產說明書</small></div>`;
       }
       function field(label, key) {
@@ -546,6 +547,7 @@
         );
       }
       function exactRights() {
+        const parkingYes = D.parking_registered === "有";
         const mark = (key, fallback = false) =>
           `<i class="check ${D[key] === undefined ? (fallback ? "y" : "") : D[key] ? "y" : ""}"></i>`;
         const value = (key) => esc(v(key, ""));

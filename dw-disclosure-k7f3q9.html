@@ -362,10 +362,6 @@
       ><a href="dw-console-k7f3q9.html">← 返回物件管理</a>
     </header>
     <main class="shell">
-      <div class="notice">
-        測試階段提醒：本表会填写屋主、买方等个人资料。现在后台尚未启用登入权限，请勿输入真实个资；正式使用前请先恢复
-        Supabase Auth 与资料权限。
-      </div>
       <div id="loading" class="notice">正在讀取案件資料…</div>
       <div id="app" style="display: none">
         <div class="layout">
@@ -401,7 +397,9 @@
     <script src="assets/disclosure-schema.js"></script>
     <script>
       const SB = window.DW_SB?.url
-        ? supabase.createClient(DW_SB.url, DW_SB.key)
+        ? supabase.createClient(location.origin + "/api/admin/supabase", "dw-admin-session", {
+            auth: { persistSession: false, autoRefreshToken: false },
+          })
         : null;
       const Q = new URLSearchParams(location.search);
       const SNO = Q.get("sno");

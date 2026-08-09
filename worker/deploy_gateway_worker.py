@@ -25,30 +25,36 @@ def fail(response):
     raise RuntimeError(f"Cloudflare API {response.status_code}: {detail}")
 
 
-def deployment_token():
-    """Prefer a CI environment variable, then use the ignored local vault."""
-    token = os.environ.get("DW_CF_API_TOKEN")
-    if token:
-        return token
+def local_setting(name):
+    value = os.environ.get(name)
+    if value:
+        return value
     if LOCAL_CREDENTIALS.exists():
         for line in LOCAL_CREDENTIALS.read_text(encoding="utf-8").splitlines():
-            if line.startswith("DW_CF_API_TOKEN="):
+            if line.startswith(f"{name}="):
                 return line.split("=", 1)[1].strip()
     return None
 
 
 def main():
-    token = deployment_token()
-    secrets = {
+    token = local_setting("DW_CF_API_TOKEN")
+    login_secrets = {
         "ADMIN_USERNAME": os.environ.get("DW_ADMIN_USERNAME"),
         "ADMIN_PASSWORD": os.environ.get("DW_ADMIN_PASSWORD"),
         "SESSION_SECRET": os.environ.get("DW_SESSION_SECRET"),
     }
+    supabase_secrets = {
+        "SUPABASE_URL": "https://sejlpuexzpadokvkrbpj.supabase.co",
+        "SUPABASE_SERVICE_KEY": local_setting("DW_SUPABASE_SERVICE_KEY"),
+    }
     if not token:
         raise RuntimeError("A deployment token is required")
-    supplied_secrets = {name: value for name, value in secrets.items() if value}
-    if supplied_secrets and len(supplied_secrets) != len(secrets):
+    supplied_login_secrets = {name: value for name, value in login_secrets.items() if value}
+    if supplied_login_secrets and len(supplied_login_secrets) != len(login_secrets):
         raise RuntimeError("Provide all three login secrets together, or leave them unchanged")
+    if not supabase_secrets["SUPABASE_SERVICE_KEY"]:
+        raise RuntimeError("DW_SUPABASE_SERVICE_KEY is required")
+    supplied_secrets = {**supplied_login_secrets, **supabase_secrets}
 
     response = requests.put(
         f"https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/workers/scripts/{WORKER}",
