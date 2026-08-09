@@ -1,0 +1,3 @@
+# Local deployment credentials and Python cache must never be committed.
+.cloudflare-deploy.env
+worker/__pycache__/

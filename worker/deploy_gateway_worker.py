@@ -14,6 +14,7 @@ ACCOUNT_ID = "9242649f2d6bdcc4290e2b5ff3f3e320"
 WORKER = "dingwei-realty-gateway"
 ROOT = pathlib.Path(__file__).resolve().parent
 ENTRY = ROOT / "gateway.js"
+LOCAL_CREDENTIALS = ROOT.parent / ".cloudflare-deploy.env"
 
 
 def fail(response):
@@ -24,15 +25,30 @@ def fail(response):
     raise RuntimeError(f"Cloudflare API {response.status_code}: {detail}")
 
 
-def main():
+def deployment_token():
+    """Prefer a CI environment variable, then use the ignored local vault."""
     token = os.environ.get("DW_CF_API_TOKEN")
+    if token:
+        return token
+    if LOCAL_CREDENTIALS.exists():
+        for line in LOCAL_CREDENTIALS.read_text(encoding="utf-8").splitlines():
+            if line.startswith("DW_CF_API_TOKEN="):
+                return line.split("=", 1)[1].strip()
+    return None
+
+
+def main():
+    token = deployment_token()
     secrets = {
         "ADMIN_USERNAME": os.environ.get("DW_ADMIN_USERNAME"),
         "ADMIN_PASSWORD": os.environ.get("DW_ADMIN_PASSWORD"),
         "SESSION_SECRET": os.environ.get("DW_SESSION_SECRET"),
     }
-    if not token or not all(secrets.values()):
-        raise RuntimeError("Deployment token and all three login secrets are required")
+    if not token:
+        raise RuntimeError("A deployment token is required")
+    supplied_secrets = {name: value for name, value in secrets.items() if value}
+    if supplied_secrets and len(supplied_secrets) != len(secrets):
+        raise RuntimeError("Provide all three login secrets together, or leave them unchanged")
 
     response = requests.put(
         f"https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/workers/scripts/{WORKER}",
@@ -55,7 +71,7 @@ def main():
         fail(response)
 
     secret_url = f"https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/workers/scripts/{WORKER}/secrets"
-    for name, value in secrets.items():
+    for name, value in supplied_secrets.items():
         response = requests.put(
             secret_url,
             headers={"Authorization": f"Bearer {token}"},
