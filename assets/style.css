@@ -1227,7 +1227,24 @@ img { max-width: 100%; display: block; }
 
 @media (max-width: 720px) {
   .site-header .wrap { flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; gap: 8px; }
-  .site-nav { order: 3; width: 100%; overflow-x: auto; }
+  .site-nav { order: 3; width: 100%; justify-content: space-between; gap: 4px; overflow: visible; }
+  .site-nav > a:not([href*="deal=sell"]):not([href*="deal=rent"]):not([href="management.html"]) { display: none; }
+  .site-nav > a[href*="deal=sell"],
+  .site-nav > a[href*="deal=rent"],
+  .site-nav > a[href="management.html"] { flex: 1 1 0; padding: 9px 4px; text-align: center; white-space: nowrap; font-size: 14px; }
+  .site-footer a[href="needs.html"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 7px;
+    background: var(--plum);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
   .brand-name { font-size: 17px; }
   .management-hero { padding: 62px 0; }
   .management-hero h1 { font-size: 35px; }
