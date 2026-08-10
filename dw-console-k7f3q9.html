@@ -143,7 +143,7 @@ img { display:block; }
       <button data-f="rent">出租</button>
       <button data-f="unlisted">已下架</button>
     </div>
-    <input class="search-input" id="listingSearch" type="search" placeholder="查詢案名、縣市區、種類或格局" aria-label="查詢物件">
+    <input class="search-input" id="listingSearch" type="search" placeholder="查詢編號、案名、縣市區、種類或格局" aria-label="查詢物件">
     <span class="count" id="count"></span>
     <span class="spacer"></span>
     <button class="btn btn-ghost" id="importBtn" style="display:none" onclick="importOld()">匯入舊站 37 筆物件</button>
@@ -213,8 +213,12 @@ img { display:block; }
         <input id="f_layout" placeholder="例：3房2廳2衛">
       </div>
       <div class="field">
-        <label>樓別</label>
-        <input id="f_floor" placeholder="例：8／14樓">
+        <label>本戶樓層</label>
+        <input id="f_floor_unit" placeholder="例：5">
+      </div>
+      <div class="field">
+        <label>總樓高</label>
+        <input id="f_floor_total" placeholder="例：15">
       </div>
       <div class="field">
         <label>屋齡</label>
@@ -312,7 +316,7 @@ function render() {
   let items = ALL.filter(r => {
     const matchesStatus = FILTER === 'all' ? r.status === 'active' :
       FILTER === 'unlisted' ? r.status !== 'active' : r.status === 'active' && r.deal === FILTER;
-    const haystack = [r.name, r.district, r.kind, r.layout, r.address]
+    const haystack = [r.sno, r.name, r.district, r.kind, r.layout, r.address]
       .concat(Object.values(r.spec || {})).join(' ').toLocaleLowerCase('zh-Hant').replace(/\s+/g, '');
     return matchesStatus && (!needle || haystack.includes(needle));
   });
@@ -491,6 +495,37 @@ document.querySelectorAll('#dealRadio input').forEach(i => {
 function openFormById(id) { openForm(ALL.find(x => x.id === id) || null); }
 function openDisclosure(sno) { window.open('dw-disclosure-k7f3q9.html?sno=' + encodeURIComponent(sno), '_blank'); }
 
+function cleanFloorUnit(value) {
+  return String(value || '').trim().replace(/[樓楼]\s*$/u, '').trim();
+}
+function cleanFloorTotal(value) {
+  return String(value || '').trim()
+    .replace(/[（(]?\s*[總总]樓(?:高|層)\s*[）)]?/gu, '')
+    .replace(/[樓楼]\s*$/u, '').trim();
+}
+function splitFloor(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return { unit: '', total: '' };
+  const parts = raw.split(/\s*[／/]\s*/u);
+  if (parts.length >= 2) return { unit: cleanFloorUnit(parts[0]), total: cleanFloorTotal(parts[1]) };
+  if (/[總总]樓(?:高|層)/u.test(raw)) return { unit: '', total: cleanFloorTotal(raw) };
+  return { unit: cleanFloorUnit(raw), total: '' };
+}
+function formatFloor(unit, total) {
+  const current = cleanFloorUnit(unit);
+  const building = cleanFloorTotal(total);
+  if (current && building) return current + '樓 / ' + building + '總樓層';
+  if (current) return current + '樓';
+  if (building) return building + '總樓層';
+  return '';
+}
+function nextSixDigitSno() {
+  const values = ALL.map(r => String(r.sno || ''))
+    .filter(s => /^\d{6}$/.test(s))
+    .map(Number);
+  return String((values.length ? Math.max(...values) : 130000) + 1).padStart(6, '0');
+}
+
 function openForm(row) {
   editingRow = row;
   F('formTitle').textContent = row ? '編輯物件：' + row.name : '刊登新物件';
@@ -507,7 +542,9 @@ function openForm(row) {
   F('f_price').value = row ? row.price : '';
   F('f_size').value = row ? row.size : '';
   F('f_layout').value = row ? row.layout || '' : '';
-  F('f_floor').value = row ? row.floor || '' : '';
+  const floorParts = splitFloor(row ? row.floor : '');
+  F('f_floor_unit').value = floorParts.unit;
+  F('f_floor_total').value = floorParts.total;
   F('f_age').value = row ? row.age || '' : '';
   F('f_parking').value = row && row.parking ? 'true' : 'false';
   F('f_address').value = row ? row.address || '' : '';
@@ -605,7 +642,7 @@ async function saveForm() {
     parking: F('f_parking').value === 'true',
     address: F('f_address').value.trim(),
     layout: F('f_layout').value.trim(),
-    floor: F('f_floor').value.trim(),
+    floor: formatFloor(F('f_floor_unit').value, F('f_floor_total').value),
     age: F('f_age').value.trim(),
     pitch: F('f_pitch').value.split('\n').map(s => s.trim()).filter(Boolean),
     spec,
@@ -621,7 +658,7 @@ async function saveForm() {
   if (editingRow) {
     ({ error } = await _sb.from('dw_listings').update(row).eq('id', editingRow.id));
   } else {
-    row.sno = String(Math.floor(Date.now() / 1000));  // 新編號：時間戳，永遠排最新
+    row.sno = nextSixDigitSno();
     row.status = 'active';
     ({ error } = await _sb.from('dw_listings').insert(row));
   }
