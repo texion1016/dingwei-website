@@ -276,6 +276,12 @@ let formVideos = [];   // 表單目前的影片網址
 /* ---------- 工具 ---------- */
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function photoUrl(p) { return /^https?:\/\//.test(p) ? p : 'assets/photos/' + p; }
+// 上傳要經過受保護的後台代理；公開展示則必須使用 Supabase 公開 bucket 的網址。
+// 不可用 _sb.getPublicUrl()，因為 _sb 的 base URL 是本網站的登入代理。
+function publicStorageUrl(path) {
+  const base = String(_SB_CFG.url || '').replace(/\/$/, '');
+  return base + '/storage/v1/object/public/dw-photos/' + String(path).split('/').map(encodeURIComponent).join('/');
+}
 
 /* ---------- 載入與列表 ---------- */
 async function loadAll() {
@@ -547,8 +553,7 @@ F('f_photos').addEventListener('change', async e => {
     const path = 'listing/' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
     const { error } = await _sb.storage.from('dw-photos').upload(path, file);
     if (error) { alert('照片上傳失敗：' + error.message); break; }
-    const { data } = _sb.storage.from('dw-photos').getPublicUrl(path);
-    formPhotos.push(data.publicUrl);
+    formPhotos.push(publicStorageUrl(path));
   }
   renderPhotoChips();
   F('formStatus').textContent = '';
@@ -569,8 +574,7 @@ F('f_videos').addEventListener('change', async e => {
     const path = 'listing/video_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
     const { error } = await _sb.storage.from('dw-photos').upload(path, file, { contentType: file.type, upsert: false });
     if (error) { alert('影片上傳失敗：' + error.message); break; }
-    const { data } = _sb.storage.from('dw-photos').getPublicUrl(path);
-    formVideos.push(data.publicUrl);
+    formVideos.push(publicStorageUrl(path));
   }
   renderVideoChips();
   F('formStatus').textContent = '';
