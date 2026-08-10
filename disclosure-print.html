@@ -293,12 +293,38 @@
         white-space: pre-wrap;
         padding: 4mm;
       }
-      .map {
+      .map-wrap {
+        position: relative;
         width: 100%;
         height: 207mm;
         border: 1px solid #222;
-        object-fit: cover;
         background: #f5f5f5;
+        overflow: hidden;
+      }
+      .map {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+      .map-pin {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 8mm;
+        height: 8mm;
+        background: #b5232e;
+        border: 1.2mm solid #fff;
+        border-radius: 50% 50% 50% 0;
+        box-shadow: 0 1px 3px #0008;
+        transform: translate(-50%, -72%) rotate(-45deg);
+      }
+      .map-pin::after {
+        content: "";
+        position: absolute;
+        inset: 2.2mm;
+        border-radius: 50%;
+        background: #fff;
       }
       .maplink {
         font-size: 8pt;
@@ -818,15 +844,33 @@
             )}</table></div><div class="right">${["photo_1", "photo_2", "photo_3"].map((k) => `<div class="photo">${photo(k)}</div>`).join("")}</div></div><div class="features">${esc(v("summary_features", ""))}</div><div style="position:absolute;bottom:10mm;left:13mm;right:13mm;text-align:center;border-top:2px solid #452b72;padding-top:2mm">經紀人：${esc(v("broker_name", ""))}　證號：${esc(v("broker_license", ""))}　【本物件資料僅供參考，詳情請洽本店】</div>`,
         );
       }
+      function staticMapUrl(latitude, longitude, radiusMeters) {
+        const lat = Number(latitude), lng = Number(longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return "";
+        const latDelta = radiusMeters / 111320;
+        const lngDelta = radiusMeters / (111320 * Math.cos((lat * Math.PI) / 180));
+        const bbox = [lng - lngDelta, lat - latDelta, lng + lngDelta, lat + latDelta]
+          .map((n) => n.toFixed(6))
+          .join(",");
+        const query = new URLSearchParams({
+          bbox,
+          bboxSR: "4326",
+          size: "760,1050",
+          imageSR: "4326",
+          format: "png32",
+          transparent: "false",
+          f: "image",
+        });
+        return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/export?" + query;
+      }
       function mapPage() {
         const lat = v("latitude", ""),
           lng = v("longitude", ""),
-          src =
-            lat && lng
-              ? `https://staticmap.openstreetmap.de/staticmap.php?center=${encodeURIComponent(lat + "," + lng)}&zoom=16&size=760x1050&maptype=mapnik&markers=${encodeURIComponent(lat + "," + lng + ",red-pushpin")}`
-              : "";
+          radiusLabel = v("map_radius", "週邊半徑300公尺"),
+          radius = { "週邊半徑300公尺": 300, "週邊半徑500公尺": 500, "週邊半徑1公里": 1000 }[radiusLabel] || 300,
+          src = staticMapUrl(lat, lng, radius);
         return sheet(
-          `${b()}<h1 class="phead">週邊半徑300公尺地圖　<small>日期：${esc(v("map_date", ""))}</small></h1><div class="grid">${field("名稱", "case_name")}${field("編號", "doc_no")}${field("地址", "doorplate")}${field("種類", "property_type")}${field("經緯度", "latitude")}${field("地圖範圍", "map_radius")}</div>${src ? `<img class="map" src="${src}" alt="物件週邊地圖">` : '<div class="map" style="display:grid;place-items:center">请先填写纬度与经度，才会显示位置地图。</div>'}<p class="maplink">地圖備註：${esc(v("map_note", ""))}　　Google 地圖：<span>${lat && lng ? `https://maps.google.com/?q=${esc(lat)},${esc(lng)}` : "—"}</span></p>`,
+          `${b()}<h1 class="phead">${esc(radiusLabel)}地圖　<small>日期：${esc(v("map_date", ""))}</small></h1><div class="grid">${field("名稱", "case_name")}${field("編號", "doc_no")}${field("地址", "doorplate")}${field("種類", "property_type")}${field("經緯度", "latitude")}${field("地圖範圍", "map_radius")}</div>${src ? `<div class="map-wrap"><img class="map" src="${src}" alt="物件週邊地圖" referrerpolicy="no-referrer"><span class="map-pin" aria-label="物件位置"></span></div>` : '<div class="map-wrap" style="display:grid;place-items:center">请先填写纬度与经度，才会显示位置地图。</div>'}<p class="maplink">地圖備註：${esc(v("map_note", ""))}　　Google 地圖：<span>${lat && lng ? `https://maps.google.com/?q=${esc(lat)},${esc(lng)}` : "—"}　　© Esri</span></p>`,
         );
       }
       const pages = {
