@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="zh-Hant-TW">
   <head>
+    <script>
+      // 后台资料受 .com 的登入 Cookie 保护；从本机档案直接开启无法取得权限。
+      if (location.protocol === "file:") {
+        location.replace("https://dingwei-realty.com/" + location.pathname.split("/").pop() + location.search);
+      }
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex,nofollow" />
