@@ -501,6 +501,40 @@
         margin-right: 7mm;
         white-space: nowrap;
       }
+      .sale-sheet { padding: 7mm 8mm; font-size: 8.6pt; }
+      .sale-sheet .sale-header { display:grid; grid-template-columns:43mm 1fr auto; align-items:center; min-height:18mm; border:0.45mm solid #222; }
+      .sale-sheet .sale-header img { width:39mm; max-height:15mm; object-fit:contain; margin:1mm; }
+      .sale-sheet .sale-header h1 { margin:0; text-align:center; font:900 20pt "Noto Serif TC"; letter-spacing:.18em; }
+      .sale-sheet .sale-header b { padding:0 3mm; font-size:13pt; white-space:nowrap; }
+      .sale-sheet .sale-overview { display:grid; grid-template-columns:1.05fr .92fr .78fr; border-left:0.35mm solid #222; border-top:0.35mm solid #222; }
+      .sale-sheet .sale-overview > div { min-height:11mm; padding:1.4mm 2mm; border-right:0.35mm solid #222; border-bottom:0.35mm solid #222; }
+      .sale-sheet .sale-overview .case { grid-row:span 3; display:grid; place-items:center; font:900 21pt "Noto Serif TC"; }
+      .sale-sheet .sale-overview .price { grid-row:span 3; display:grid; place-items:center; font:900 29pt "Noto Serif TC"; }
+      .sale-sheet .sale-overview .k, .sale-sheet .sale-table th { font-weight:900; background:#f4f4f4; }
+      .sale-sheet .sale-address { display:grid; grid-template-columns:18mm 1fr; border:0.35mm solid #222; border-top:0; min-height:9mm; }
+      .sale-sheet .sale-address b { background:#f4f4f4; padding:1.5mm; text-align:center; }
+      .sale-sheet .sale-address span { padding:1.5mm 2mm; }
+      .sale-sheet .sale-columns { display:grid; grid-template-columns:1.05fr .95fr; }
+      .sale-sheet .sale-block { border-left:0.35mm solid #222; border-bottom:0.35mm solid #222; }
+      .sale-sheet .sale-block:last-child { border-right:0.35mm solid #222; }
+      .sale-sheet .sale-block h2 { margin:0; padding:1.4mm; font-size:10.5pt; text-align:center; letter-spacing:.16em; background:#f4f4f4; border-bottom:0.35mm solid #222; }
+      .sale-sheet .sale-table { width:100%; border-collapse:collapse; }
+      .sale-sheet .sale-table th, .sale-sheet .sale-table td { border-right:0.35mm solid #222; border-bottom:0.35mm solid #222; padding:1.1mm 1.5mm; vertical-align:middle; }
+      .sale-sheet .sale-table tr:last-child th, .sale-sheet .sale-table tr:last-child td { border-bottom:0; }
+      .sale-sheet .sale-table th:last-child, .sale-sheet .sale-table td:last-child { border-right:0; }
+      .sale-sheet .sale-feature { min-height:27mm; white-space:pre-wrap; padding:2mm; font:900 12pt/1.55 "Noto Serif TC"; }
+      .sale-sheet .sale-images { display:grid; grid-template-columns:1fr 1fr; border-left:0.35mm solid #222; border-right:0.35mm solid #222; border-bottom:0.35mm solid #222; }
+      .sale-sheet .sale-image { min-height:43mm; border-right:0.35mm solid #222; display:flex; flex-direction:column; }
+      .sale-sheet .sale-image:last-child { border-right:0; }
+      .sale-sheet .sale-image b { text-align:center; padding:1mm; background:#f4f4f4; border-bottom:0.35mm solid #222; }
+      .sale-sheet .sale-image img { width:100%; height:38mm; object-fit:contain; }
+      .sale-sheet .sale-empty { display:grid; place-items:center; flex:1; color:#777; }
+      .sale-sheet .sale-bottom { display:grid; grid-template-columns:1fr 1fr; border-left:0.35mm solid #222; border-right:0.35mm solid #222; border-bottom:0.35mm solid #222; }
+      .sale-sheet .sale-bottom > div { min-height:20mm; padding:1.5mm; border-right:0.35mm solid #222; white-space:pre-wrap; }
+      .sale-sheet .sale-bottom > div:last-child { border-right:0; }
+      .sale-sheet .sale-sign { display:grid; grid-template-columns:1fr 1fr 1fr; border:0.35mm solid #222; border-top:0; }
+      .sale-sheet .sale-sign span { padding:1.5mm; min-height:9mm; border-right:0.35mm solid #222; }
+      .sale-sheet .sale-sign span:last-child { border-right:0; }
       @media print {
         .rights-sheet {
           padding: 7mm 6mm 6mm;
@@ -517,7 +551,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/config.js"></script>
     <script src="assets/data.js"></script>
-    <script src="assets/disclosure-schema.js"></script>
+    <script src="assets/disclosure-schema.js?v=2"></script>
     <script>
       const SB = window.DW_SB?.url
           ? supabase.createClient(location.origin + "/api/admin/supabase", "dw-admin-session", {
@@ -878,6 +912,23 @@
             )}</table></div><div class="right">${["photo_1", "photo_2", "photo_3"].map((k) => `<div class="photo">${photo(k)}</div>`).join("")}</div></div><div class="features">${esc(v("summary_features", ""))}</div><div style="position:absolute;bottom:10mm;left:13mm;right:13mm;text-align:center;border-top:2px solid #452b72;padding-top:2mm">經紀人：${esc(v("broker_name", ""))}　證號：${esc(v("broker_license", ""))}　【本物件資料僅供參考，詳情請洽本店】</div>`,
         );
       }
+      function saleSheet() {
+        const c = company();
+        const value = (key) => esc(v(key, ""));
+        const box = (label, key) => `<tr><th>${label}</th><td>${value(key)}</td></tr>`;
+        const image = (key, label) =>
+          `<div class="sale-image"><b>${label}</b>${D[key] ? `<img src="${esc(D[key])}" alt="${label}">` : '<div class="sale-empty">未上傳圖片</div>'}</div>`;
+        return sheet(
+          `<div class="sale-header"><img src="assets/brand/logo_old.gif" alt="DING WEI REAL ESTATE"><h1>${esc(c.name || "鼎瑋不動產")}</h1><b>售屋資料表</b></div>
+          <div class="sale-overview"><div class="case">${value("case_name")}</div><div><span class="k">樓層</span>　${value("sales_floor")}</div><div class="price">${value("commission_total")}萬</div><div><span class="k">格局</span>　${value("layout_detail")}</div><div><span class="k">車位</span>　${value("parking_info")}</div></div>
+          <div class="sale-address"><b>地址</b><span>${value("doorplate")}</span></div>
+          <div class="sale-columns"><section class="sale-block"><h2>權 利 範 圍</h2><table class="sale-table">${box("登記總面積／建物合計", "registered_area")}${box("土地面積／權利範圍", "land_area")}${box("基地面積", "land_base_area")}<tr><th>主建物</th><td>${value("main_area")}</td><th>附屬建物</th><td>${value("attached_area")}</td></tr><tr><th>公共設施</th><td>${value("common_area")}</td><th>公設比</th><td>${value("public_ratio")}</td></tr></table><h2>建 物 狀 況</h2><table class="sale-table">${box("完成日期", "completion_date")}${box("主要建材", "main_material")}${box("隔間材料", "building_insulation")}${box("地板", "floor_material")}${box("座向", "direction")}</table><h2>附近設施</h2><table class="sale-table">${box("學區", "school_zone")}${box("市場", "market")}${box("公園", "park")}${box("交通／站牌", "transportation")}</table></section><section class="sale-block"><h2>付 款 條 件</h2><table class="sale-table"><tr><th>簽約款</th><th>備證</th><th>完稅</th><th>尾款</th></tr><tr><td>${value("payment_1_percent")}%</td><td>${value("payment_2_percent")}%</td><td>${value("payment_3_percent")}%</td><td>${value("payment_4_percent")}%</td></tr>${box("銀行設定（萬）", "loan_bank")}${box("實際貸款約（萬）", "loan_actual")}</table><h2>使 用 狀 況</h2><table class="sale-table"><tr><th>自來水</th><td>${value("water")}</td><th>天然瓦斯</th><td>${value("gas")}</td></tr><tr><th>獨立電表</th><td>${value("electricity")}</td><th>管理費</th><td>${value("management_fee")}</td></tr><tr><th>每坪／合計</th><td colspan="3">${value("management_unit_fee")} 元／坪　　${value("management_total_fee")} 元</td></tr></table><h2>本 案 特 色</h2><div class="sale-feature">${value("summary_features")}</div></section></div>
+          <div class="sale-images">${image("sale_location_map", "位置圖")}${image("sale_floor_plan", "平面圖")}</div>
+          <div class="sale-bottom"><div><b>備註</b><br>${value("sale_remarks")}</div><div><b>附贈物／現況</b><br>${value("gift_summary")}</div></div>
+          <div class="sale-sign"><span>驗屋：${value("inspection_status")}</span><span>買方確認：${value("buyer_confirm")}<br>賣方確認：${value("seller_confirm")}</span><span>主管：${value("store_manager")}<br>經紀人：${value("broker_name")}　營業員：${value("agent_name")}</span></div>`,
+          "sale-sheet",
+        );
+      }
       function staticMapUrl(latitude, longitude, radiusMeters) {
         const lat = Number(latitude), lng = Number(longitude);
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) return "";
@@ -917,6 +968,7 @@
         terms,
         summary,
         map: mapPage,
+        sale_sheet: saleSheet,
       };
       async function boot() {
         try {

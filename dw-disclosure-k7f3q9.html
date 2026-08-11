@@ -228,6 +228,30 @@
         min-height: 84px;
         resize: vertical;
       }
+      .image-field {
+        grid-column: span 1;
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: #fcfaf8;
+      }
+      .image-field .image-preview {
+        display: grid;
+        place-items: center;
+        height: 170px;
+        margin: 5px 0 9px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .image-field .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .image-field small { color: var(--muted); }
       .check {
         flex-direction: row;
         align-items: center;
@@ -328,6 +352,7 @@
         .fields {
           grid-template-columns: 1fr;
         }
+        .image-field { grid-column: 1; }
         .top .hint {
           display: none;
         }
@@ -400,7 +425,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/config.js"></script>
     <script src="assets/data.js"></script>
-    <script src="assets/disclosure-schema.js"></script>
+    <script src="assets/disclosure-schema.js?v=2"></script>
     <script>
       const SB = window.DW_SB?.url
         ? supabase.createClient(location.origin + "/api/admin/supabase", "dw-admin-session", {
@@ -467,6 +492,9 @@
           latitude: listing?.lat || "",
           longitude: listing?.lng || "",
           map_radius: "週邊半徑300公尺",
+          land_area: spec("地坪"),
+          park: spec("公園"),
+          transportation: [spec("捷運"), spec("站名")].filter(Boolean).join("／"),
           attach_title_check: true,
           attach_condition_check: true,
           attach_land_transcript: true,
@@ -477,6 +505,8 @@
         const [k, label, type, opts] = f;
         const v = doc[k] ?? "";
         if (type === "photo") return "";
+        if (type === "image")
+          return `<div class="field image-field"><label>${esc(label)}</label><div class="image-preview">${v ? `<img src="${esc(v)}" alt="${esc(label)}">` : "尚未上傳圖片"}</div><input data-upload-key="${k}" type="file" accept="image/*" onchange="uploadDocumentImage('${k}', this)"><small>上傳後會儲存在此案件的售屋資料中，列印時會直接帶入。</small></div>`;
         if (type === "check")
           return `<div class="field check"><input data-key="${k}" id="${k}" type="checkbox" ${v ? "checked" : ""}><label for="${k}">${esc(label)}</label></div>`;
         if (type === "textarea")
@@ -526,6 +556,7 @@
           terms: "交易條件",
           summary: "建物調查表",
           map: "週邊地圖",
+          sale_sheet: "售屋資料表",
         };
         return (
           '<span class="print-label">單頁列印（儲存後直接開啟該頁）</span>' +
@@ -543,6 +574,38 @@
               (doc[el.dataset.key] =
                 el.type === "checkbox" ? el.checked : el.value),
           );
+        syncSharedFields();
+      }
+      function syncSharedFields() {
+        const links = [
+          ["doorplate", "building_doorplate"],
+          ["registered_area", "house_area"],
+          ["registered_area", "total_area"],
+          ["land_area", "land_base_area"],
+          ["summary_features", "feature_notes"],
+        ];
+        links.forEach(([from, to]) => {
+          if (String(doc[from] ?? "").trim()) doc[to] = doc[from];
+        });
+      }
+      function publicStorageUrl(path) {
+        const base = String(window.DW_SB?.url || "").replace(/\/$/, "");
+        return base + "/storage/v1/object/public/dw-photos/" + String(path).split("/").map(encodeURIComponent).join("/");
+      }
+      async function uploadDocumentImage(key, input) {
+        const image = input.files?.[0];
+        if (!image || !SB) return;
+        if (image.size > 12 * 1024 * 1024) { alert("图片请控制在 12MB 以内。"); input.value = ""; return; }
+        collect();
+        document.getElementById("saveStatus").textContent = "圖片上傳中…";
+        const ext = (image.name.split(".").pop() || "jpg").toLowerCase();
+        const path = "property-file/" + String(listing.sno) + "/" + key + "_" + Date.now() + "." + ext;
+        const { error } = await SB.storage.from("dw-photos").upload(path, image, { contentType: image.type, upsert: false });
+        input.value = "";
+        if (error) { alert("圖片上傳失敗：" + error.message); document.getElementById("saveStatus").textContent = "尚未儲存"; return; }
+        doc[key] = publicStorageUrl(path);
+        document.getElementById("saveStatus").textContent = "圖片已上傳，請按儲存資料";
+        render();
       }
       async function save(silent = false) {
         collect();
@@ -652,6 +715,7 @@
         };
         document.getElementById("loading").style.display = "none";
         document.getElementById("app").style.display = "block";
+        document.getElementById("allPrint").textContent = "列印整套 " + DW_DISCLOSURE_PAGE_ORDER.length + " 頁";
         render();
       }
       boot();
