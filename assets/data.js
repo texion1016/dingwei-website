@@ -2020,3 +2020,81 @@ window.LISTINGS = [
   ]
  }
 ];
+
+/* 同一案件的「物件管理」與「售租屋資料」共用欄位同步規則。 */
+window.DW_LISTING_SYNC = (function () {
+  "use strict";
+  const specToDoc = {
+    "\u7269\u6cc1": "condition_status", "\u7ba1\u7406": "management_fee", "\u5efa\u6750": "main_material",
+    "\u5916\u7246": "exterior_material", "\u5730\u677f": "floor_material", "\u7528\u9014": "building_use",
+    "\u8b66\u885b": "security", "\u4e2d\u5ead": "courtyard", "\u516c\u6bd4": "public_ratio",
+    "\u4e3b\u5efa": "main_area", "\u9644\u5c6c": "attached_area", "\u516c\u8a2d": "common_area",
+    "\u5b78\u53401": "school_zone", "\u5e02\u5834": "market", "\u516c\u5712": "park",
+    "\u6377\u904b": "transportation", "\u671d\u5411": "direction"
+  };
+  const aliases = [
+    ["doorplate", "building_doorplate"], ["deal", "trade_type"],
+    ["registered_area", "house_area", "total_area"], ["land_area", "land_base_area"],
+    ["summary_features", "feature_notes"]
+  ];
+  const text = (value) => value === undefined || value === null ? "" : String(value);
+  const first = (...values) => values.map(text).find((value) => value.trim() !== "") || "";
+  const number = (value) => {
+    const parsed = Number(String(value ?? "").replace(/[^0-9.\-]/g, ""));
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  const deal = (value, fallback = "sell") => {
+    const raw = text(value);
+    if (raw === "rent" || raw.indexOf("\u79df") >= 0) return "rent";
+    if (raw === "sell" || raw.indexOf("\u8cb7") >= 0 || raw.indexOf("\u552e") >= 0) return "sell";
+    return fallback === "rent" ? "rent" : "sell";
+  };
+  const yes = (value) => /^(true|1|yes|\u6709)$/i.test(text(value).trim());
+  const dealLabel = (value) => value === "rent" ? "\u79df\u8cc3" : "\u8cb7\u8ce3";
+
+  function syncAliases(doc, sourceKey) {
+    aliases.forEach((group) => {
+      const value = sourceKey && group.includes(sourceKey)
+        ? text(doc[sourceKey]) : first(...group.map((key) => doc[key]));
+      group.forEach((key) => { doc[key] = value; });
+    });
+    return doc;
+  }
+
+  function applyListingToDocument(doc, listing) {
+    const data = doc || {}, spec = listing?.spec || {}, listingDeal = deal(listing?.deal);
+    const features = Array.isArray(listing?.pitch) ? listing.pitch.filter(Boolean).join("\n") : "";
+    Object.assign(data, {
+      doc_no: text(listing?.sno) + (listing?.name ? "/" + listing.name : ""),
+      case_name: text(listing?.name), deal: dealLabel(listingDeal), trade_type: dealLabel(listingDeal),
+      commission_total: text(listing?.price), monthly_rent: listingDeal === "rent" ? text(listing?.price) : "",
+      doorplate: text(listing?.address), building_doorplate: text(listing?.address), property_type: text(listing?.kind),
+      registered_area: text(listing?.size), house_area: text(listing?.size), total_area: text(listing?.size),
+      layout_detail: text(listing?.layout), sales_floor: text(listing?.floor), parking_info: listing?.parking ? "\u6709" : "\u7121",
+      latitude: text(listing?.lat), longitude: text(listing?.lng), summary_features: features, feature_notes: features
+    });
+    Object.entries(specToDoc).forEach(([specKey, docKey]) => { data[docKey] = text(spec[specKey]); });
+    return syncAliases(data);
+  }
+
+  function patchListingFromDocument(doc, listing) {
+    const listingDeal = deal(first(doc.deal, doc.trade_type), listing?.deal);
+    const price = listingDeal === "rent" ? number(first(doc.monthly_rent, doc.commission_total)) : number(doc.commission_total);
+    const size = number(first(doc.registered_area, doc.house_area, doc.total_area));
+    const spec = { ...(listing?.spec || {}) };
+    Object.entries(specToDoc).forEach(([specKey, docKey]) => {
+      const value = text(doc[docKey]).trim();
+      if (value) spec[specKey] = value; else delete spec[specKey];
+    });
+    const pitch = text(first(doc.summary_features, doc.feature_notes)).split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const patch = {
+      name: text(doc.case_name).trim(), deal: listingDeal, price, size,
+      address: text(first(doc.doorplate, doc.building_doorplate)).trim(), kind: text(doc.property_type).trim(),
+      layout: text(doc.layout_detail).trim(), floor: text(doc.sales_floor).trim(), parking: yes(doc.parking_info),
+      pitch, spec, lat: text(doc.latitude).trim(), lng: text(doc.longitude).trim(), updated_at: new Date().toISOString()
+    };
+    patch.unit = listingDeal === "sell" && size > 0 ? (price / size).toFixed(1) : "";
+    return patch;
+  }
+  return { syncAliases, applyListingToDocument, patchListingFromDocument };
+})();
