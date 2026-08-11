@@ -289,6 +289,15 @@
       if (!rows) return "";
       return '<div class="spec-card"><h2>' + g[0] + "</h2><table><tbody>" + rows + "</tbody></table></div>";
     }).join("");
+    var presetKeys = SPEC_GROUPS.reduce(function (keys, group) {
+      return keys.concat(group[1].map(function (pair) { return pair[0]; }));
+    }, []);
+    var customSpecRows = Object.entries(l.spec || {}).filter(function (pair) {
+      return pair[1] && presetKeys.indexOf(pair[0]) === -1;
+    }).map(function (pair) {
+      return '<tr><td class="k">' + esc(pair[0]) + "</td><td>" + esc(pair[1]) + "</td></tr>";
+    }).join("");
+    if (customSpecRows) specHTML += '<div class="spec-card"><h2>其他規格</h2><table><tbody>' + customSpecRows + "</tbody></table></div>";
 
     var mapLink = l.lat
       ? '<a class="map-link" target="_blank" rel="noopener" href="https://www.google.com/maps?q=' +
