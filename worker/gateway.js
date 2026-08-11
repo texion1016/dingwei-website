@@ -6,6 +6,7 @@ const ADMIN_PAGES = new Set([
 const COOKIE = "dw_admin_session";
 const TTL = 8 * 60 * 60;
 const ADMIN_API_PREFIX = "/api/admin/supabase";
+const GEOCODE_PATH = "/api/admin/geocode";
 const enc = new TextEncoder();
 
 function b64url(bytes) {
@@ -95,9 +96,78 @@ function supabaseProxy(request, env) {
   }));
 }
 
+function json(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store" },
+  });
+}
+
+function validCoordinates(lat, lng) {
+  return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+}
+
+function coordinatesFromText(input) {
+  const raw = String(input || "").replace(/\+/g, " ");
+  let text = raw;
+  try { text = decodeURIComponent(raw); } catch { /* 使用原始文字繼續判讀。 */ }
+  const patterns = [
+    /@(-?\d{1,2}(?:\.\d+)?),(-?\d{2,3}(?:\.\d+)?)/,
+    /!3d(-?\d{1,2}(?:\.\d+)?).*?!4d(-?\d{2,3}(?:\.\d+)?)/,
+    /(?:[?&](?:q|query|ll|center)=|\b)(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{2,3}\.\d{3,})/,
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (!match) continue;
+    const lat = Number(match[1]), lng = Number(match[2]);
+    if (validCoordinates(lat, lng)) return { lat, lng };
+  }
+  return null;
+}
+
+function allowedMapUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    return url.protocol === "https:" && (host === "maps.app.goo.gl" || host === "goo.gl" || host.endsWith(".google.com") || host === "google.com");
+  } catch { return false; }
+}
+
+async function geocode(request) {
+  if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
+  const query = new URL(request.url).searchParams.get("query")?.trim() || "";
+  if (!query || query.length > 600) return json({ error: "請提供有效的 Google 地圖網址或完整地址。" }, 400);
+
+  let found = coordinatesFromText(query);
+  if (!found && allowedMapUrl(query)) {
+    try {
+      const response = await fetch(query, { redirect: "follow", headers: { "accept": "text/html,application/xhtml+xml" } });
+      found = coordinatesFromText(response.url) || coordinatesFromText(await response.text());
+    } catch { /* 改以下方地址查詢作為備援。 */ }
+  }
+  if (found) return json({ ...found, source: "google-link" });
+
+  const search = new URL("https://nominatim.openstreetmap.org/search");
+  search.search = new URLSearchParams({ format: "jsonv2", limit: "1", countrycodes: "tw", "accept-language": "zh-TW", q: query }).toString();
+  try {
+    const response = await fetch(search, { headers: { "accept": "application/json", "user-agent": "Dingwei-Realty-Admin/1.0 (https://dingwei-realty.com)" } });
+    const rows = await response.json();
+    const first = Array.isArray(rows) ? rows[0] : null;
+    const lat = Number(first?.lat), lng = Number(first?.lon);
+    if (!validCoordinates(lat, lng)) return json({ error: "找不到這個地址的位置，請改貼 Google 地圖分享連結。" }, 404);
+    return json({ lat, lng, display_name: first.display_name || "", source: "address" });
+  } catch {
+    return json({ error: "地圖服務暫時無法查詢，請改貼 Google 地圖分享連結。" }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === GEOCODE_PATH) {
+      if (!(await loggedIn(request, env))) return new Response("Unauthorized", { status: 401 });
+      return geocode(request);
+    }
     if (url.pathname === ADMIN_API_PREFIX || url.pathname.startsWith(`${ADMIN_API_PREFIX}/`)) {
       if (!(await loggedIn(request, env))) return new Response("Unauthorized", { status: 401 });
       return supabaseProxy(request, env);

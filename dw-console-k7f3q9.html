@@ -98,6 +98,11 @@ img { display:block; }
 .field input, .field select, .field textarea { font:inherit; padding:9px 12px; border:1px solid var(--hairline); border-radius:8px; background:#fff; color:var(--ink); }
 .field textarea { resize:vertical; }
 .field .tip { font-size:12px; color:var(--ink-soft); }
+.geo-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; }
+.geo-row .btn { justify-content:center; white-space:nowrap; border-radius:8px; padding:9px 14px; }
+.geo-status { min-height:18px; color:var(--ink-soft); font-size:12px; }
+.geo-status.ok { color:var(--ok); }
+.geo-status.err { color:var(--sell); }
 .deal-radio { display:flex; gap:10px; }
 .deal-radio label { flex:1; display:grid; place-items:center; border:1.5px solid var(--hairline); border-radius:8px; padding:9px; font-weight:700; cursor:pointer; }
 .deal-radio input { display:none; }
@@ -118,6 +123,7 @@ img { display:block; }
   .row .thumb, .row .nophoto { width:72px; height:56px; }
   .row .acts { grid-column:1 / -1; justify-content:flex-start; }
   .grid2, .grid3 { grid-template-columns:1fr; }
+  .geo-row { grid-template-columns:1fr; }
   .toolbar .search-input { width:100%; min-width:0; }
 }
 </style>
@@ -239,6 +245,22 @@ img { display:block; }
         <input id="f_address" placeholder="例：桃園市蘆竹區南昌路">
       </div>
       <div class="field full">
+        <label>Google 地圖網址或完整地址</label>
+        <div class="geo-row">
+          <input id="f_geo_query" placeholder="貼上 Google Maps 分享連結，或輸入完整地址">
+          <button type="button" class="btn btn-ghost" onclick="locateAddress(this)">取得經緯度</button>
+        </div>
+        <span id="geoStatus" class="geo-status">可貼上 Google 地圖分享連結；也可直接用案址查詢。</span>
+      </div>
+      <div class="field">
+        <label>緯度</label>
+        <input id="f_lat" inputmode="decimal" placeholder="自動帶入，可手動修正">
+      </div>
+      <div class="field">
+        <label>經度</label>
+        <input id="f_lng" inputmode="decimal" placeholder="自動帶入，可手動修正">
+      </div>
+      <div class="field full">
         <label>訴求重點（一行一句，顯示在物件頁特色卡）</label>
         <textarea id="f_pitch" rows="4" placeholder="例：&#10;近南崁市區生活機能佳&#10;邊間採光通風好&#10;全天保全管理嚴謹"></textarea>
       </div>
@@ -291,6 +313,34 @@ function photoUrl(p) { return /^https?:\/\//.test(p) ? p : 'assets/photos/' + p;
 function publicStorageUrl(path) {
   const base = String(_SB_CFG.url || '').replace(/\/$/, '');
   return base + '/storage/v1/object/public/dw-photos/' + String(path).split('/').map(encodeURIComponent).join('/');
+}
+
+function setGeoStatus(message, type) {
+  const el = F('geoStatus');
+  el.textContent = message;
+  el.className = 'geo-status' + (type ? ' ' + type : '');
+}
+function coordinate(value, min, max) {
+  const n = Number(String(value || '').trim());
+  return Number.isFinite(n) && n >= min && n <= max ? n : null;
+}
+async function locateAddress(button) {
+  const query = F('f_geo_query').value.trim() || F('f_address').value.trim();
+  if (!query) { setGeoStatus('請先貼上 Google 地圖連結或填入完整地址。', 'err'); return; }
+  setGeoStatus('正在取得位置…');
+  if (button) button.disabled = true;
+  try {
+    const response = await fetch('/api/admin/geocode?query=' + encodeURIComponent(query), { credentials: 'same-origin' });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.lat || !result.lng) throw new Error(result.error || '找不到可用的座標');
+    F('f_lat').value = Number(result.lat).toFixed(6);
+    F('f_lng').value = Number(result.lng).toFixed(6);
+    setGeoStatus('已帶入座標：' + F('f_lat').value + '，' + F('f_lng').value + (result.display_name ? '（' + result.display_name + '）' : ''), 'ok');
+  } catch (err) {
+    setGeoStatus('無法取得座標：' + (err.message || '請確認連結或地址'), 'err');
+  } finally {
+    if (button) button.disabled = false;
+  }
 }
 
 /* ---------- 載入與列表 ---------- */
@@ -554,6 +604,10 @@ function openForm(row) {
   F('f_age').value = row ? row.age || '' : '';
   F('f_parking').value = row && row.parking ? 'true' : 'false';
   F('f_address').value = row ? row.address || '' : '';
+  F('f_geo_query').value = row ? row.address || '' : '';
+  F('f_lat').value = row ? row.lat || '' : '';
+  F('f_lng').value = row ? row.lng || '' : '';
+  setGeoStatus(row && row.lat && row.lng ? '已儲存座標：' + row.lat + '，' + row.lng : '可貼上 Google 地圖分享連結；也可直接用案址查詢。');
   F('f_pitch').value = row ? (row.pitch || []).join('\n') : '';
   F('f_spec').value = row ? Object.entries(row.spec || {}).map(([k, v]) => k + ':' + v).join('\n') : '';
   F('f_photos').value = '';
@@ -637,6 +691,10 @@ async function saveForm() {
     const m = line.trim().match(/^([^:：]+)[:：](.+)$/);
     if (m) spec[m[1].trim()] = m[2].trim();
   });
+  const latitude = coordinate(F('f_lat').value, -90, 90);
+  const longitude = coordinate(F('f_lng').value, -180, 180);
+  if ((F('f_lat').value.trim() && latitude === null) || (F('f_lng').value.trim() && longitude === null)) { alert('緯度或經度格式不正確。'); return; }
+  if ((latitude === null) !== (longitude === null)) { alert('緯度與經度請一併填寫。'); return; }
 
   const row = {
     deal: document.querySelector('#dealRadio input:checked').value,
@@ -647,6 +705,8 @@ async function saveForm() {
     size: parseFloat(F('f_size').value) || 0,
     parking: F('f_parking').value === 'true',
     address: F('f_address').value.trim(),
+    lat: latitude === null ? '' : latitude,
+    lng: longitude === null ? '' : longitude,
     layout: F('f_layout').value.trim(),
     floor: formatFloor(F('f_floor_unit').value, F('f_floor_total').value),
     age: F('f_age').value.trim(),

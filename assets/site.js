@@ -63,6 +63,45 @@
     return /^https?:\/\//.test(p) ? p : PHOTO_DIR + p;
   }
 
+  function validLocation(l) {
+    var lat = Number(l.lat), lng = Number(l.lng);
+    return isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  }
+
+  function initListingMap(l) {
+    var target = document.getElementById("listing-map");
+    if (!target || !validLocation(l)) return;
+    var lat = Number(l.lat), lng = Number(l.lng);
+    var openMap = target.parentNode.querySelector(".listing-map-open");
+    if (openMap) openMap.href = "https://www.google.com/maps?q=" + encodeURIComponent(lat + "," + lng);
+    if (!window.L) {
+      target.outerHTML = '<div class="listing-map-fallback">地圖載入失敗。<a href="https://www.google.com/maps?q=' +
+        encodeURIComponent(lat + "," + lng) + '" target="_blank" rel="noopener">在 Google 地圖查看位置</a></div>';
+      return;
+    }
+    var map = window.L.map(target, { scrollWheelZoom: false, zoomControl: true, attributionControl: true });
+    window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "© OpenStreetMap contributors"
+    }).addTo(map);
+    var radiusCircle = window.L.circle([lat, lng], {
+      radius: 300,
+      color: "#8f1f3e",
+      weight: 2,
+      fillColor: "#b5232e",
+      fillOpacity: 0.13
+    }).addTo(map);
+    window.L.circleMarker([lat, lng], {
+      radius: 8,
+      color: "#fff",
+      weight: 3,
+      fillColor: "#b5232e",
+      fillOpacity: 1
+    }).addTo(map).bindTooltip("物件位置", { direction: "top" });
+    map.fitBounds(radiusCircle.getBounds(), { padding: [18, 18] });
+    setTimeout(function () { map.invalidateSize(); }, 0);
+  }
+
   function coverUrl(l) { return l.photos.length ? photoUrl(l.photos[0]) : ""; }
 
   function esc(s) {
@@ -278,6 +317,7 @@
       (l.videos && l.videos.length ? '<section class="listing-videos"><h2>物件影片</h2>' +
         l.videos.map(function (src) { return '<video controls preload="metadata" src="' + esc(src) + '">您的瀏覽器不支援影片播放。</video>'; }).join("") +
         '</section>' : "") +
+      (validLocation(l) ? '<section class="listing-map"><div class="listing-map-head"><h2>週邊 300 公尺地圖</h2><a class="listing-map-open" target="_blank" rel="noopener">在 Google 地圖查看</a></div><div id="listing-map" class="listing-map-canvas" aria-label="物件週邊 300 公尺地圖"></div></section>' : "") +
       "</div>" +
       "<div>" + pitch + specHTML +
       '<div class="contact-card">' +
@@ -307,6 +347,7 @@
         b.classList.add("active");
       });
     });
+    initListingMap(l);
   }
 
   /* ---------- 頁尾社群連結（LINE / Facebook 之後補上） ---------- */

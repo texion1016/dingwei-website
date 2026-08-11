@@ -618,6 +618,12 @@
         }
         file = d.data;
         doc = { ...defaults(), ...(file?.data || {}) };
+        // 物件後台的座標是唯一來源。每次開啟說明書都同步帶入，
+        // 單張列印或整套列印在儲存後會更新既有的說明書資料。
+        if (listing.lat && listing.lng) {
+          doc.latitude = listing.lat;
+          doc.longitude = listing.lng;
+        }
         document.getElementById("caseName").textContent = listing.name;
         document.getElementById("caseMeta").textContent =
           `編號 ${listing.sno}・${listing.deal === "rent" ? "出租" : "出售"}・${listing.address || "未填地址"}`;
