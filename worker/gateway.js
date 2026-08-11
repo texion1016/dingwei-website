@@ -147,8 +147,13 @@ async function geocode(request) {
   }
   if (found) return json({ ...found, source: "google-link" });
 
+  if (allowedMapUrl(query)) return json({ error: "無法從此 Google 地圖連結讀取座標，請改用完整分享連結或直接輸入地址。" }, 404);
+
+  // 台灣地址的樓層／門牌常未收錄在開放地圖，保留到路名即可取得
+  // 可用的街道中心點；若要精確到門牌，使用 Google 地圖分享連結即可。
+  const address = query.replace(/[0-9０-９]+號.*$/, "").trim() || query;
   const search = new URL("https://nominatim.openstreetmap.org/search");
-  search.search = new URLSearchParams({ format: "jsonv2", limit: "1", countrycodes: "tw", "accept-language": "zh-TW", q: query }).toString();
+  search.search = new URLSearchParams({ format: "jsonv2", limit: "1", countrycodes: "tw", "accept-language": "zh-TW", q: address }).toString();
   try {
     const response = await fetch(search, { headers: { "accept": "application/json", "user-agent": "Dingwei-Realty-Admin/1.0 (https://dingwei-realty.com)" } });
     const rows = await response.json();

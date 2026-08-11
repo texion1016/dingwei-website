@@ -64,6 +64,7 @@
   }
 
   function validLocation(l) {
+    if (String(l.lat || "").trim() === "" || String(l.lng || "").trim() === "") return false;
     var lat = Number(l.lat), lng = Number(l.lng);
     return isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   }

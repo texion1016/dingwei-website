@@ -250,7 +250,7 @@ img { display:block; }
           <input id="f_geo_query" placeholder="貼上 Google Maps 分享連結，或輸入完整地址">
           <button type="button" class="btn btn-ghost" onclick="locateAddress(this)">取得經緯度</button>
         </div>
-        <span id="geoStatus" class="geo-status">可貼上 Google 地圖分享連結；也可直接用案址查詢。</span>
+        <span id="geoStatus" class="geo-status">可貼上 Google 地圖分享連結；直接查地址時會定位到路段中心。</span>
       </div>
       <div class="field">
         <label>緯度</label>
@@ -607,7 +607,7 @@ function openForm(row) {
   F('f_geo_query').value = row ? row.address || '' : '';
   F('f_lat').value = row ? row.lat || '' : '';
   F('f_lng').value = row ? row.lng || '' : '';
-  setGeoStatus(row && row.lat && row.lng ? '已儲存座標：' + row.lat + '，' + row.lng : '可貼上 Google 地圖分享連結；也可直接用案址查詢。');
+  setGeoStatus(row && row.lat && row.lng ? '已儲存座標：' + row.lat + '，' + row.lng : '可貼上 Google 地圖分享連結；直接查地址時會定位到路段中心。');
   F('f_pitch').value = row ? (row.pitch || []).join('\n') : '';
   F('f_spec').value = row ? Object.entries(row.spec || {}).map(([k, v]) => k + ':' + v).join('\n') : '';
   F('f_photos').value = '';
