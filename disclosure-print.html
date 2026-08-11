@@ -501,40 +501,61 @@
         margin-right: 7mm;
         white-space: nowrap;
       }
-      .sale-sheet { padding: 7mm 8mm; font-size: 8.6pt; }
-      .sale-sheet .sale-header { display:grid; grid-template-columns:43mm 1fr auto; align-items:center; min-height:18mm; border:0.45mm solid #222; }
-      .sale-sheet .sale-header img { width:39mm; max-height:15mm; object-fit:contain; margin:1mm; }
-      .sale-sheet .sale-header h1 { margin:0; text-align:center; font:900 20pt "Noto Serif TC"; letter-spacing:.18em; }
-      .sale-sheet .sale-header b { padding:0 3mm; font-size:13pt; white-space:nowrap; }
-      .sale-sheet .sale-overview { display:grid; grid-template-columns:1.05fr .92fr .78fr; border-left:0.35mm solid #222; border-top:0.35mm solid #222; }
-      .sale-sheet .sale-overview > div { min-height:11mm; padding:1.4mm 2mm; border-right:0.35mm solid #222; border-bottom:0.35mm solid #222; }
-      .sale-sheet .sale-overview .case { grid-row:span 3; display:grid; place-items:center; font:900 21pt "Noto Serif TC"; }
-      .sale-sheet .sale-overview .price { grid-row:span 3; display:grid; place-items:center; font:900 29pt "Noto Serif TC"; }
-      .sale-sheet .sale-overview .k, .sale-sheet .sale-table th { font-weight:900; background:#f4f4f4; }
-      .sale-sheet .sale-address { display:grid; grid-template-columns:18mm 1fr; border:0.35mm solid #222; border-top:0; min-height:9mm; }
-      .sale-sheet .sale-address b { background:#f4f4f4; padding:1.5mm; text-align:center; }
-      .sale-sheet .sale-address span { padding:1.5mm 2mm; }
-      .sale-sheet .sale-columns { display:grid; grid-template-columns:1.05fr .95fr; }
-      .sale-sheet .sale-block { border-left:0.35mm solid #222; border-bottom:0.35mm solid #222; }
-      .sale-sheet .sale-block:last-child { border-right:0.35mm solid #222; }
-      .sale-sheet .sale-block h2 { margin:0; padding:1.4mm; font-size:10.5pt; text-align:center; letter-spacing:.16em; background:#f4f4f4; border-bottom:0.35mm solid #222; }
-      .sale-sheet .sale-table { width:100%; border-collapse:collapse; }
-      .sale-sheet .sale-table th, .sale-sheet .sale-table td { border-right:0.35mm solid #222; border-bottom:0.35mm solid #222; padding:1.1mm 1.5mm; vertical-align:middle; }
+      /* 售屋資料表：所有格線都由同一個表格系統繪製，避免列印時出現斷線或雙線。 */
+      .sale-sheet { padding: 6mm 7mm 5mm; font: 8.8pt/1.24 "PMingLiU", "MingLiU", "Noto Serif TC", serif; color:#161616; }
+      .sale-sheet, .sale-sheet * { box-sizing:border-box; }
+      .sale-sheet .sale-header { display:grid; grid-template-columns:43mm 1fr 28mm; align-items:center; min-height:18mm; border:0.25mm solid #171717; }
+      .sale-sheet .sale-header img { width:39mm; max-height:15mm; object-fit:contain; margin:1mm 2mm; }
+      .sale-sheet .sale-header h1 { margin:0; text-align:center; font:900 19pt "Noto Serif TC", serif; letter-spacing:.16em; white-space:nowrap; }
+      .sale-sheet .sale-header b { padding:0 2mm; font:900 12.5pt "Noto Serif TC", serif; white-space:nowrap; text-align:center; }
+      .sale-sheet .sale-overview { display:grid; grid-template-columns:38% 34% 28%; min-height:33mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
+      .sale-sheet .sale-overview > div { min-width:0; }
+      .sale-sheet .sale-overview .case, .sale-sheet .sale-overview .price { display:grid; place-items:center; padding:2mm; text-align:center; }
+      .sale-sheet .sale-overview .case { border-right:0.25mm solid #171717; font:900 20pt "Noto Serif TC", serif; overflow-wrap:anywhere; }
+      .sale-sheet .sale-overview .meta { display:grid; grid-template-rows:repeat(3, 1fr); border-right:0.25mm solid #171717; }
+      .sale-sheet .sale-overview .meta > div { display:grid; grid-template-columns:14mm 1fr; min-height:11mm; }
+      .sale-sheet .sale-overview .meta > div + div { border-top:0.25mm solid #171717; }
+      .sale-sheet .sale-overview .meta b { display:flex; align-items:center; justify-content:center; background:#f5f5f5; border-right:0.25mm solid #171717; font-weight:900; }
+      .sale-sheet .sale-overview .meta span { display:flex; align-items:center; padding:1mm 2mm; overflow-wrap:anywhere; }
+      .sale-sheet .sale-overview .price { font:900 29pt "Noto Serif TC", serif; white-space:nowrap; }
+      .sale-sheet .sale-address { display:grid; grid-template-columns:18mm 1fr; min-height:9mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
+      .sale-sheet .sale-address b { display:flex; align-items:center; justify-content:center; background:#f5f5f5; border-right:0.25mm solid #171717; }
+      .sale-sheet .sale-address span { display:flex; align-items:center; padding:1mm 2mm; overflow-wrap:anywhere; }
+      .sale-sheet .sale-columns { display:grid; grid-template-columns:52.5% 47.5%; min-height:110mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
+      .sale-sheet .sale-block { min-width:0; display:flex; flex-direction:column; }
+      .sale-sheet .sale-block + .sale-block { border-left:0.25mm solid #171717; }
+      .sale-sheet .sale-section { min-width:0; }
+      .sale-sheet .sale-section + .sale-section { border-top:0.25mm solid #171717; }
+      .sale-sheet .sale-section h2 { margin:0; min-height:8mm; display:flex; align-items:center; justify-content:center; padding:1mm; font:900 10.5pt "Noto Serif TC", serif; letter-spacing:.18em; background:#f5f5f5; border-bottom:0.25mm solid #171717; }
+      .sale-sheet .sale-table { width:100%; table-layout:fixed; border-collapse:collapse; }
+      .sale-sheet .sale-table th, .sale-sheet .sale-table td { height:7.15mm; padding:0.8mm 1.4mm; vertical-align:middle; overflow-wrap:anywhere; }
+      .sale-sheet .sale-table th { width:40%; text-align:center; font-weight:900; background:#f5f5f5; border-right:0.25mm solid #171717; }
+      .sale-sheet .sale-table td { border-bottom:0.25mm solid #171717; }
       .sale-sheet .sale-table tr:last-child th, .sale-sheet .sale-table tr:last-child td { border-bottom:0; }
-      .sale-sheet .sale-table th:last-child, .sale-sheet .sale-table td:last-child { border-right:0; }
-      .sale-sheet .sale-feature { min-height:27mm; white-space:pre-wrap; padding:2mm; font:900 12pt/1.55 "Noto Serif TC"; }
-      .sale-sheet .sale-images { display:grid; grid-template-columns:1fr 1fr; border-left:0.35mm solid #222; border-right:0.35mm solid #222; border-bottom:0.35mm solid #222; }
-      .sale-sheet .sale-image { min-height:43mm; border-right:0.35mm solid #222; display:flex; flex-direction:column; }
-      .sale-sheet .sale-image:last-child { border-right:0; }
-      .sale-sheet .sale-image b { text-align:center; padding:1mm; background:#f4f4f4; border-bottom:0.35mm solid #222; }
-      .sale-sheet .sale-image img { width:100%; height:38mm; object-fit:contain; }
-      .sale-sheet .sale-empty { display:grid; place-items:center; flex:1; color:#777; }
-      .sale-sheet .sale-bottom { display:grid; grid-template-columns:1fr 1fr; border-left:0.35mm solid #222; border-right:0.35mm solid #222; border-bottom:0.35mm solid #222; }
-      .sale-sheet .sale-bottom > div { min-height:20mm; padding:1.5mm; border-right:0.35mm solid #222; white-space:pre-wrap; }
-      .sale-sheet .sale-bottom > div:last-child { border-right:0; }
-      .sale-sheet .sale-sign { display:grid; grid-template-columns:1fr 1fr 1fr; border:0.35mm solid #222; border-top:0; }
-      .sale-sheet .sale-sign span { padding:1.5mm; min-height:9mm; border-right:0.35mm solid #222; }
-      .sale-sheet .sale-sign span:last-child { border-right:0; }
+      .sale-sheet .sale-table tr + tr th { border-top:0.25mm solid #171717; }
+      .sale-sheet .sale-table + .sale-table { border-top:0.25mm solid #171717; }
+      .sale-sheet .sale-table.sale-four th, .sale-sheet .sale-table.sale-four td { width:25%; text-align:center; }
+      .sale-sheet .sale-table.sale-four th { border-right:0.25mm solid #171717; }
+      .sale-sheet .sale-table.sale-four td { border-right:0.25mm solid #171717; }
+      .sale-sheet .sale-table.sale-four tr > *:last-child { border-right:0; }
+      .sale-sheet .sale-table.sale-four tr + tr td { border-top:0.25mm solid #171717; }
+      .sale-sheet .sale-table.sale-pairs th { width:20%; }
+      .sale-sheet .sale-table.sale-pairs td { width:30%; border-right:0.25mm solid #171717; }
+      .sale-sheet .sale-table.sale-pairs tr > *:last-child { border-right:0; }
+      .sale-sheet .sale-feature-section { flex:1; display:flex; flex-direction:column; }
+      .sale-sheet .sale-feature { flex:1; min-height:35mm; white-space:pre-wrap; padding:2.4mm 3mm; font:900 12.5pt/1.55 "Noto Serif TC", serif; overflow-wrap:anywhere; }
+      .sale-sheet .sale-images { display:grid; grid-template-columns:1fr 1fr; min-height:57mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
+      .sale-sheet .sale-image { min-width:0; display:flex; flex-direction:column; }
+      .sale-sheet .sale-image + .sale-image { border-left:0.25mm solid #171717; }
+      .sale-sheet .sale-image b { min-height:7mm; display:flex; align-items:center; justify-content:center; background:#f5f5f5; border-bottom:0.25mm solid #171717; font-size:10pt; }
+      .sale-sheet .sale-image img { width:100%; height:50mm; object-fit:contain; display:block; }
+      .sale-sheet .sale-empty { display:grid; place-items:center; flex:1; min-height:50mm; color:#666; }
+      .sale-sheet .sale-bottom { display:grid; grid-template-columns:1fr 1fr; min-height:19mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
+      .sale-sheet .sale-bottom > div { padding:1.4mm 2mm; white-space:pre-wrap; overflow-wrap:anywhere; }
+      .sale-sheet .sale-bottom > div + div { border-left:0.25mm solid #171717; }
+      .sale-sheet .sale-sign { display:grid; grid-template-columns:25% 37% 38%; min-height:11mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
+      .sale-sheet .sale-sign span { padding:1.2mm 1.7mm; overflow-wrap:anywhere; }
+      .sale-sheet .sale-sign span + span { border-left:0.25mm solid #171717; }
       @media print {
         .rights-sheet {
           padding: 7mm 6mm 6mm;
@@ -920,9 +941,9 @@
           `<div class="sale-image"><b>${label}</b>${D[key] ? `<img src="${esc(D[key])}" alt="${label}">` : '<div class="sale-empty">未上傳圖片</div>'}</div>`;
         return sheet(
           `<div class="sale-header"><img src="assets/brand/logo_old.gif" alt="DING WEI REAL ESTATE"><h1>${esc(c.name || "鼎瑋不動產")}</h1><b>售屋資料表</b></div>
-          <div class="sale-overview"><div class="case">${value("case_name")}</div><div><span class="k">樓層</span>　${value("sales_floor")}</div><div class="price">${value("commission_total")}萬</div><div><span class="k">格局</span>　${value("layout_detail")}</div><div><span class="k">車位</span>　${value("parking_info")}</div></div>
+          <div class="sale-overview"><div class="case">${value("case_name")}</div><div class="meta"><div><b>樓層</b><span>${value("sales_floor")}</span></div><div><b>格局</b><span>${value("layout_detail")}</span></div><div><b>車位</b><span>${value("parking_info")}</span></div></div><div class="price">${value("commission_total")}萬</div></div>
           <div class="sale-address"><b>地址</b><span>${value("doorplate")}</span></div>
-          <div class="sale-columns"><section class="sale-block"><h2>權 利 範 圍</h2><table class="sale-table">${box("登記總面積／建物合計", "registered_area")}${box("土地面積／權利範圍", "land_area")}${box("基地面積", "land_base_area")}<tr><th>主建物</th><td>${value("main_area")}</td><th>附屬建物</th><td>${value("attached_area")}</td></tr><tr><th>公共設施</th><td>${value("common_area")}</td><th>公設比</th><td>${value("public_ratio")}</td></tr></table><h2>建 物 狀 況</h2><table class="sale-table">${box("完成日期", "completion_date")}${box("主要建材", "main_material")}${box("隔間材料", "building_insulation")}${box("地板", "floor_material")}${box("座向", "direction")}</table><h2>附近設施</h2><table class="sale-table">${box("學區", "school_zone")}${box("市場", "market")}${box("公園", "park")}${box("交通／站牌", "transportation")}</table></section><section class="sale-block"><h2>付 款 條 件</h2><table class="sale-table"><tr><th>簽約款</th><th>備證</th><th>完稅</th><th>尾款</th></tr><tr><td>${value("payment_1_percent")}%</td><td>${value("payment_2_percent")}%</td><td>${value("payment_3_percent")}%</td><td>${value("payment_4_percent")}%</td></tr>${box("銀行設定（萬）", "loan_bank")}${box("實際貸款約（萬）", "loan_actual")}</table><h2>使 用 狀 況</h2><table class="sale-table"><tr><th>自來水</th><td>${value("water")}</td><th>天然瓦斯</th><td>${value("gas")}</td></tr><tr><th>獨立電表</th><td>${value("electricity")}</td><th>管理費</th><td>${value("management_fee")}</td></tr><tr><th>每坪／合計</th><td colspan="3">${value("management_unit_fee")} 元／坪　　${value("management_total_fee")} 元</td></tr></table><h2>本 案 特 色</h2><div class="sale-feature">${value("summary_features")}</div></section></div>
+          <div class="sale-columns"><section class="sale-block"><div class="sale-section"><h2>權 利 範 圍</h2><table class="sale-table">${box("登記總面積／建物合計", "registered_area")}${box("土地面積", "land_area")}${box("權利範圍", "land_right_range")}${box("基地面積", "land_base_area")}</table><table class="sale-table sale-pairs"><tr><th>主建物</th><td>${value("main_area")}</td><th>附屬建物</th><td>${value("attached_area")}</td></tr><tr><th>公共設施</th><td>${value("common_area")}</td><th>公設比</th><td>${value("public_ratio")}</td></tr></table></div><div class="sale-section"><h2>建 物 狀 況</h2><table class="sale-table">${box("完成日期", "completion_date")}${box("主要建材", "main_material")}${box("隔間材料", "building_insulation")}${box("地板", "floor_material")}${box("座向", "direction")}</table></div><div class="sale-section"><h2>附 近 設 施</h2><table class="sale-table">${box("學區", "school_zone")}${box("市場", "market")}${box("公園", "park")}${box("交通／站牌", "transportation")}</table></div></section><section class="sale-block"><div class="sale-section"><h2>付 款 條 件</h2><table class="sale-table sale-four"><tr><th>簽約款</th><th>備證</th><th>完稅</th><th>尾款</th></tr><tr><td>${value("payment_1_percent")}%</td><td>${value("payment_2_percent")}%</td><td>${value("payment_3_percent")}%</td><td>${value("payment_4_percent")}%</td></tr></table><table class="sale-table">${box("銀行設定（萬）", "loan_bank")}${box("實際貸款約（萬）", "loan_actual")}</table></div><div class="sale-section"><h2>使 用 狀 況</h2><table class="sale-table sale-pairs"><tr><th>自來水</th><td>${value("water")}</td><th>天然瓦斯</th><td>${value("gas")}</td></tr><tr><th>獨立電表</th><td>${value("electricity")}</td><th>管理費</th><td>${value("management_fee")}</td></tr></table><table class="sale-table"><tr><th>每坪／合計</th><td>${value("management_unit_fee")} 元／坪　　${value("management_total_fee")} 元</td></tr></table></div><div class="sale-section sale-feature-section"><h2>本 案 特 色</h2><div class="sale-feature">${value("summary_features")}</div></div></section></div>
           <div class="sale-images">${image("sale_location_map", "位置圖")}${image("sale_floor_plan", "平面圖")}</div>
           <div class="sale-bottom"><div><b>備註</b><br>${value("sale_remarks")}</div><div><b>附贈物／現況</b><br>${value("gift_summary")}</div></div>
           <div class="sale-sign"><span>驗屋：${value("inspection_status")}</span><span>買方確認：${value("buyer_confirm")}<br>賣方確認：${value("seller_confirm")}</span><span>主管：${value("store_manager")}<br>經紀人：${value("broker_name")}　營業員：${value("agent_name")}</span></div>`,
