@@ -210,13 +210,21 @@
 
     document.title = l.name + "｜" + C.name;
 
-    var extras = [];
-    if (l.address) extras.push(["案址", l.address]);
-    if (l.floor) extras.push(["樓別", l.floor]);
-    if (l.age) extras.push(["屋齡", l.age]);
+    // 基本欄位由後台獨立儲存，其他規格則以 spec 儲存。詳情頁將兩者合併
+    // 顯示，並以使用者在「其他規格」手動填寫的內容為優先，避免重複或覆蓋。
+    var extras = [
+      ["案址", l.address],
+      ["種類", l.kind],
+      ["格局", l.layout],
+      ["樓別", l.floor],
+      ["屋齡", l.age],
+      ["建坪", l.size ? String(l.size) + "坪" : ""],
+      ["車位", l.parking ? "有" : "無"],
+      ["單價", l.deal === "sell" && l.unit ? String(l.unit) + "萬／坪" : ""],
+      ["租金", l.deal === "rent" && l.price ? String(l.price) + "萬／月" : ""]
+    ];
     extras.forEach(function (pair) {
-      var key = { "案址": "案址", "樓別": "樓別", "屋齡": "屋齡" }[pair[0]];
-      if (key && !l.spec[key]) l.spec[key] = pair[1];
+      if (pair[1] && !l.spec[pair[0]]) l.spec[pair[0]] = pair[1];
     });
 
     var mainPhoto = l.photos.length
