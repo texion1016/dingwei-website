@@ -258,7 +258,6 @@
       ["格局", l.layout],
       ["樓別", l.floor],
       ["屋齡", l.age],
-      ["建坪", l.size ? String(l.size) + "坪" : ""],
       ["車位", l.parking ? "有" : "無"],
       ["單價", l.deal === "sell" && l.unit ? String(l.unit) + "萬／坪" : ""],
       ["租金", l.deal === "rent" && l.price ? String(l.price) + "萬／月" : ""]
