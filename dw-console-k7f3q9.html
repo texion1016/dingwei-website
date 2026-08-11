@@ -477,6 +477,7 @@ async function toggleStatus(id) {
 async function delRow(id) {
   const r = ALL.find(x => x.id === id); if (!r) return;
   if (!confirm('確定要永久刪除「' + r.name + '」？\n（若只是成交或暫停刊登，建議用「下架」即可）')) return;
+  if (!confirm('再次確認：這會永久刪除「' + r.name + '」及其售租屋資料，無法復原。\n\n確定要刪除嗎？')) return;
   const { error } = await _sb.from('dw_listings').delete().eq('id', id);
   if (error) { alert('刪除失敗：' + error.message); return; }
   ALL = ALL.filter(x => x.id !== id);
