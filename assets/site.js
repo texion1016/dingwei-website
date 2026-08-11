@@ -80,6 +80,7 @@
       return;
     }
     var map = window.L.map(target, { scrollWheelZoom: false, zoomControl: true, attributionControl: true });
+    map.setView([lat, lng], 16);
     window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: "© OpenStreetMap contributors"
@@ -98,7 +99,6 @@
       fillColor: "#b5232e",
       fillOpacity: 1
     }).addTo(map).bindTooltip("物件位置", { direction: "top" });
-    map.fitBounds(radiusCircle.getBounds(), { padding: [18, 18] });
     setTimeout(function () { map.invalidateSize(); }, 0);
   }
 
