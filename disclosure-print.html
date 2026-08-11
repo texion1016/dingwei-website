@@ -53,7 +53,7 @@
       }
       .sheet {
         width: 210mm;
-        min-height: 297mm;
+        height: 297mm;
         padding: 12mm 13mm 10mm;
         background: #fff;
         margin: 0 auto 8mm;
@@ -334,6 +334,33 @@
       }
       .maplink {
         font-size: 8pt;
+      }
+      /* 兩張資訊量較高的紙本表，保留資料內容並各自收在一張 A4 內。 */
+      .exterior-sheet .cell {
+        min-height: 8mm;
+        padding: 1.4mm;
+      }
+      .exterior-sheet .photos {
+        gap: 2.5mm;
+        margin-top: 2mm;
+      }
+      .exterior-sheet .photo {
+        height: 38mm;
+      }
+      .exterior-sheet .amenities {
+        margin-top: 2mm;
+        padding: 1.2mm;
+        line-height: 1.26;
+      }
+      .map-sheet {
+        padding-top: 10mm;
+        padding-bottom: 7mm;
+      }
+      .map-sheet .map-wrap {
+        height: 165mm;
+      }
+      .map-sheet .maplink {
+        margin: 2mm 0 0;
       }
       .loading {
         padding: 30px;
@@ -741,6 +768,7 @@
             .join(
               "",
             )}</div><div class="cell"><b>特色說明</b><div class="note">${esc(v("feature_notes", ""))}</div></div><div class="photos">${["photo_1", "photo_2", "photo_3", "photo_4"].map((k, i) => `<div><small>實景照片${["一", "二", "三", "四"][i]}</small><div class="photo">${photo(k)}</div></div>`).join("")}</div><div class="amenities"><b>週邊半徑300公尺重要環境設施：</b><br>${amenities.map((k, i) => `${i + 1}.${y(k)}${al[i]}`).join("　")}</div>`,
+          "exterior-sheet",
         );
       }
       function terms() {
@@ -877,6 +905,7 @@
           src = staticMapUrl(lat, lng, radius);
         return sheet(
           `${b()}<h1 class="phead">${esc(radiusLabel)}地圖　<small>日期：${esc(v("map_date", ""))}</small></h1><div class="grid">${field("名稱", "case_name")}${field("編號", "doc_no")}${field("地址", "doorplate")}${field("種類", "property_type")}${field("經緯度", "latitude")}${field("地圖範圍", "map_radius")}</div>${src ? `<div class="map-wrap"><img class="map" src="${src}" alt="物件週邊地圖" referrerpolicy="no-referrer"><span class="map-pin" aria-label="物件位置"></span></div>` : '<div class="map-wrap" style="display:grid;place-items:center">请先填写纬度与经度，才会显示位置地图。</div>'}<p class="maplink">地圖備註：${esc(v("map_note", ""))}　　Google 地圖：<span>${lat && lng ? `https://maps.google.com/?q=${esc(lat)},${esc(lng)}` : "—"}　　© Esri</span></p>`,
+          "map-sheet",
         );
       }
       const pages = {
