@@ -152,7 +152,7 @@ img { display:block; }
   <span class="seal">鼎</span>
   <h1>物件管理後台</h1>
   <span class="hint">刊登、下架即時同步官網</span>
-  <a href="index.html" target="_blank">開啟官網 ↗</a>
+  <a href="index.html">開啟官網 ↗</a>
 </header>
 
 <div class="wrap">
@@ -443,10 +443,10 @@ function render() {
       '<div class="price ' + (r.deal === 'rent' ? 'r' : 's') + '">' +
       (r.deal === 'rent' ? Number(r.price) + ' 萬/月' : Number(r.price).toLocaleString('zh-TW') + ' 萬') + '</div></div>' +
       '<div class="acts">' +
-      '<button class="btn btn-ghost btn-sm" onclick="toggleStatus(\'' + r.id + '\')">' + (active ? '下架' : '重新上架') + '</button>' +
-      '<button class="btn btn-ghost btn-sm" onclick="openDisclosure(\'' + esc(r.sno) + '\')">售租屋資料</button>' +
       '<button class="btn btn-ghost btn-sm" onclick="openFormById(\'' + r.id + '\')">編輯</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="toggleStatus(\'' + r.id + '\')">' + (active ? '下架' : '重新上架') + '</button>' +
       '<button class="btn btn-danger btn-sm" onclick="delRow(\'' + r.id + '\')">刪除</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="openDisclosure(\'' + esc(r.sno) + '\')">出租屋資料</button>' +
       '</div></div>';
   }).join('');
 }

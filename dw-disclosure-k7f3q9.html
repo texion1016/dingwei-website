@@ -665,7 +665,7 @@
         const popup = window.open("", "_blank");
         if (!popup) { alert("瀏覽器封鎖了列印視窗，請允許此網站開啟彈出式視窗後再試。"); return; }
         popup.document.write("<title>正在儲存列印資料…</title><p style='font-family:sans-serif;padding:24px'>正在儲存目前內容並開啟列印頁…</p>");
-        if (await save(true)) popup.location.replace("disclosure-print.html?sno=" + encodeURIComponent(SNO) + "&page=" + p + "&v=4");
+        if (await save(true)) popup.location.replace("disclosure-print.html?sno=" + encodeURIComponent(SNO) + "&page=" + p + "&v=5");
         else popup.close();
       }
       async function boot() {
@@ -737,7 +737,7 @@
           const popup = window.open("", "_blank");
           if (!popup) { alert("瀏覽器封鎖了列印視窗，請允許此網站開啟彈出式視窗後再試。"); return; }
           popup.document.write("<title>正在儲存列印資料…</title><p style='font-family:sans-serif;padding:24px'>正在儲存目前內容並開啟列印頁…</p>");
-          if (await save(true)) popup.location.replace("disclosure-print.html?sno=" + encodeURIComponent(SNO) + "&v=4");
+          if (await save(true)) popup.location.replace("disclosure-print.html?sno=" + encodeURIComponent(SNO) + "&set=all&v=5");
           else popup.close();
         };
         document.getElementById("loading").style.display = "none";
