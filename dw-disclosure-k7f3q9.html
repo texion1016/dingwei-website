@@ -426,6 +426,7 @@
     <script src="assets/config.js"></script>
     <script src="assets/data.js"></script>
     <script src="assets/disclosure-schema.js?v=2"></script>
+    <script src="assets/listing-data-sync.js?v=1"></script>
     <script>
       const SB = window.DW_SB?.url
         ? supabase.createClient(location.origin + "/api/admin/supabase", "dw-admin-session", {
@@ -559,7 +560,7 @@
           sale_sheet: "售屋資料表",
         };
         return (
-          '<span class="print-label">單頁列印（儲存後直接開啟該頁）</span>' +
+          '<span class="print-label">可直接列印（會自動儲存目前內容）</span>' +
           DW_DISCLOSURE_PAGE_ORDER.map(
             (p, i) =>
               `<button type="button" class="btn" onclick="printPage('${p}')">${String(i + 1).padStart(2, "0")} ${labels[p]}</button>`,
@@ -576,17 +577,8 @@
           );
         syncSharedFields();
       }
-      function syncSharedFields() {
-        const links = [
-          ["doorplate", "building_doorplate"],
-          ["registered_area", "house_area"],
-          ["registered_area", "total_area"],
-          ["land_area", "land_base_area"],
-          ["summary_features", "feature_notes"],
-        ];
-        links.forEach(([from, to]) => {
-          if (String(doc[from] ?? "").trim()) doc[to] = doc[from];
-        });
+      function syncSharedFields(sourceKey) {
+        window.DW_LISTING_SYNC?.syncAliases(doc, sourceKey);
       }
       function publicStorageUrl(path) {
         const base = String(window.DW_SB?.url || "").replace(/\/$/, "");
@@ -611,6 +603,22 @@
         collect();
         document.getElementById("saveBtn").disabled = true;
         document.getElementById("saveStatus").textContent = "儲存中…";
+        const listingPatch = window.DW_LISTING_SYNC?.patchListingFromDocument(doc, listing);
+        if (listingPatch) {
+          const listingResult = await SB.from("dw_listings")
+            .update(listingPatch)
+            .eq("id", listing.id)
+            .select()
+            .single();
+          if (listingResult.error) {
+            document.getElementById("saveBtn").disabled = false;
+            document.getElementById("saveStatus").textContent = "儲存失敗";
+            if (!silent) alert("案件資料同步失敗：" + listingResult.error.message);
+            return false;
+          }
+          listing = listingResult.data;
+          window.DW_LISTING_SYNC.applyListingToDocument(doc, listing);
+        }
         const payload = {
           listing_id: listing.id,
           sno: String(listing.sno),
@@ -642,15 +650,11 @@
         return true;
       }
       async function printPage(p) {
-        if (await save(true))
-          window.open(
-            "disclosure-print.html?sno=" +
-              encodeURIComponent(SNO) +
-              "&page=" +
-              p +
-              "&v=3",
-            "_blank",
-          );
+        const popup = window.open("", "_blank");
+        if (!popup) { alert("瀏覽器封鎖了列印視窗，請允許此網站開啟彈出式視窗後再試。"); return; }
+        popup.document.write("<title>正在儲存列印資料…</title><p style='font-family:sans-serif;padding:24px'>正在儲存目前內容並開啟列印頁…</p>");
+        if (await save(true)) popup.location.replace("disclosure-print.html?sno=" + encodeURIComponent(SNO) + "&page=" + p + "&v=4");
+        else popup.close();
       }
       async function boot() {
         if (!SNO || !SB) {
@@ -681,6 +685,7 @@
         }
         file = d.data;
         doc = { ...defaults(), ...(file?.data || {}) };
+        window.DW_LISTING_SYNC?.syncAliases(doc);
         // 物件後台的座標是唯一來源。每次開啟說明書都同步帶入，
         // 單張列印或整套列印在儲存後會更新既有的說明書資料。
         if (listing.lat && listing.lng) {
@@ -705,13 +710,23 @@
           section = b.dataset.section;
           render();
         });
+        document.getElementById("editor").addEventListener("input", (e) => {
+          if (!e.target.dataset.key) return;
+          doc[e.target.dataset.key] = e.target.value;
+          window.DW_LISTING_SYNC?.syncAliases(doc, e.target.dataset.key);
+        });
+        document.getElementById("editor").addEventListener("change", (e) => {
+          if (!e.target.dataset.key) return;
+          doc[e.target.dataset.key] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+          window.DW_LISTING_SYNC?.syncAliases(doc, e.target.dataset.key);
+        });
         document.getElementById("saveBtn").onclick = () => save();
         document.getElementById("allPrint").onclick = async () => {
-          if (await save(true))
-            window.open(
-              "disclosure-print.html?sno=" + encodeURIComponent(SNO) + "&v=3",
-              "_blank",
-            );
+          const popup = window.open("", "_blank");
+          if (!popup) { alert("瀏覽器封鎖了列印視窗，請允許此網站開啟彈出式視窗後再試。"); return; }
+          popup.document.write("<title>正在儲存列印資料…</title><p style='font-family:sans-serif;padding:24px'>正在儲存目前內容並開啟列印頁…</p>");
+          if (await save(true)) popup.location.replace("disclosure-print.html?sno=" + encodeURIComponent(SNO) + "&v=4");
+          else popup.close();
         };
         document.getElementById("loading").style.display = "none";
         document.getElementById("app").style.display = "block";

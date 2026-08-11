@@ -314,6 +314,7 @@ img { display:block; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/config.js?v=6"></script>
 <script src="assets/data.js?v=6"></script>
+<script src="assets/listing-data-sync.js?v=1"></script>
 <script>
 const _SB_CFG = window.DW_SB || { url: '', key: '' };
 const _sb = _SB_CFG.url ? supabase.createClient(location.origin + '/api/admin/supabase', 'dw-admin-session', {
@@ -626,6 +627,20 @@ function nextSixDigitSno() {
   return String((values.length ? Math.max(...values) : 130000) + 1).padStart(6, '0');
 }
 
+async function syncListingDocument(listing) {
+  if (!window.DW_LISTING_SYNC || !listing?.id) return null;
+  const existing = await _sb.from('dw_property_files').select('*').eq('listing_id', listing.id).maybeSingle();
+  if (existing.error) return existing.error;
+  const data = window.DW_LISTING_SYNC.applyListingToDocument({ ...(existing.data?.data || {}) }, listing);
+  const result = await _sb.from('dw_property_files').upsert({
+    listing_id: listing.id,
+    sno: String(listing.sno),
+    title: listing.name || '',
+    data
+  }, { onConflict: 'listing_id' });
+  return result.error || null;
+}
+
 function openForm(row) {
   editingRow = row;
   F('formTitle').textContent = row ? '編輯物件：' + row.name : '刊登新物件';
@@ -769,16 +784,22 @@ async function saveForm() {
 
   F('saveBtn').disabled = true;
   F('formStatus').textContent = '儲存中…';
-  let error;
+  let error, savedRow;
   if (editingRow) {
-    ({ error } = await _sb.from('dw_listings').update(row).eq('id', editingRow.id));
+    ({ data: savedRow, error } = await _sb.from('dw_listings').update(row).eq('id', editingRow.id).select().single());
   } else {
     row.sno = nextSixDigitSno();
     row.status = 'active';
-    ({ error } = await _sb.from('dw_listings').insert(row));
+    ({ data: savedRow, error } = await _sb.from('dw_listings').insert(row).select().single());
   }
   F('saveBtn').disabled = false;
   if (error) { F('formStatus').textContent = ''; alert('儲存失敗：' + error.message); return; }
+  const syncError = await syncListingDocument(savedRow);
+  if (syncError) {
+    F('formStatus').textContent = '';
+    alert('案件已儲存，但售租屋資料同步失敗：' + syncError.message + '。請重新儲存一次。');
+    return;
+  }
   closeForm();
   loadAll();
 }
