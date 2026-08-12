@@ -42,12 +42,17 @@ CREATE TABLE IF NOT EXISTS public.dw_management_statement_units (
   lease_day SMALLINT CHECK (lease_day BETWEEN 1 AND 31),
   unit_no TEXT NOT NULL DEFAULT '',
   electricity_kwh NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (electricity_kwh >= 0),
+  electricity_fee_override NUMERIC(12,2),
   rent_amount NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (rent_amount >= 0),
   management_fee NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (management_fee >= 0),
   note TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- 適用於已先建立資料表的既有專案：保留已核對的歷史人工電費。
+ALTER TABLE public.dw_management_statement_units
+  ADD COLUMN IF NOT EXISTS electricity_fee_override NUMERIC(12,2);
 
 CREATE INDEX IF NOT EXISTS dw_management_owners_project_idx ON public.dw_management_owners(project_id);
 CREATE INDEX IF NOT EXISTS dw_management_statements_project_idx ON public.dw_management_statements(project_id, billing_roc_year DESC, billing_month DESC);

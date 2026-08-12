@@ -10,11 +10,14 @@
   const money = (value) => Math.round(num(value)).toLocaleString('zh-TW');
   const decimal = (value) => Number(num(value).toFixed(2)).toString();
   const filenameSafe = (value) => String(value || '').replace(/[\\/:*?"<>|]/g, '－').trim() || '未命名';
-  const todayUnit = () => ({ lease_roc_year: ROC_YEAR, lease_month: '', lease_day: '', unit_no: '', electricity_kwh: '', rent_amount: '', management_fee: '', note: '' });
+  const todayUnit = () => ({ lease_roc_year: ROC_YEAR, lease_month: '', lease_day: '', unit_no: '', electricity_kwh: '', electricity_fee_override: null, rent_amount: '', management_fee: '', note: '' });
   const statementTitle = () => `${state.statement?.billing_roc_year || ROC_YEAR}年${state.statement?.billing_month || MONTH}月結算`;
   const fullFilename = () => `${filenameSafe(state.project?.name)}-${filenameSafe(state.owner?.owner_name)}-${statementTitle()}代租代管結算`;
   const calc = (unit) => {
-    const electricity = Math.round(num(unit.electricity_kwh) * num(state.statement?.electricity_rate));
+    // 與既有代租代管帳表一致：用電度數乘單價後，小數直接捨去；
+    // 舊帳表如曾人工調整電費，則保留該筆已核對的金額。
+    const hasOverride = unit.electricity_fee_override !== null && unit.electricity_fee_override !== undefined && unit.electricity_fee_override !== '';
+    const electricity = hasOverride ? num(unit.electricity_fee_override) : Math.floor(num(unit.electricity_kwh) * num(state.statement?.electricity_rate));
     const subtotal = Math.round(num(unit.rent_amount) + electricity);
     const total = Math.round(subtotal - num(unit.management_fee));
     return { electricity, subtotal, total };
@@ -90,5 +93,49 @@
   async function downloadXlsx() { const saved=await saveStatement({silent:true}); if(!saved) return; try { XLSX.writeFile(makeWorkbook(), fullFilename()+'.xlsx'); } catch(err) { alert('下载 Excel 失败：'+err.message); } }
   async function shareStatement() { const saved=await saveStatement({silent:true}); if(!saved) return; const name=fullFilename()+'.xlsx'; try { const wb=makeWorkbook(); const bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'}); const file=new File([bytes],name,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}); const text=`${state.project.name}｜${state.owner.owner_name}｜${statementTitle()}，本期应付屋主：${money(summary().total)} 元。`; if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) { await navigator.share({title:name,text,files:[file]}); } else { await navigator.clipboard.writeText(text); alert('此装置无法直接转发 Excel，已复制结算摘要；请先下载 Excel 后附档传送。'); } } catch(err) { if (err.name !== 'AbortError') alert('转发失败：'+err.message); } }
   async function printStatement() { const win=window.open('about:blank','_blank'); const saved=await saveStatement({silent:true}); if(!saved) { if(win) win.close(); return; } if (win) win.location.href='dw-settlement-print-k7f3q9.html?statement='+encodeURIComponent(saved.id); else alert('浏览器阻挡了列印视窗，请允许弹出视窗后再试。'); }
+  // Re-declared here so imports with an audited manual electricity amount keep it
+  // after any later save, Excel export, or share action.
+  async function saveStatement(options = {}) {
+    if (!state.owner || !state.project) return null;
+    const year = Math.trunc(num(state.statement.billing_roc_year));
+    const month = Math.trunc(num(state.statement.billing_month));
+    if (!year || month < 1 || month > 12) { if (!options.silent) alert('請填寫正確的民國年與月份。'); return null; }
+    const payload = { project_id:state.project.id, owner_id:state.owner.id, billing_roc_year:year, billing_month:month, electricity_rate:num(state.statement.electricity_rate), note:(state.statement.note || '').trim() };
+    const status = $('#settleSaveStatus'); if (status) status.textContent = '儲存中…';
+    const result = state.statement.id
+      ? await api().from('dw_management_statements').update(payload).eq('id', state.statement.id).select().single()
+      : await api().from('dw_management_statements').upsert(payload, { onConflict:'owner_id,billing_roc_year,billing_month' }).select().single();
+    if (result.error) { if (!options.silent) alert('儲存結算單失敗：' + result.error.message); if (status) status.textContent = '儲存失敗'; return null; }
+    state.statement = result.data;
+    const deleted = await api().from('dw_management_statement_units').delete().eq('statement_id', state.statement.id);
+    if (deleted.error) { if (!options.silent) alert('清除舊房戶資料失敗：' + deleted.error.message); return null; }
+    const units = state.units.map((unit, index) => ({
+      statement_id:state.statement.id, sort_order:index,
+      lease_roc_year:num(unit.lease_roc_year) || null, lease_month:num(unit.lease_month) || null, lease_day:num(unit.lease_day) || null,
+      unit_no:(unit.unit_no || '').trim(), electricity_kwh:num(unit.electricity_kwh),
+      electricity_fee_override:(unit.electricity_fee_override === null || unit.electricity_fee_override === undefined || unit.electricity_fee_override === '') ? null : num(unit.electricity_fee_override),
+      rent_amount:num(unit.rent_amount), management_fee:num(unit.management_fee), note:(unit.note || '').trim()
+    }));
+    if (units.length) { const inserted = await api().from('dw_management_statement_units').insert(units); if (inserted.error) { if (!options.silent) alert('儲存房戶資料失敗：' + inserted.error.message); return null; } }
+    state.statements = [state.statement, ...state.statements.filter(row => row.id !== state.statement.id)];
+    if (status) status.textContent = `已儲存 ${new Date().toLocaleTimeString('zh-TW', { hour:'2-digit', minute:'2-digit' })}`;
+    if (!options.silent) renderStatement();
+    return state.statement;
+  }
+  function makeWorkbook() {
+    if (!window.XLSX) throw new Error('Excel 下載元件尚未載入，請重新整理後再試。');
+    const rows = [[`鼎瑋不動產｜${state.project.name}｜${state.owner.owner_name}`], [`${statementTitle()}代租代管結算`], ['本期每度（元）', num(state.statement.electricity_rate)], ['起租日','編號／房號','用電度數','租金','電費','合計','代管費','總計','備註']];
+    state.units.forEach((unit, index) => {
+      const line = index + 5;
+      const fixedElectricity = unit.electricity_fee_override !== null && unit.electricity_fee_override !== undefined && unit.electricity_fee_override !== '';
+      const electricityCell = fixedElectricity ? num(unit.electricity_fee_override) : { f:`ROUNDDOWN(C${line}*$B$3,0)` };
+      rows.push([`${unit.lease_roc_year || ''}/${unit.lease_month || ''}/${unit.lease_day || ''}`, unit.unit_no || '', num(unit.electricity_kwh), num(unit.rent_amount), electricityCell, { f:`D${line}+E${line}` }, num(unit.management_fee), { f:`F${line}-G${line}` }, unit.note || '']);
+    });
+    const totalLine = 5 + state.units.length, firstUnit = state.units.length ? 5 : totalLine;
+    rows.push(['合計', `${state.units.length} 間`, { f:`SUM(C${firstUnit}:C${totalLine - 1})` }, { f:`SUM(D${firstUnit}:D${totalLine - 1})` }, { f:`SUM(E${firstUnit}:E${totalLine - 1})` }, { f:`SUM(F${firstUnit}:F${totalLine - 1})` }, { f:`SUM(G${firstUnit}:G${totalLine - 1})` }, { f:`SUM(H${firstUnit}:H${totalLine - 1})` }, '']);
+    rows.push([], ['本期應付屋主','','','','','','', { f:`H${totalLine}` }, ''], [], ['備註', state.statement.note || '']);
+    const ws = XLSX.utils.aoa_to_sheet(rows); ws['!cols'] = [{ wch:14 },{ wch:13 },{ wch:12 },{ wch:13 },{ wch:13 },{ wch:13 },{ wch:13 },{ wch:14 },{ wch:27 }]; ws['!merges'] = [XLSX.utils.decode_range('A1:I1'), XLSX.utils.decode_range('A2:I2')];
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '屋主結算'); return wb;
+  }
   window.DWRentalSettlements={ open, showCreateProject:renderCreateProject, chooseProject, createProject, addOwner, chooseOwner, loadStatement, setStatement, changeUnit, addUnit, removeUnit, saveStatement, downloadXlsx, shareStatement, printStatement };
 })();
