@@ -1,5 +1,14 @@
 /* 代租代管結算：延續後台品牌，但優先讓每月金額一眼可核對。 */
 .settle-shell { display:grid; gap:18px; }
+.settle-workbench { display:grid; gap:18px; }
+.settle-backbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:5px 0 3px; }
+.settle-backbar .btn { border-radius:999px; }
+.settle-backbar small { color:var(--ink-soft); font-weight:700; }
+.settle-project-card { position:relative; }
+.settle-project-card .settle-project { width:100%; }
+.settle-project-edit { position:absolute; right:16px; top:15px; z-index:1; min-height:auto; border:0; padding:5px 8px; color:var(--ink-soft); background:#fff7f5; font-size:12px; }
+.settle-project-edit:hover { color:var(--plum); background:var(--plum-tint); }
+.settle-project-editor { display:grid; grid-template-columns:minmax(0,1fr) 150px auto; gap:10px; align-items:end; padding:17px 20px; border:1px solid var(--hairline); border-radius:var(--radius); background:#fffaf8; box-shadow:var(--shadow); }
 .settle-head { display:flex; align-items:end; justify-content:space-between; gap:20px; padding:4px 0 8px; }
 .settle-head h2 { margin:0; font:900 28px/1.35 "Noto Serif TC",serif; letter-spacing:.05em; }
 .settle-head p { margin:6px 0 0; color:var(--ink-soft); font-size:14px; }
@@ -16,15 +25,21 @@
 .settle-card-head h3 { margin:0; font:900 17px "Noto Serif TC",serif; letter-spacing:.05em; }
 .settle-card-head small { color:var(--ink-soft); }
 .settle-project-form { display:grid; grid-template-columns:1.35fr .65fr auto; gap:10px; padding:16px 18px; align-items:end; }
-.settle-project-form label, .settle-form label { display:grid; gap:4px; color:var(--ink-soft); font-size:12.5px; font-weight:700; }
-.settle-project-form input, .settle-form input, .settle-form textarea, .settle-form select, .settle-table input { min-width:0; width:100%; border:1px solid var(--hairline); border-radius:7px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
-.settle-project-form input:focus, .settle-form input:focus, .settle-form textarea:focus, .settle-form select:focus, .settle-table input:focus { outline:2px solid #f2c3bd; outline-offset:1px; border-color:var(--plum); }
+.settle-project-form label, .settle-project-editor label, .settle-form label { display:grid; gap:4px; color:var(--ink-soft); font-size:12.5px; font-weight:700; }
+.settle-project-form input, .settle-project-editor input, .settle-form input, .settle-form textarea, .settle-form select, .settle-table input { min-width:0; width:100%; border:1px solid var(--hairline); border-radius:7px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
+.settle-project-form input:focus, .settle-project-editor input:focus, .settle-form input:focus, .settle-form textarea:focus, .settle-form select:focus, .settle-table input:focus { outline:2px solid #f2c3bd; outline-offset:1px; border-color:var(--plum); }
 .settle-workspace { display:grid; grid-template-columns:275px minmax(0,1fr); gap:18px; align-items:start; }
 .settle-side { display:grid; gap:14px; position:sticky; top:72px; }
 .settle-side-section { border:1px solid var(--hairline); border-radius:var(--radius); background:var(--card); overflow:hidden; }
 .settle-side-title { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 14px; border-bottom:1px solid var(--hairline); color:var(--ink-soft); font-size:13px; font-weight:700; }
 .settle-owner-list { display:flex; flex-direction:column; padding:6px; gap:3px; }
 .settle-owner { display:flex; justify-content:space-between; align-items:center; gap:8px; width:100%; border:0; border-radius:7px; padding:9px 8px; background:none; color:var(--ink); text-align:left; }
+.settle-owner-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:3px; }
+.settle-owner-row .settle-owner { min-width:0; }
+.settle-owner-edit { align-self:center; border:0; border-radius:6px; padding:5px 7px; color:var(--ink-soft); background:transparent; font-size:12px; }
+.settle-owner-edit:hover { color:var(--plum); background:var(--plum-tint); }
+.settle-owner-editor { display:grid; grid-template-columns:minmax(0,1fr) 68px; gap:7px; padding:9px 10px 11px; border-top:1px solid var(--hairline); }
+.settle-owner-editor .btn { grid-column:1/-1; justify-content:center; border-radius:7px; padding:7px; }
 .settle-owner:hover { background:var(--plum-tint); }
 .settle-owner.on { background:var(--plum); color:#fff; }
 .settle-owner b { font-size:14px; }
@@ -86,6 +101,8 @@
   .settle-head, .settle-statement-head, .settle-save-line { display:block; }
   .settle-head .btn, .settle-actions { margin-top:13px; }
   .settle-project-form, .settle-form { grid-template-columns:1fr 1fr; }
+  .settle-project-editor { grid-template-columns:1fr 1fr; }
+  .settle-project-editor .btn { grid-column:1/-1; }
   .settle-project-form .btn, .settle-form label:last-child { grid-column:1/-1; }
   .settle-side { grid-template-columns:1fr; }
   .settle-statement-head { padding:24px 20px 20px; }
