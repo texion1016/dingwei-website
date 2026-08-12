@@ -622,6 +622,7 @@ img { max-width: 100%; display: block; }
 /* ---------- 代租代管 ---------- */
 
 .management-page { background: #f7f1eb; overflow: hidden; }
+body:has(.management-page) .theme-picker { display:none; }
 .management-hero--proof { position: relative; padding: 82px 0 72px; background: #6f1f21; color: #fff; }
 .management-hero--proof::before { content:""; position:absolute; inset:0; opacity:.22; background-image: linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px), linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px); background-size: 38px 38px; mask-image: linear-gradient(to right, #000 0%, transparent 75%); }
 .management-hero-grid { position:relative; display:grid; grid-template-columns: minmax(0, .95fr) minmax(340px, .8fr); gap: clamp(36px, 7vw, 92px); align-items:center; }
