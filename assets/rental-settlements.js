@@ -125,17 +125,22 @@
   function makeWorkbook() {
     if (!window.XLSX) throw new Error('Excel 下載元件尚未載入，請重新整理後再試。');
     const rows = [[`鼎瑋不動產｜${state.project.name}｜${state.owner.owner_name}`], [`${statementTitle()}代租代管結算`], ['本期每度（元）', num(state.statement.electricity_rate)], ['起租日','編號／房號','用電度數','租金','電費','合計','代管費','總計','備註']];
+    const totals = summary();
     state.units.forEach((unit, index) => {
       const line = index + 5;
       const fixedElectricity = unit.electricity_fee_override !== null && unit.electricity_fee_override !== undefined && unit.electricity_fee_override !== '';
-      const electricityCell = fixedElectricity ? num(unit.electricity_fee_override) : { f:`ROUNDDOWN(C${line}*$B$3,0)` };
-      rows.push([`${unit.lease_roc_year || ''}/${unit.lease_month || ''}/${unit.lease_day || ''}`, unit.unit_no || '', num(unit.electricity_kwh), num(unit.rent_amount), electricityCell, { f:`D${line}+E${line}` }, num(unit.management_fee), { f:`F${line}-G${line}` }, unit.note || '']);
+      const values = calc(unit);
+      // v 是已计算的缓存值：即使 Excel 的保护视图暂不重算，也能马上显示金额。
+      const electricityCell = fixedElectricity ? num(unit.electricity_fee_override) : { t:'n', f:`ROUNDDOWN(C${line}*$B$3,0)`, v:values.electricity };
+      rows.push([`${unit.lease_roc_year || ''}/${unit.lease_month || ''}/${unit.lease_day || ''}`, unit.unit_no || '', num(unit.electricity_kwh), num(unit.rent_amount), electricityCell, { t:'n', f:`D${line}+E${line}`, v:values.subtotal }, num(unit.management_fee), { t:'n', f:`F${line}-G${line}`, v:values.total }, unit.note || '']);
     });
     const totalLine = 5 + state.units.length, firstUnit = state.units.length ? 5 : totalLine;
-    rows.push(['合計', `${state.units.length} 間`, { f:`SUM(C${firstUnit}:C${totalLine - 1})` }, { f:`SUM(D${firstUnit}:D${totalLine - 1})` }, { f:`SUM(E${firstUnit}:E${totalLine - 1})` }, { f:`SUM(F${firstUnit}:F${totalLine - 1})` }, { f:`SUM(G${firstUnit}:G${totalLine - 1})` }, { f:`SUM(H${firstUnit}:H${totalLine - 1})` }, '']);
-    rows.push([], ['本期應付屋主','','','','','','', { f:`H${totalLine}` }, ''], [], ['備註', state.statement.note || '']);
+    rows.push(['合計', `${state.units.length} 間`, { t:'n', f:`SUM(C${firstUnit}:C${totalLine - 1})`, v:totals.kwh }, { t:'n', f:`SUM(D${firstUnit}:D${totalLine - 1})`, v:totals.rent }, { t:'n', f:`SUM(E${firstUnit}:E${totalLine - 1})`, v:totals.electricity }, { t:'n', f:`SUM(F${firstUnit}:F${totalLine - 1})`, v:totals.subtotal }, { t:'n', f:`SUM(G${firstUnit}:G${totalLine - 1})`, v:totals.fee }, { t:'n', f:`SUM(H${firstUnit}:H${totalLine - 1})`, v:totals.total }, '']);
+    rows.push([], ['本期應付屋主','','','','','','', { t:'n', f:`H${totalLine}`, v:totals.total }, ''], [], ['備註', state.statement.note || '']);
     const ws = XLSX.utils.aoa_to_sheet(rows); ws['!cols'] = [{ wch:14 },{ wch:13 },{ wch:12 },{ wch:13 },{ wch:13 },{ wch:13 },{ wch:13 },{ wch:14 },{ wch:27 }]; ws['!merges'] = [XLSX.utils.decode_range('A1:I1'), XLSX.utils.decode_range('A2:I2')];
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '屋主結算'); return wb;
+    const wb = XLSX.utils.book_new();
+    wb.Workbook = { CalcPr:{ calcMode:'auto', fullCalcOnLoad:'1', forceFullCalc:'1' } };
+    XLSX.utils.book_append_sheet(wb, ws, '屋主結算'); return wb;
   }
   window.DWRentalSettlements={ open, showCreateProject:renderCreateProject, chooseProject, createProject, addOwner, chooseOwner, loadStatement, setStatement, changeUnit, addUnit, removeUnit, saveStatement, downloadXlsx, shareStatement, printStatement };
 })();
