@@ -12,7 +12,10 @@
     body { margin:0; background:#edf0f1; color:#131313; font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif }
     .tool { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:#302525; color:#fff }
     .tool button { border:0; border-radius:5px; background:#a52f25; color:#fff; padding:8px 17px; font:700 14px inherit; cursor:pointer }
-    .paper { width:277mm; min-height:190mm; margin:16px auto; padding:10mm; background:#fff; box-shadow:0 2px 16px #0002 }
+    .paper { width:277mm; margin:16px auto; background:transparent }
+    .print-page { width:277mm; min-height:190mm; padding:10mm; background:#fff; box-shadow:0 2px 16px #0002; break-inside:avoid; page-break-inside:avoid }
+    .print-page + .print-page { margin-top:16px }
+    .page-no { margin:5px 0 0; color:#7b6662; text-align:right; font-size:10px }
     .brand { display:flex; justify-content:space-between; align-items:end; padding-bottom:10px; border-bottom:3px solid #92281f }
     .brand h1 { margin:0; font-size:25px; letter-spacing:.14em }
     .brand p { margin:0; color:#7e2a23; font-weight:700 }
@@ -40,7 +43,7 @@
     .note { min-height:40px; margin-top:10px; border:1px solid #272727; padding:8px 10px; font-size:12px }
     .foot { margin-top:10px; font-size:10px; color:#645452 }
     .dense .brand { padding-bottom:6px }.dense .brand h1 { font-size:20px }.dense .meta { margin:7px 0 }.dense .meta div { min-height:42px; padding:5px 8px }.dense .meta b { font-size:14px }.dense .rate { margin-bottom:6px;font-size:10px }.dense table { font-size:9px }.dense th,.dense td { padding:3px 4px }.dense .summary { margin-top:6px }.dense .summary div { padding:5px 7px }.dense .summary b { font-size:13px }.dense .summary div:last-child b { font-size:17px }.dense .note { min-height:28px;margin-top:6px;padding:5px 7px;font-size:10px }.dense .foot { margin-top:6px;font-size:9px }
-    @media print { body { background:#fff }.tool { display:none }.paper { width:auto; min-height:0; margin:0; padding:0; box-shadow:none } }
+    @media print { body { background:#fff }.tool { display:none }.paper { width:auto; margin:0; background:#fff }.print-page { width:277mm; min-height:190mm; margin:0; padding:0; box-shadow:none; break-after:page; page-break-after:always }.print-page:last-child { break-after:auto; page-break-after:auto } }
   </style>
 </head>
 <body>
@@ -78,14 +81,16 @@
         return total;
       }, { kwh:0, rent:0, electricity:0, subtotal:0, fee:0, total:0 });
       document.title = `${project.data.name}-${owner.data.owner_name}-${statement.data.billing_roc_year}年${statement.data.billing_month}月代租代管結算`;
-      if (rows.length > 12) app.classList.add('dense');
-      app.innerHTML = `
+      const pageSize = 15;
+      const pages = rows.length ? Array.from({ length:Math.ceil(rows.length / pageSize) }, (_, index) => rows.slice(index * pageSize, (index + 1) * pageSize)) : [[]];
+      const unitMarkup = unit => { const value = calc(unit, statement.data.electricity_rate); return `<tr><td class="input">${esc(unit.lease_roc_year || '')}/${esc(unit.lease_month || '')}/${esc(unit.lease_day || '')}</td><td class="input">${esc(unit.unit_no)}</td><td class="input">${n(unit.electricity_kwh)}</td><td class="input">${money(unit.rent_amount)}</td><td class="electric">${money(value.electricity)}</td><td class="subtotal">${money(value.subtotal)}</td><td class="input">${money(unit.management_fee)}</td><td class="total">${money(value.total)}</td><td class="input">${esc(unit.note)}</td></tr>`; };
+      const tableMarkup = pageRows => `<table><thead><tr><th>起租日</th><th>編號／房號</th><th>用電度數</th><th>租金</th><th>電費</th><th>合計</th><th>代管費</th><th>總計</th><th>備註</th></tr></thead><tbody>${pageRows.map(unitMarkup).join('')}</tbody></table>`;
+      const sharedHeader = `
         <header class="brand"><div><h1>鼎瑋不動產經紀有限公司</h1><p>代租代管屋主結算表</p></div><p>${statement.data.billing_roc_year} 年 ${statement.data.billing_month} 月</p></header>
-        <section class="meta"><div><span>案場</span><b>${esc(project.data.name)}</b></div><div><span>屋主</span><b>${esc(owner.data.owner_name)}${owner.data.owner_code ? '（' + esc(owner.data.owner_code) + '）' : ''}</b></div><div class="money"><span>本期應付屋主</span><b>${money(sum.total)} 元</b></div></section>
-        <p class="rate">本期每度電費：<b>${n(statement.data.electricity_rate)} 元</b>　｜　電費按用電度數 × 本期每度電費計算</p>
-        <table><thead><tr><th>起租日</th><th>編號／房號</th><th>用電度數</th><th>租金</th><th>電費</th><th>合計</th><th>代管費</th><th>總計</th><th>備註</th></tr></thead><tbody>${rows.map(unit => { const value = calc(unit, statement.data.electricity_rate); return `<tr><td class="input">${esc(unit.lease_roc_year || '')}/${esc(unit.lease_month || '')}/${esc(unit.lease_day || '')}</td><td class="input">${esc(unit.unit_no)}</td><td class="input">${n(unit.electricity_kwh)}</td><td class="input">${money(unit.rent_amount)}</td><td class="electric">${money(value.electricity)}</td><td class="subtotal">${money(value.subtotal)}</td><td class="input">${money(unit.management_fee)}</td><td class="total">${money(value.total)}</td><td class="input">${esc(unit.note)}</td></tr>`; }).join('')}</tbody></table>
-        <section class="summary"><div><span>房戶數／用電度數</span><b>${rows.length} 間／${sum.kwh} 度</b></div><div><span>租金合計</span><b>${money(sum.rent)} 元</b></div><div><span>電費合計</span><b>${money(sum.electricity)} 元</b></div><div><span>代管費合計</span><b>${money(sum.fee)} 元</b></div><div><span>本期應付屋主</span><b>${money(sum.total)} 元</b></div></section>
-        <section class="note"><b>備註：</b>${esc(statement.data.note || '—')}</section><p class="foot">本表為代租代管內部結算資料；租屋電費計收應以實際電費帳單及租賃契約約定為準。</p>`;
+        <section class="meta"><div><span>案場</span><b>${esc(project.data.name)}</b></div><div><span>屋主</span><b>${esc(owner.data.owner_name)}</b></div><div class="money"><span>本期應付屋主</span><b>${money(sum.total)} 元</b></div></section>
+        <p class="rate">本期每度電費：<b>${n(statement.data.electricity_rate)} 元</b>　｜　電費按用電度數 × 本期每度電費計算</p>`;
+      const summaryMarkup = `<section class="summary"><div><span>房戶數／用電度數</span><b>${rows.length} 間／${sum.kwh} 度</b></div><div><span>租金合計</span><b>${money(sum.rent)} 元</b></div><div><span>電費合計</span><b>${money(sum.electricity)} 元</b></div><div><span>代管費合計</span><b>${money(sum.fee)} 元</b></div><div><span>本期應付屋主</span><b>${money(sum.total)} 元</b></div></section><section class="note"><b>備註：</b>${esc(statement.data.note || '—')}</section><p class="foot">本表為代租代管內部結算資料；租屋電費計收應以實際電費帳單及租賃契約約定為準。</p>`;
+      app.innerHTML = pages.map((pageRows, index) => `<section class="print-page ${pageRows.length > 10 ? 'dense' : ''}">${sharedHeader}${tableMarkup(pageRows)}${index === pages.length - 1 ? summaryMarkup : `<p class="page-no">第 ${index + 1}／${pages.length} 頁</p>`}</section>`).join('');
       setTimeout(() => window.print(), 300);
     })();
   </script>

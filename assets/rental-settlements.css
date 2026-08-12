@@ -28,7 +28,7 @@
 .settle-project-form label, .settle-project-editor label, .settle-form label { display:grid; gap:4px; color:var(--ink-soft); font-size:12.5px; font-weight:700; }
 .settle-project-form input, .settle-project-editor input, .settle-form input, .settle-form textarea, .settle-form select, .settle-table input { min-width:0; width:100%; border:1px solid var(--hairline); border-radius:7px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
 .settle-project-form input:focus, .settle-project-editor input:focus, .settle-form input:focus, .settle-form textarea:focus, .settle-form select:focus, .settle-table input:focus { outline:2px solid #f2c3bd; outline-offset:1px; border-color:var(--plum); }
-.settle-workspace { display:grid; grid-template-columns:275px minmax(0,1fr); gap:18px; align-items:start; }
+.settle-workspace { display:block; }
 .settle-side { display:grid; gap:14px; position:sticky; top:72px; }
 .settle-side-section { border:1px solid var(--hairline); border-radius:var(--radius); background:var(--card); overflow:hidden; }
 .settle-side-title { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 14px; border-bottom:1px solid var(--hairline); color:var(--ink-soft); font-size:13px; font-weight:700; }
@@ -48,12 +48,26 @@
 .settle-mini-form .btn { justify-content:center; border-radius:7px; padding:7px; }
 .settle-rate-note { margin:0; padding:11px 13px; border-radius:8px; background:#fff7e7; color:#79551c; font-size:12px; line-height:1.7; }
 .settle-rate-note a { color:inherit; font-weight:700; }
+.settle-owner-bar { display:grid; grid-template-columns:auto minmax(0,1fr) minmax(300px,430px); align-items:center; gap:15px; padding:13px 17px; border:1px solid var(--hairline); border-radius:var(--radius); background:var(--card); box-shadow:var(--shadow); }
+.settle-owner-bar-title { color:var(--ink-soft); font-size:13px; font-weight:800; white-space:nowrap; }
+.settle-owner-bar .settle-owner-list { display:flex; flex-direction:row; flex-wrap:wrap; gap:6px; padding:0; }
+.settle-owner-bar .settle-owner-row { display:block; }
+.settle-owner-bar .settle-owner { width:auto; min-width:108px; padding:8px 11px; border:1px solid var(--hairline); border-radius:999px; }
+.settle-owner-bar .settle-owner span, .settle-owner-bar .settle-owner-edit { display:none; }
+.settle-owner-bar .settle-owner-editor { display:none; }
+.settle-owner-add { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:7px; min-width:0; }
+.settle-owner-add input { min-width:0; width:100%; border:1px solid var(--hairline); border-radius:7px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
+.settle-owner-add .btn { border-radius:7px; padding:8px 12px; white-space:nowrap; }
+.settle-owner-edit-panel { display:grid; grid-template-columns:minmax(210px,360px) auto auto; align-items:end; gap:8px; padding:12px 17px; border:1px solid #dfcbc5; border-radius:10px; background:#fffaf8; }
+.settle-owner-edit-panel label { display:grid; gap:5px; color:var(--ink-soft); font-size:12px; font-weight:800; }
+.settle-owner-edit-panel input { min-width:0; width:100%; border:1px solid var(--hairline); border-radius:7px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
 .settle-main { min-width:0; }
-.settle-statement-head { display:grid; grid-template-columns:minmax(0,1fr) minmax(330px,420px); align-items:end; gap:28px; padding:30px 30px 25px; border-bottom:1px solid var(--hairline); background:linear-gradient(120deg,#fff 0%,#fffaf8 61%,#f9ece8 100%); }
-.settle-statement-head h3 { max-width:18ch; margin:0; font:900 clamp(27px,2.4vw,35px)/1.3 "Noto Serif TC",serif; letter-spacing:.045em; text-wrap:balance; }
+.settle-statement-head { display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,460px); align-items:end; gap:28px; padding:30px 30px 25px; border-bottom:1px solid var(--hairline); background:linear-gradient(120deg,#fff 0%,#fffaf8 61%,#f9ece8 100%); }
+.settle-statement-head h3 { max-width:none; margin:0; font:900 clamp(27px,2.4vw,35px)/1.3 "Noto Serif TC",serif; letter-spacing:.045em; text-wrap:balance; }
 .settle-statement-head p { max-width:48ch; margin:10px 0 0; color:var(--ink-soft); font-size:14px; line-height:1.75; }
 .settle-statement-head p b { color:var(--plum); }
 .settle-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:stretch; gap:8px; }
+.settle-owner-statement { grid-column:1/-1; overflow:hidden; color:var(--ink); font:900 21px/1.25 "Noto Serif TC",serif; letter-spacing:.045em; text-align:right; text-overflow:ellipsis; white-space:nowrap; }
 .settle-actions select { grid-column:1/-1; min-width:0; height:39px; border:1px solid #d8c9c2; border-radius:8px; padding:0 11px; color:var(--ink); background:#fff; font:inherit; }
 .settle-actions .btn { min-height:39px; border-radius:8px; padding:7px 9px; font-size:13px; white-space:nowrap; }
 .settle-form { display:grid; grid-template-columns:120px 110px 142px minmax(220px,1fr); gap:14px; padding:22px 30px 24px; border-bottom:1px solid var(--hairline); background:#fffdfa; }
@@ -93,9 +107,9 @@
 .settle-no-owner { padding:60px 26px; text-align:center; color:var(--ink-soft); }
 
 @media (max-width:860px) {
-  .settle-workspace { grid-template-columns:1fr; }
-  .settle-side { position:static; grid-template-columns:1fr 1fr; }
-  .settle-rate-note { grid-column:1/-1; }
+  .settle-owner-bar { grid-template-columns:1fr; align-items:stretch; }
+  .settle-owner-edit-panel { grid-template-columns:1fr 1fr; }
+  .settle-owner-edit-panel label { grid-column:1/-1; }
 }
 @media (max-width:620px) {
   .settle-head, .settle-statement-head, .settle-save-line { display:block; }
@@ -108,6 +122,9 @@
   .settle-statement-head { padding:24px 20px 20px; }
   .settle-statement-head h3 { max-width:100%; font-size:27px; }
   .settle-actions { margin-top:18px; }
+  .settle-owner-statement { font-size:18px; text-align:left; }
+  .settle-owner-bar { padding:14px; }
+  .settle-owner-bar .settle-owner-list { overflow-x:auto; flex-wrap:nowrap; padding-bottom:3px; }
   .settle-form { gap:12px; padding:18px 20px 20px; }
   .settle-table-wrap { margin:0 12px; }
   .settle-add-row { margin:15px 20px 20px; }
