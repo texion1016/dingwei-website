@@ -95,12 +95,12 @@
       const pages = rows.length ? Array.from({ length:Math.ceil(rows.length / pageSize) }, (_, index) => rows.slice(index * pageSize, (index + 1) * pageSize)) : [[]];
       const unitMarkup = unit => { const value = calc(unit, statement.data.electricity_rate); return `<tr><td class="input">${esc(unit.lease_roc_year || '')}/${esc(unit.lease_month || '')}/${esc(unit.lease_day || '')}</td><td class="input">${esc(unit.unit_no)}</td><td class="input">${n(unit.electricity_kwh)}</td><td class="input">${money(unit.rent_amount)}</td><td class="electric">${money(value.electricity)}</td><td class="subtotal">${money(value.subtotal)}</td><td class="input">${money(unit.management_fee)}</td><td class="total">${money(value.total)}</td><td class="input">${esc(unit.note)}</td></tr>`; };
       const tableMarkup = pageRows => `<table><thead><tr><th>起租日</th><th>編號／房號</th><th>用電度數</th><th>租金</th><th>電費</th><th>合計</th><th>代管費</th><th>總計</th><th>備註</th></tr></thead><tbody>${pageRows.map(unitMarkup).join('')}</tbody></table>`;
-      const sharedHeader = `
+      const firstPageHeader = `
         <header class="brand"><div><h1>鼎瑋不動產經紀有限公司</h1><p>代租代管屋主結算表</p></div><p>${statement.data.billing_roc_year} 年 ${statement.data.billing_month} 月</p></header>
         <section class="meta"><div><span>案場</span><b>${esc(project.data.name)}</b></div><div><span>屋主</span><b>${esc(owner.data.owner_name)}</b></div><div class="money"><span>本期應付屋主</span><b>${money(sum.total)} 元</b></div></section>
         <p class="rate">本期每度電費：<b>${n(statement.data.electricity_rate)} 元</b>　｜　電費按用電度數 × 本期每度電費計算</p>`;
       const summaryMarkup = `<section class="summary"><div><span>房戶數／用電度數</span><b>${rows.length} 間／${sum.kwh} 度</b></div><div><span>租金合計</span><b>${money(sum.rent)} 元</b></div><div><span>電費合計</span><b>${money(sum.electricity)} 元</b></div><div><span>代管費合計</span><b>${money(sum.fee)} 元</b></div><div><span>本期應付屋主</span><b>${money(sum.total)} 元</b></div></section><section class="note"><b>備註：</b>${esc(statement.data.note || '—')}</section><p class="foot">本表為代租代管內部結算資料；租屋電費計收應以實際電費帳單及租賃契約約定為準。</p>`;
-      app.innerHTML = pages.map((pageRows, index) => `<section class="print-page ${pageRows.length > 10 ? 'dense' : ''}">${sharedHeader}${tableMarkup(pageRows)}${index === pages.length - 1 ? summaryMarkup : `<p class="page-no">第 ${index + 1}／${pages.length} 頁</p>`}</section>`).join('');
+      app.innerHTML = pages.map((pageRows, index) => `<section class="print-page ${index === 0 ? 'first-page' : 'continuation-page'} ${pageRows.length > 10 ? 'dense' : ''}">${index === 0 ? firstPageHeader : ''}${tableMarkup(pageRows)}${index === pages.length - 1 ? summaryMarkup : `<p class="page-no">第 ${index + 1}／${pages.length} 頁</p>`}</section>`).join('');
       setTimeout(() => window.print(), 300);
     })();
   </script>

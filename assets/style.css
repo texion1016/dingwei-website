@@ -1249,11 +1249,12 @@ body:has(.management-page) .theme-picker { display:none; }
 
 @media (max-width: 720px) {
   .site-header .wrap { flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; gap: 8px; }
-  .site-nav { order: 3; width: 100%; justify-content: space-between; gap: 4px; overflow: visible; }
-  .site-nav > a:not([href*="deal=sell"]):not([href*="deal=rent"]):not([href="management.html"]) { display: none; }
+  .site-nav { display:contents; }
+  .site-nav > a:not([href*="deal=sell"]):not([href*="deal=rent"]):not([href="management.html"]):not(.login-link) { display: none; }
   .site-nav > a[href*="deal=sell"],
   .site-nav > a[href*="deal=rent"],
-  .site-nav > a[href="management.html"] { flex: 1 1 0; padding: 9px 4px; text-align: center; white-space: nowrap; font-size: 14px; }
+  .site-nav > a[href="management.html"] { order:3; flex: 1 1 0; padding: 9px 4px; text-align: center; white-space: nowrap; font-size: 14px; }
+  .site-header .login-link { display:inline-flex !important; order:2; margin-left:auto; padding:7px 12px; font-size:13px; }
   .site-footer a[href="needs.html"] {
     display: flex;
     align-items: center;
