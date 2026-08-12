@@ -63,16 +63,26 @@
       return { electricity, subtotal, total:Math.round(subtotal - n(unit.management_fee)) };
     };
     (async () => {
-      const id = new URLSearchParams(location.search).get('statement');
+      const params = new URLSearchParams(location.search);
+      const id = params.get('statement');
+      const share = params.get('share');
       const app = document.getElementById('app');
       if (!id) { app.textContent = '找不到結算單編號。'; return; }
-      const statement = await sb.from('dw_management_statements').select('*').eq('id', id).maybeSingle();
-      if (statement.error || !statement.data) { app.textContent = '讀取失敗：' + (statement.error?.message || '找不到資料'); return; }
-      const [project, owner, units] = await Promise.all([
-        sb.from('dw_management_projects').select('*').eq('id', statement.data.project_id).maybeSingle(),
-        sb.from('dw_management_owners').select('*').eq('id', statement.data.owner_id).maybeSingle(),
-        sb.from('dw_management_statement_units').select('*').eq('statement_id', id).order('sort_order')
-      ]);
+      let statement, project, owner, units;
+      if (share) {
+        const response = await fetch(`/api/settlement-share?statement=${encodeURIComponent(id)}&share=${encodeURIComponent(share)}`);
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) { app.textContent = '分享連結已失效或無法讀取。'; return; }
+        statement = { data:data.statement }; project = { data:data.project }; owner = { data:data.owner }; units = { data:data.units || [] };
+      } else {
+        statement = await sb.from('dw_management_statements').select('*').eq('id', id).maybeSingle();
+        if (statement.error || !statement.data) { app.textContent = '讀取失敗：' + (statement.error?.message || '找不到資料'); return; }
+        [project, owner, units] = await Promise.all([
+          sb.from('dw_management_projects').select('*').eq('id', statement.data.project_id).maybeSingle(),
+          sb.from('dw_management_owners').select('*').eq('id', statement.data.owner_id).maybeSingle(),
+          sb.from('dw_management_statement_units').select('*').eq('statement_id', id).order('sort_order')
+        ]);
+      }
       if (project.error || owner.error || units.error) { app.textContent = '讀取列印資料失敗。'; return; }
       const rows = units.data || [];
       const sum = rows.reduce((total, unit) => {

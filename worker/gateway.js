@@ -2,12 +2,15 @@ const ADMIN_PAGES = new Set([
   "/dw-console-k7f3q9.html",
   "/dw-disclosure-k7f3q9.html",
   "/disclosure-print.html",
-  "/dw-settlement-print-k7f3q9.html",
 ]);
 const COOKIE = "dw_admin_session";
 const TTL = 8 * 60 * 60;
 const ADMIN_API_PREFIX = "/api/admin/supabase";
 const GEOCODE_PATH = "/api/admin/geocode";
+const SETTLEMENT_PRINT_PATH = "/dw-settlement-print-k7f3q9.html";
+const SETTLEMENT_SHARE_PATH = "/api/settlement-share";
+const SETTLEMENT_SHARE_LINK_PATH = "/api/admin/settlement-share-link";
+const SHARE_TTL = 14 * 24 * 60 * 60;
 const enc = new TextEncoder();
 
 function b64url(bytes) {
@@ -108,6 +111,64 @@ function json(body, status = 200) {
   });
 }
 
+function validUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || "");
+}
+
+async function shareSignature(statement, expires, env) {
+  return sign(`${statement}.${expires}`, env.SESSION_SECRET);
+}
+
+async function validSettlementShare(url, env) {
+  const statement = url.searchParams.get("statement") || "";
+  const [expires, signature] = (url.searchParams.get("share") || "").split(".");
+  return validUuid(statement)
+    && /^\d{10}$/.test(expires)
+    && Number(expires) > Math.floor(Date.now() / 1000)
+    && Boolean(signature)
+    && same(signature, await shareSignature(statement, expires, env));
+}
+
+function serviceHeaders(env) {
+  return { Authorization:`Bearer ${env.SUPABASE_SERVICE_KEY}`, apikey:env.SUPABASE_SERVICE_KEY };
+}
+
+async function settlementShareLink(request, env) {
+  const url = new URL(request.url);
+  const statement = url.searchParams.get("statement") || "";
+  if (!validUuid(statement)) return json({ error:"Invalid statement" }, 400);
+  const expires = String(Math.floor(Date.now() / 1000) + SHARE_TTL);
+  const signature = await shareSignature(statement, expires, env);
+  url.pathname = SETTLEMENT_PRINT_PATH;
+  url.search = new URLSearchParams({ statement, share:`${expires}.${signature}` }).toString();
+  return json({ url:url.toString(), expires:Number(expires) });
+}
+
+async function settlementShareData(request, env) {
+  const incoming = new URL(request.url);
+  if (!(await validSettlementShare(incoming, env))) return json({ error:"Invalid or expired share link" }, 401);
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) return json({ error:"Data service unavailable" }, 503);
+  const statementId = incoming.searchParams.get("statement");
+  const rest = path => {
+    const url = new URL(`/rest/v1/${path}`, env.SUPABASE_URL);
+    return fetch(url, { headers:serviceHeaders(env) }).then(response => response.ok ? response.json() : Promise.reject(new Error(`Supabase ${response.status}`)));
+  };
+  try {
+    const statements = await rest(`dw_management_statements?id=eq.${encodeURIComponent(statementId)}&select=*`);
+    const statement = statements[0];
+    if (!statement) return json({ error:"Statement not found" }, 404);
+    const [projects, owners, units] = await Promise.all([
+      rest(`dw_management_projects?id=eq.${encodeURIComponent(statement.project_id)}&select=id,name`),
+      rest(`dw_management_owners?id=eq.${encodeURIComponent(statement.owner_id)}&select=id,owner_name`),
+      rest(`dw_management_statement_units?statement_id=eq.${encodeURIComponent(statement.id)}&select=*&order=sort_order.asc`),
+    ]);
+    if (!projects[0] || !owners[0]) return json({ error:"Related data not found" }, 404);
+    return json({ statement, project:projects[0], owner:owners[0], units });
+  } catch {
+    return json({ error:"Unable to read settlement" }, 502);
+  }
+}
+
 function validCoordinates(lat, lng) {
   return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
 }
@@ -178,6 +239,15 @@ export default {
       if (!(await loggedIn(request, env))) return new Response("Unauthorized", { status: 401 });
       return geocode(request);
     }
+    if (url.pathname === SETTLEMENT_SHARE_PATH) {
+      if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
+      return settlementShareData(request, env);
+    }
+    if (url.pathname === SETTLEMENT_SHARE_LINK_PATH) {
+      if (!(await loggedIn(request, env))) return new Response("Unauthorized", { status: 401 });
+      if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
+      return settlementShareLink(request, env);
+    }
     if (url.pathname === ADMIN_API_PREFIX || url.pathname.startsWith(`${ADMIN_API_PREFIX}/`)) {
       if (!(await loggedIn(request, env))) return new Response("Unauthorized", { status: 401 });
       return supabaseProxy(request, env);
@@ -192,6 +262,7 @@ export default {
       return new Response(null, { status: 302, headers: { Location: next, "Set-Cookie": `${COOKIE}=${await session(env)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${TTL}` } });
     }
     if (url.pathname === "/admin/logout") return new Response(null, { status: 302, headers: { Location: "/", "Set-Cookie": `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0` } });
+    if (url.pathname === SETTLEMENT_PRINT_PATH && !(await loggedIn(request, env)) && !(await validSettlementShare(url, env))) return Response.redirect(`${url.origin}/admin/login?next=${encodeURIComponent(url.pathname + url.search)}`, 302);
     if (ADMIN_PAGES.has(url.pathname) && !(await loggedIn(request, env))) return Response.redirect(`${url.origin}/admin/login?next=${encodeURIComponent(url.pathname + url.search)}`, 302);
     return proxy(request, env);
   },
