@@ -2,6 +2,7 @@ const ADMIN_PAGES = new Set([
   "/dw-console-k7f3q9.html",
   "/dw-disclosure-k7f3q9.html",
   "/disclosure-print.html",
+  "/dw-settlement-print-k7f3q9.html",
 ]);
 const COOKIE = "dw_admin_session";
 const TTL = 8 * 60 * 60;
@@ -69,6 +70,10 @@ function permittedAdminApi(pathname) {
     "/rest/v1/dw_listings",
     "/rest/v1/dw_messages",
     "/rest/v1/dw_property_files",
+    "/rest/v1/dw_management_projects",
+    "/rest/v1/dw_management_owners",
+    "/rest/v1/dw_management_statements",
+    "/rest/v1/dw_management_statement_units",
     "/storage/v1/object/dw-photos",
   ].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }

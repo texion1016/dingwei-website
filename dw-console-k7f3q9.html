@@ -14,6 +14,7 @@ if (location.protocol === 'file:') {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/rental-settlements.css?v=1">
 <style>
 :root {
   --paper: #F3EDE5; --card: #fff; --ink: #241A20; --ink-soft: #6E6067;
@@ -161,6 +162,7 @@ img { display:block; }
   <div class="toolbar" style="margin-bottom:8px">
     <div class="tabs" id="pageTabs">
       <button data-p="listings" class="on">物件管理</button>
+      <button data-p="settlements">代租代管結算</button>
       <button data-p="messages">需求留言 <span id="msgBadge"></span></button>
     </div>
   </div>
@@ -182,6 +184,8 @@ img { display:block; }
 
   <div class="rows" id="rows"></div>
   </div>
+
+  <div id="panelSettlements" style="display:none"></div>
 
   <div id="panelMessages" style="display:none">
     <div class="toolbar">
@@ -511,10 +515,12 @@ let MSG_FILTER = 'open';
 document.getElementById('pageTabs').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   document.querySelectorAll('#pageTabs button').forEach(x => x.classList.toggle('on', x === b));
-  const showMsgs = b.dataset.p === 'messages';
-  document.getElementById('panelListings').style.display = showMsgs ? 'none' : '';
-  document.getElementById('panelMessages').style.display = showMsgs ? '' : 'none';
-  if (showMsgs) loadMsgs();
+  const page = b.dataset.p;
+  document.getElementById('panelListings').style.display = page === 'listings' ? '' : 'none';
+  document.getElementById('panelSettlements').style.display = page === 'settlements' ? '' : 'none';
+  document.getElementById('panelMessages').style.display = page === 'messages' ? '' : 'none';
+  if (page === 'messages') loadMsgs();
+  if (page === 'settlements' && window.DWRentalSettlements) window.DWRentalSettlements.open();
 });
 
 document.getElementById('msgTabs').addEventListener('click', e => {
@@ -814,5 +820,7 @@ async function saveForm() {
 
 document.addEventListener('DOMContentLoaded', () => { loadAll(); loadMsgs(); });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="assets/rental-settlements.js?v=1"></script>
 </body>
 </html>
