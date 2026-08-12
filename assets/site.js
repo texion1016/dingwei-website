@@ -29,7 +29,8 @@
       lat: r.lat || "",
       lng: r.lng || "",
       photos: r.photos || [],
-      videos: r.videos || []
+      videos: r.videos || [],
+      updatedAt: r.updated_at || ""
     };
   }
 
@@ -111,7 +112,11 @@
     });
   }
 
-  function byNewest(a, b) { return Number(b.sno) - Number(a.sno); }
+  function byNewest(a, b) {
+    var bTime = Date.parse(b.updatedAt || "") || 0;
+    var aTime = Date.parse(a.updatedAt || "") || 0;
+    return bTime - aTime || Number(b.sno) - Number(a.sno);
+  }
 
   /* ---------- 物件卡片 ---------- */
 
@@ -374,54 +379,10 @@
     }
   }
 
-  /* ---------- 試配色切換器（選定後可移除） ---------- */
-
-  var THEMES = [
-    { id: "sign", label: "正紅", color: "#BE2418" },
-    { id: "crimson", label: "深紅", color: "#971A1A" },
-    { id: "brick", label: "磚紅", color: "#B0402A" },
-    { id: "rose", label: "胭脂紅", color: "#8F1F3E" }
-  ];
-
-  function initThemePicker() {
-    var saved = null;
-    try { saved = localStorage.getItem("dw-theme"); } catch (e) {}
-    var valid = THEMES.some(function (t) { return t.id === saved; });
-    if (valid && saved !== "sign") document.documentElement.setAttribute("data-theme", saved);
-
-    var box = document.createElement("div");
-    box.className = "theme-picker";
-    box.setAttribute("role", "group");
-    box.setAttribute("aria-label", "試配色");
-    box.innerHTML = '<span class="tp-label">試配色</span>' + THEMES.map(function (t) {
-      return '<button type="button" data-theme-id="' + t.id + '" title="' + t.label +
-        '" aria-label="' + t.label + '" style="background:' + t.color + '"></button>';
-    }).join("");
-    document.body.appendChild(box);
-
-    function mark() {
-      var cur = document.documentElement.getAttribute("data-theme") || "sign";
-      box.querySelectorAll("button").forEach(function (b) {
-        b.classList.toggle("active", b.dataset.themeId === cur);
-      });
-    }
-    box.addEventListener("click", function (e) {
-      var b = e.target.closest("button");
-      if (!b) return;
-      var id = b.dataset.themeId;
-      if (id === "sign") document.documentElement.removeAttribute("data-theme");
-      else document.documentElement.setAttribute("data-theme", id);
-      try { localStorage.setItem("dw-theme", id); } catch (err) {}
-      mark();
-    });
-    mark();
-  }
-
   /* ---------- 啟動 ---------- */
 
   document.addEventListener("DOMContentLoaded", function () {
     initSns();
-    initThemePicker();
     loadListings().then(function (items) {
       L = items;
       var page = document.body.dataset.page;

@@ -14,7 +14,7 @@ if (location.protocol === 'file:') {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/rental-settlements.css?v=1">
+<link rel="stylesheet" href="assets/rental-settlements.css?v=2">
 <style>
 :root {
   --paper: #F3EDE5; --card: #fff; --ink: #241A20; --ink-soft: #6E6067;
@@ -175,7 +175,7 @@ img { display:block; }
       <button data-f="rent">出租</button>
       <button data-f="unlisted">已下架</button>
     </div>
-    <input class="search-input" id="listingSearch" type="search" placeholder="查詢編號、案名、縣市區、種類或格局" aria-label="查詢物件">
+    <input class="search-input" id="listingSearch" type="search" placeholder="案名、編號" aria-label="查詢物件">
     <span class="count" id="count"></span>
     <span class="spacer"></span>
     <button class="btn btn-ghost" id="importBtn" style="display:none" onclick="importOld()">匯入舊站 37 筆物件</button>
@@ -215,6 +215,10 @@ img { display:block; }
       <div class="field">
         <label>案名 <span class="req">＊</span></label>
         <input id="f_name" placeholder="例：合雄悅園">
+      </div>
+      <div class="field">
+        <label>案件編號 <span class="req">＊</span></label>
+        <input id="f_sno" maxlength="48" placeholder="例：136834">
       </div>
       <div class="field">
         <label>區域</label>
@@ -409,7 +413,7 @@ async function loadAll() {
     return;
   }
   notice.style.display = 'none';
-  ALL = (data || []).sort((a, b) => Number(b.sno) - Number(a.sno));
+  ALL = (data || []).sort((a, b) => Date.parse(b.updated_at || 0) - Date.parse(a.updated_at || 0) || String(a.sno || '').localeCompare(String(b.sno || '')));
   document.getElementById('importBtn').style.display = ALL.length ? 'none' : '';
   render();
 }
@@ -626,13 +630,6 @@ function formatFloor(unit, total) {
   if (building) return building + '總樓層';
   return '';
 }
-function nextSixDigitSno() {
-  const values = ALL.map(r => String(r.sno || ''))
-    .filter(s => /^\d{6}$/.test(s))
-    .map(Number);
-  return String((values.length ? Math.max(...values) : 130000) + 1).padStart(6, '0');
-}
-
 if (!window.DW_LISTING_SYNC) window.DW_LISTING_SYNC = (() => {
   const specPairs = [["condition_status", "\u7269\u6cc1"], ["management_fee", "\u7ba1\u7406"], ["main_material", "\u5efa\u6750"], ["exterior_material", "\u5916\u7246"], ["floor_material", "\u5730\u677f"], ["building_use", "\u7528\u9014"], ["security", "\u8b66\u885b"], ["courtyard", "\u4e2d\u5ead"], ["public_ratio", "\u516c\u6bd4"], ["main_area", "\u4e3b\u5efa"], ["attached_area", "\u9644\u5c6c"], ["common_area", "\u516c\u8a2d"], ["school_zone", "\u5b78\u53401"], ["market", "\u5e02\u5834"], ["park", "\u516c\u5712"], ["transportation", "\u6377\u904b"], ["direction", "\u671d\u5411"]];
   const text = (v) => v == null ? '' : String(v);
@@ -666,6 +663,7 @@ function openForm(row) {
   F('dealR').className = dealRent ? 'sel-r' : '';
   F('priceLabel').innerHTML = dealRent ? '月租（萬） <span class="req">＊</span>' : '總價（萬） <span class="req">＊</span>';
   F('f_name').value = row ? row.name : '';
+  F('f_sno').value = row ? row.sno || '' : '';
   F('f_district').value = row ? row.district || '' : '';
   F('f_kind').value = row ? row.kind || '' : '';
   F('f_price').value = row ? row.price : '';
@@ -755,8 +753,11 @@ F('f_videos').addEventListener('change', async e => {
 async function saveForm() {
   if (!_sb) { alert('尚未設定資料庫連線（assets/config.js）'); return; }
   const name = F('f_name').value.trim();
+  const sno = F('f_sno').value.trim();
   const price = parseFloat(F('f_price').value);
   if (!name) { alert('請填寫案名'); return; }
+  if (!sno) { alert('請填寫案件編號'); return; }
+  if (ALL.some(item => String(item.sno) === sno && item.id !== editingRow?.id)) { alert('這個案件編號已存在，請換一個編號。'); return; }
   if (!(price > 0)) { alert('請填寫價格'); return; }
 
   const spec = {};
@@ -775,6 +776,7 @@ async function saveForm() {
   if ((latitude === null) !== (longitude === null)) { alert('緯度與經度請一併填寫。'); return; }
 
   const row = {
+    sno,
     deal: document.querySelector('#dealRadio input:checked').value,
     name,
     district: F('f_district').value.trim(),
@@ -802,7 +804,6 @@ async function saveForm() {
   if (editingRow) {
     ({ data: savedRow, error } = await _sb.from('dw_listings').update(row).eq('id', editingRow.id).select().single());
   } else {
-    row.sno = nextSixDigitSno();
     row.status = 'active';
     ({ data: savedRow, error } = await _sb.from('dw_listings').insert(row).select().single());
   }
@@ -821,6 +822,6 @@ async function saveForm() {
 document.addEventListener('DOMContentLoaded', () => { loadAll(); loadMsgs(); });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="assets/rental-settlements.js?v=1"></script>
+<script src="assets/rental-settlements.js?v=2"></script>
 </body>
 </html>

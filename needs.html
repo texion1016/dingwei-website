@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=7">
+<link rel="stylesheet" href="assets/style.css?v=9">
 </head>
 <body data-page="needs">
 
@@ -118,7 +118,7 @@
 
 <script src="assets/config.js?v=6"></script>
 <script src="assets/data.js?v=6"></script>
-<script src="assets/site.js?v=7"></script>
+<script src="assets/site.js?v=8"></script>
 <script>
 (function () {
   "use strict";
@@ -126,6 +126,10 @@
   var KINDS = { buy: ["想買", "kind-buy"], rent: ["想租", "kind-rent"], sell: ["委託出售", "kind-sell"] };
   var ALLMSG = [];
   var FILTER = "all";
+  var preset = new URLSearchParams(location.search);
+
+  if (KINDS[preset.get("kind")]) document.getElementById("n_kind").value = preset.get("kind");
+  if (preset.get("content")) document.getElementById("n_content").value = preset.get("content");
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {

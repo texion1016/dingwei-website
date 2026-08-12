@@ -32,7 +32,7 @@
       <div id="settleProjectCreate"></div><div id="settleProjects"></div><div id="settleWorkspace"></div>
     </section>`;
   }
-  function renderCreateProject(show) {
+  function renderCreateProject(show = true) {
     const el = $('#settleProjectCreate'); if (!el) return;
     el.innerHTML = show ? `<section class="settle-card"><div class="settle-card-head"><h3>建立新的代租代管案場</h3><button class="btn btn-ghost btn-sm" type="button" onclick="DWRentalSettlements.showCreateProject(false)">取消</button></div><div class="settle-project-form"><label>案場名称<input id="settleProjectName" placeholder="例：大園獨立套房"></label><label>预设每度（元）<input id="settleProjectRate" type="number" min="0" step="0.01" value="6.5"></label><button class="btn btn-primary" type="button" onclick="DWRentalSettlements.createProject()">建立案场</button></div></section>` : '';
   }
