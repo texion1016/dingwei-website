@@ -22,7 +22,7 @@
     });
   }
 
-  async function passkeyLogin(link) {
+  async function passkeyLogin(link) {\n    if (location.protocol === "file:") { location.href = link.href; return; }
     if (!window.PublicKeyCredential || !window.DW_SB || !window.DW_SB.url || !window.DW_SB.key) {
       location.href = link.href;
       return;
