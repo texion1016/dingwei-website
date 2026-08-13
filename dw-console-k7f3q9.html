@@ -34,6 +34,8 @@ img { display:block; }
 .topbar h1 { font-family:"Noto Serif TC",serif; font-weight:900; font-size:19px; margin:0; letter-spacing:.06em; }
 .topbar .hint { font-size:12.5px; opacity:.75; }
 .topbar a { color:#fff; margin-left:auto; font-size:14px; }
+.topbar-passkey { display:none; border:1px solid rgba(255,255,255,.8); border-radius:999px; background:#fff; color:var(--plum); padding:8px 12px; min-height:40px; font-size:13px; font-weight:700; white-space:nowrap; }
+.topbar-passkey[disabled] { opacity:.72; }
 
 .wrap { max-width:1120px; margin:0 auto; padding:26px 22px 80px; }
 
@@ -136,6 +138,11 @@ img { display:block; }
 .modal .foot .status { margin-right:auto; color:var(--ink-soft); font-size:13.5px; align-self:center; }
 
 @media (max-width:720px) {
+  .topbar { gap:9px; padding:10px 14px; }
+  .topbar .hint { display:none; }
+  .topbar h1 { font-size:16px; }
+  .topbar-passkey { display:inline-flex; align-items:center; justify-content:center; margin-left:auto; }
+  .topbar a { margin-left:0; font-size:12px; }
   .row { grid-template-columns:72px 1fr; }
   .row .thumb, .row .nophoto { width:72px; height:56px; }
   .row .acts { grid-column:1 / -1; justify-content:flex-start; }
@@ -153,6 +160,7 @@ img { display:block; }
   <span class="seal">鼎</span>
   <h1>物件管理後台</h1>
   <span class="hint">刊登、下架即時同步官網</span>
+  <button type="button" class="topbar-passkey" id="enableMobilePasskey">啟用手機 Face ID</button>
   <a href="index.html">開啟官網 ↗</a>
 </header>
 
@@ -823,5 +831,6 @@ document.addEventListener('DOMContentLoaded', () => { loadAll(); loadMsgs(); });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="assets/rental-settlements.js?v=7"></script>
+<script src="assets/admin-passkey.js?v=1"></script>
 </body>
 </html>

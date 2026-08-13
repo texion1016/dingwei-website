@@ -1,0 +1,13 @@
+{
+  "name": "大南崁房屋｜鼎瑋不動產",
+  "short_name": "鼎瑋房屋",
+  "description": "大南崁房屋－鼎瑋不動產，桃園蘆竹、南崁在地買賣、租屋與代租代管服務。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F3EDE5",
+  "theme_color": "#BE2418",
+  "icons": [
+    { "src": "/assets/brand/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

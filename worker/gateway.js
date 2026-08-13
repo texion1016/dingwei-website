@@ -7,6 +7,8 @@ const COOKIE = "dw_admin_session";
 const TTL = 8 * 60 * 60;
 const ADMIN_API_PREFIX = "/api/admin/supabase";
 const GEOCODE_PATH = "/api/admin/geocode";
+const PASSKEY_BOOTSTRAP_PATH = "/api/admin/passkey/bootstrap";
+const PASSKEY_SESSION_PATH = "/api/admin/passkey/session";
 const SETTLEMENT_PRINT_PATH = "/dw-settlement-print-k7f3q9.html";
 const SETTLEMENT_SHARE_PATH = "/api/settlement-share";
 const SETTLEMENT_SHARE_LINK_PATH = "/api/admin/settlement-share-link";
@@ -51,6 +53,14 @@ async function loggedIn(request, env) {
 async function session(env) {
   const body = b64url(enc.encode(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + TTL })));
   return `${body}.${await sign(body, env.SESSION_SECRET)}`;
+}
+
+function sessionCookie(value, maxAge = TTL) {
+  return `${COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`;
+}
+
+function passkeyConfigured(env) {
+  return Boolean(env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY && env.PASSKEY_AUTH_EMAIL && env.PASSKEY_AUTH_PASSWORD);
 }
 
 function loginHtml(next, failed = false) {
@@ -129,8 +139,54 @@ async function validSettlementShare(url, env) {
     && same(signature, await shareSignature(statement, expires, env));
 }
 
-function serviceHeaders(env) {
-  return { Authorization:`Bearer ${env.SUPABASE_SERVICE_KEY}`, apikey:env.SUPABASE_SERVICE_KEY };
+function serviceHeaders(env, contentType = false) {
+  const headers = { Authorization:`Bearer ${env.SUPABASE_SERVICE_KEY}`, apikey:env.SUPABASE_SERVICE_KEY };
+  if (contentType) headers["content-type"] = "application/json";
+  return headers;
+}
+
+async function passkeyBootstrap(request, env) {
+  if (!(await loggedIn(request, env))) return new Response("Unauthorized", { status: 401 });
+  if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
+  if (!passkeyConfigured(env)) return json({ error: "Passkey service is not configured" }, 503);
+
+  const target = new URL("/auth/v1/token?grant_type=password", env.SUPABASE_URL);
+  const signIn = () => fetch(target, {
+    method: "POST",
+    headers: serviceHeaders(env, true),
+    body: JSON.stringify({ email: env.PASSKEY_AUTH_EMAIL, password: env.PASSKEY_AUTH_PASSWORD }),
+  });
+  let response = await signIn();
+  let data = await response.json().catch(() => ({}));
+  if (!response.ok && response.status === 400) {
+    const create = await fetch(new URL("/auth/v1/admin/users", env.SUPABASE_URL), {
+      method: "POST",
+      headers: serviceHeaders(env, true),
+      body: JSON.stringify({ email: env.PASSKEY_AUTH_EMAIL, password: env.PASSKEY_AUTH_PASSWORD, email_confirm: true }),
+    });
+    if (create.ok || create.status === 422) {
+      response = await signIn();
+      data = await response.json().catch(() => ({}));
+    }
+  }
+  if (!response.ok || !data.access_token || !data.refresh_token) return json({ error: "Unable to prepare Passkey enrollment" }, 502);
+  return json({ access_token: data.access_token, refresh_token: data.refresh_token });
+}
+
+async function passkeySession(request, env) {
+  if (request.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
+  if (!passkeyConfigured(env)) return json({ error: "Passkey service is not configured" }, 503);
+  const authorization = request.headers.get("Authorization") || "";
+  if (!authorization.startsWith("Bearer ")) return new Response("Unauthorized", { status: 401 });
+
+  const response = await fetch(new URL("/auth/v1/user", env.SUPABASE_URL), {
+    headers: { ...serviceHeaders(env), Authorization: authorization },
+  });
+  const user = await response.json().catch(() => ({}));
+  if (!response.ok || !same(String(user.email || "").toLowerCase(), String(env.PASSKEY_AUTH_EMAIL).toLowerCase())) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+  return new Response(null, { status: 204, headers: { "Set-Cookie": sessionCookie(await session(env)), "cache-control": "no-store" } });
 }
 
 async function settlementShareLink(request, env) {
@@ -239,6 +295,8 @@ export default {
       if (!(await loggedIn(request, env))) return new Response("Unauthorized", { status: 401 });
       return geocode(request);
     }
+    if (url.pathname === PASSKEY_BOOTSTRAP_PATH) return passkeyBootstrap(request, env);
+    if (url.pathname === PASSKEY_SESSION_PATH) return passkeySession(request, env);
     if (url.pathname === SETTLEMENT_SHARE_PATH) {
       if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
       return settlementShareData(request, env);
@@ -259,9 +317,9 @@ export default {
       const valid = same(String(form.get("username") || ""), env.ADMIN_USERNAME) && same(String(form.get("password") || ""), env.ADMIN_PASSWORD);
       const next = nextPath(String(form.get("next") || ""));
       if (!valid) return new Response(loginHtml(next, true), { status: 401, headers: { "content-type": "text/html; charset=UTF-8" } });
-      return new Response(null, { status: 302, headers: { Location: next, "Set-Cookie": `${COOKIE}=${await session(env)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${TTL}` } });
+      return new Response(null, { status: 302, headers: { Location: next, "Set-Cookie": sessionCookie(await session(env)) } });
     }
-    if (url.pathname === "/admin/logout") return new Response(null, { status: 302, headers: { Location: "/", "Set-Cookie": `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0` } });
+    if (url.pathname === "/admin/logout") return new Response(null, { status: 302, headers: { Location: "/", "Set-Cookie": sessionCookie("", 0) } });
     if (url.pathname === SETTLEMENT_PRINT_PATH && !(await loggedIn(request, env)) && !(await validSettlementShare(url, env))) return Response.redirect(`${url.origin}/admin/login?next=${encodeURIComponent(url.pathname + url.search)}`, 302);
     if (ADMIN_PAGES.has(url.pathname) && !(await loggedIn(request, env))) return Response.redirect(`${url.origin}/admin/login?next=${encodeURIComponent(url.pathname + url.search)}`, 302);
     return proxy(request, env);

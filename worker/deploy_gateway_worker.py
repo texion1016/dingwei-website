@@ -43,6 +43,10 @@ def main():
         "ADMIN_PASSWORD": os.environ.get("DW_ADMIN_PASSWORD"),
         "SESSION_SECRET": os.environ.get("DW_SESSION_SECRET"),
     }
+    passkey_secrets = {
+        "PASSKEY_AUTH_EMAIL": os.environ.get("DW_PASSKEY_AUTH_EMAIL"),
+        "PASSKEY_AUTH_PASSWORD": os.environ.get("DW_PASSKEY_AUTH_PASSWORD"),
+    }
     supabase_secrets = {
         "SUPABASE_URL": "https://sejlpuexzpadokvkrbpj.supabase.co",
         "SUPABASE_SERVICE_KEY": local_setting("DW_SUPABASE_SERVICE_KEY"),
@@ -52,9 +56,12 @@ def main():
     supplied_login_secrets = {name: value for name, value in login_secrets.items() if value}
     if supplied_login_secrets and len(supplied_login_secrets) != len(login_secrets):
         raise RuntimeError("Provide all three login secrets together, or leave them unchanged")
+    supplied_passkey_secrets = {name: value for name, value in passkey_secrets.items() if value}
+    if supplied_passkey_secrets and len(supplied_passkey_secrets) != len(passkey_secrets):
+        raise RuntimeError("Provide both Passkey secrets together, or leave them unchanged")
     if not supabase_secrets["SUPABASE_SERVICE_KEY"]:
         raise RuntimeError("DW_SUPABASE_SERVICE_KEY is required")
-    supplied_secrets = {**supplied_login_secrets, **supabase_secrets}
+    supplied_secrets = {**supplied_login_secrets, **supplied_passkey_secrets, **supabase_secrets}
 
     response = requests.put(
         f"https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/workers/scripts/{WORKER}",

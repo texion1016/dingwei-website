@@ -157,6 +157,18 @@ img { max-width: 100%; display: block; }
 .login-link:hover { background: var(--plum) !important; color: #fff !important; }
 .login-link:focus-visible { outline: 2px solid var(--plum); outline-offset: 2px; }
 
+.install-link {
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink-soft);
+  font: 500 14px var(--font-body);
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+.install-link:hover { border-color: var(--plum); color: var(--plum); background: var(--plum-tint); }
+.install-link[hidden] { display: none !important; }
+
 /* ---------- 首頁主視覺 ---------- */
 
 .hero {
@@ -1254,6 +1266,7 @@ body:has(.management-page) .theme-picker { display:none; }
   .site-nav > a[href*="deal=rent"],
   .site-nav > a[href="management.html"] { order:3; flex: 1 1 0; padding: 9px 4px; text-align: center; white-space: nowrap; font-size: 14px; }
   .site-header .login-link { display:inline-flex !important; order:2; margin-left:auto; padding:7px 12px; font-size:13px; }
+  .site-header .install-link { display:none !important; }
   .site-footer a[href="needs.html"] {
     display: flex;
     align-items: center;

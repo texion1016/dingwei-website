@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title>鼎瑋不動產</title>
+  <rect width="512" height="512" rx="96" fill="#F3EDE5"/>
+  <path d="M94 250 256 112l162 138" fill="none" stroke="#BE2418" stroke-linecap="round" stroke-linejoin="round" stroke-width="30"/>
+  <path d="M142 232v144h228V232" fill="#fff" stroke="#BE2418" stroke-linejoin="round" stroke-width="22"/>
+  <text x="256" y="306" fill="#BE2418" font-family="Noto Serif TC, Microsoft JhengHei, serif" font-size="86" font-weight="800" text-anchor="middle">鼎瑋</text>
+  <text x="256" y="425" fill="#8C1710" font-family="Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="4" text-anchor="middle">DING WEI</text>
+</svg>
