@@ -369,6 +369,7 @@
   function initSns() {
     var line = document.getElementById("sns-line");
     var fb = document.getElementById("sns-fb");
+    var fbGroup = document.getElementById("sns-fb-group");
     if (line) {
       if (C.line) { line.href = C.line; line.classList.remove("pending"); }
       else { line.removeAttribute("href"); line.title = "LINE 連結即將上線"; }
@@ -376,6 +377,10 @@
     if (fb) {
       if (C.facebook) { fb.href = C.facebook; fb.classList.remove("pending"); }
       else { fb.removeAttribute("href"); fb.title = "Facebook 連結即將上線"; }
+    }
+    if (fbGroup) {
+      if (C.facebookGroup) { fbGroup.href = C.facebookGroup; fbGroup.classList.remove("pending"); }
+      else { fbGroup.removeAttribute("href"); fbGroup.title = "Facebook 社團連結即將上線"; }
     }
   }
 

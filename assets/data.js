@@ -9,7 +9,8 @@ window.COMPANY = {
   "brokerLicense": "(106)桃市經字第001615號",
   "serviceArea": "桃園市蘆竹、南崁地區",
   "line": "https://line.me/ti/p/ADzdYhodme",
-  "facebook": "",
+  "facebook": "https://www.facebook.com/profile.php?id=100081575727181",
+  "facebookGroup": "https://www.facebook.com/groups/901545473202439",
   "printPhone": "0913231553",
   "printName": "胡妤庭"
 };
