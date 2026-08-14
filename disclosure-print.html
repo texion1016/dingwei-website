@@ -531,12 +531,12 @@
       .sale-sheet .sale-header img { width:39mm; max-height:15mm; object-fit:contain; margin:1mm 2mm; }
       .sale-sheet .sale-header h1 { margin:0; text-align:center; font:900 19pt "Noto Serif TC", serif; letter-spacing:.16em; white-space:nowrap; }
       .sale-sheet .sale-header b { padding:0 2mm; font:900 12.5pt "Noto Serif TC", serif; white-space:nowrap; text-align:center; }
-      .sale-sheet .sale-overview { display:grid; grid-template-columns:38% 34% 28%; min-height:33mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
+      .sale-sheet .sale-overview { display:grid; grid-template-columns:38% 34% 28%; min-height:36mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
       .sale-sheet .sale-overview > div { min-width:0; }
       .sale-sheet .sale-overview .case, .sale-sheet .sale-overview .price { display:grid; place-items:center; padding:2mm; text-align:center; }
       .sale-sheet .sale-overview .case { border-right:0.25mm solid #171717; font:900 20pt "Noto Serif TC", serif; overflow-wrap:anywhere; color:#15579a; }
-      .sale-sheet .sale-overview .meta { display:grid; grid-template-rows:repeat(3, 1fr); border-right:0.25mm solid #171717; }
-      .sale-sheet .sale-overview .meta > div { display:grid; grid-template-columns:14mm 1fr; min-height:11mm; }
+      .sale-sheet .sale-overview .meta { display:grid; grid-template-rows:repeat(4, 1fr); border-right:0.25mm solid #171717; }
+      .sale-sheet .sale-overview .meta > div { display:grid; grid-template-columns:16mm 1fr; min-height:9mm; }
       .sale-sheet .sale-overview .meta > div + div { border-top:0.25mm solid #171717; }
       .sale-sheet .sale-overview .meta b { display:flex; align-items:center; justify-content:center; background:#f5f5f5; border-right:0.25mm solid #171717; font-weight:900; }
       .sale-sheet .sale-overview .meta span { display:flex; align-items:center; padding:1mm 2mm; overflow-wrap:anywhere; color:#15579a; }
@@ -554,6 +554,12 @@
       .sale-sheet .sale-table th, .sale-sheet .sale-table td { height:7.15mm; padding:0.8mm 1.4mm; vertical-align:middle; overflow-wrap:anywhere; }
       .sale-sheet .sale-table th { width:40%; text-align:center; font-weight:900; background:#f5f5f5; border-right:0.25mm solid #171717; }
       .sale-sheet .sale-table td { border-bottom:0.25mm solid #171717; color:#15579a; }
+      .sale-sheet .input-data { color:#15579a; font-weight:900; font-size:1.1em; }
+      .sale-sheet .input-data.important { color:#b12620; font-size:1em; }
+      .sale-sheet .sale-overview .case .input-data,
+      .sale-sheet .sale-overview .price .input-data,
+      .sale-sheet .sale-feature .input-data { font-size:1em; }
+      .sale-sheet .sale-table td .input-data { font-size:10.2pt; }
       .sale-sheet .sale-table tr:last-child th, .sale-sheet .sale-table tr:last-child td { border-bottom:0; }
       .sale-sheet .sale-table tr + tr th { border-top:0.25mm solid #171717; }
       .sale-sheet .sale-table + .sale-table { border-top:0.25mm solid #171717; }
@@ -572,12 +578,15 @@
       .sale-sheet .sale-image + .sale-image { border-left:0.25mm solid #171717; }
       .sale-sheet .sale-image b { min-height:7mm; display:flex; align-items:center; justify-content:center; background:#f5f5f5; border-bottom:0.25mm solid #171717; font-size:10pt; }
       .sale-sheet .sale-image img { width:100%; height:50mm; object-fit:contain; display:block; }
+      .sale-sheet .sale-map-body { position:relative; height:50mm; }
+      .sale-sheet .sale-map-body img { height:100%; }
+      .sale-sheet .sale-map-pin { position:absolute; left:50%; top:50%; width:4.2mm; height:4.2mm; border-radius:50%; background:#b12620; border:0.8mm solid #fff; box-shadow:0 0 0 0.45mm rgba(177,38,32,.45); transform:translate(-50%,-50%); }
       .sale-sheet .sale-empty { display:grid; place-items:center; flex:1; min-height:50mm; color:#666; }
       .sale-sheet .sale-bottom { display:grid; grid-template-columns:1fr 1fr; min-height:19mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
       .sale-sheet .sale-bottom > div { padding:1.4mm 2mm; white-space:pre-wrap; overflow-wrap:anywhere; color:#15579a; }
       .sale-sheet .sale-bottom > div + div { border-left:0.25mm solid #171717; }
       .sale-sheet .sale-sign { display:grid; grid-template-columns:25% 37% 38%; min-height:11mm; border-left:0.25mm solid #171717; border-right:0.25mm solid #171717; border-bottom:0.25mm solid #171717; }
-      .sale-sheet .sale-sign span { padding:1.2mm 1.7mm; overflow-wrap:anywhere; color:#15579a; }
+      .sale-sheet .sale-sign span { padding:1.2mm 1.7mm; overflow-wrap:anywhere; color:#15579a; font-size:8.7pt; line-height:1.45; }
       .sale-sheet .sale-sign span + span { border-left:0.25mm solid #171717; }
       @media print {
         .rights-sheet {
@@ -960,20 +969,22 @@
         const c = company();
         const value = (key, tone = "") => `<span class="input-data ${tone}">${esc(v(key, ""))}</span>`;
         const box = (label, key) => `<tr><th>${label}</th><td>${value(key)}</td></tr>`;
-        const image = (key, label) =>
-          `<div class="sale-image"><b>${label}</b>${D[key] ? `<img src="${esc(D[key])}" alt="${label}">` : '<div class="sale-empty">未上傳圖片</div>'}</div>`;
+        const radius = { "週邊半徑300公尺": 300, "週邊半徑500公尺": 500, "週邊半徑1公里": 1000 }[v("map_radius", "")] || 300;
+        const generatedLocationMap = staticMapUrl(v("latitude", ""), v("longitude", ""), radius, "1050,760");
+        const image = (key, label, source = D[key], showPin = false) =>
+          `<div class="sale-image"><b>${label}</b>${source ? (showPin ? `<div class="sale-map-body"><img src="${esc(source)}" alt="${label}" referrerpolicy="no-referrer"><span class="sale-map-pin" aria-label="物件位置"></span></div>` : `<img src="${esc(source)}" alt="${label}" referrerpolicy="no-referrer">`) : '<div class="sale-empty">未上傳圖片</div>'}</div>`;
         return sheet(
           `<div class="sale-header"><img src="assets/brand/logo_old.gif" alt="DING WEI REAL ESTATE"><h1>${esc(c.name || "鼎瑋不動產")}</h1><b>售屋資料表</b></div>
-          <div class="sale-overview"><div class="case">${value("case_name")}</div><div class="meta"><div><b>樓層</b><span>${value("sales_floor")}</span></div><div><b>格局</b><span>${value("layout_detail")}</span></div><div><b>車位</b><span>${value("parking_info")}</span></div></div><div class="price">${value("commission_total", "important")}萬</div></div>
+          <div class="sale-overview"><div class="case">${value("case_name")}</div><div class="meta"><div><b>房屋編號</b><span>${value("doc_no")}</span></div><div><b>樓層</b><span>${value("sales_floor")}</span></div><div><b>格局</b><span>${value("layout_detail")}</span></div><div><b>車位</b><span>${value("parking_info")}</span></div></div><div class="price">${value("commission_total", "important")}萬</div></div>
           <div class="sale-address"><b>地址</b><span>${value("doorplate")}</span></div>
           <div class="sale-columns"><section class="sale-block"><div class="sale-section"><h2>權 利 範 圍</h2><table class="sale-table">${box("登記總面積／建物合計", "registered_area")}${box("土地面積", "land_area")}${box("權利範圍", "land_right_range")}${box("基地面積", "land_base_area")}</table><table class="sale-table sale-pairs"><tr><th>主建物</th><td>${value("main_area")}</td><th>附屬建物</th><td>${value("attached_area")}</td></tr><tr><th>公共設施</th><td>${value("common_area")}</td><th>公設比</th><td>${value("public_ratio")}</td></tr></table></div><div class="sale-section"><h2>建 物 狀 況</h2><table class="sale-table">${box("完成日期", "completion_date")}${box("主要建材", "main_material")}${box("隔間材料", "building_insulation")}${box("地板", "floor_material")}${box("座向", "direction")}</table></div><div class="sale-section"><h2>附 近 設 施</h2><table class="sale-table">${box("學區", "school_zone")}${box("市場", "market")}${box("公園", "park")}${box("交通／站牌", "transportation")}</table></div></section><section class="sale-block"><div class="sale-section"><h2>付 款 條 件</h2><table class="sale-table sale-four"><tr><th>簽約款</th><th>備證</th><th>完稅</th><th>尾款</th></tr><tr><td>${value("payment_1_percent")}%</td><td>${value("payment_2_percent")}%</td><td>${value("payment_3_percent")}%</td><td>${value("payment_4_percent")}%</td></tr></table><table class="sale-table">${box("銀行設定（萬）", "loan_bank")}${box("實際貸款約（萬）", "loan_actual")}</table></div><div class="sale-section"><h2>使 用 狀 況</h2><table class="sale-table sale-pairs"><tr><th>自來水</th><td>${value("water")}</td><th>天然瓦斯</th><td>${value("gas")}</td></tr><tr><th>獨立電表</th><td>${value("electricity")}</td><th>管理費</th><td>${value("management_fee")}</td></tr></table><table class="sale-table"><tr><th>每坪／合計</th><td>${value("management_unit_fee")} 元／坪　　${value("management_total_fee")} 元</td></tr></table></div><div class="sale-section sale-feature-section"><h2>本 案 特 色</h2><div class="sale-feature">${value("summary_features")}</div></div></section></div>
-          <div class="sale-images">${image("sale_location_map", "位置圖")}${image("sale_floor_plan", "平面圖")}</div>
+          <div class="sale-images">${image("sale_location_map", "位置圖", generatedLocationMap || D.sale_location_map, Boolean(generatedLocationMap))}${image("sale_floor_plan", "平面圖")}</div>
           <div class="sale-bottom"><div><b>備註</b><br>${value("sale_remarks")}</div><div><b>附贈物／現況</b><br>${value("gift_summary")}</div></div>
-          <div class="sale-sign"><span>驗屋：${value("inspection_status")}</span><span>買方確認：${value("buyer_confirm")}<br>賣方確認：${value("seller_confirm")}</span><span>主管：${value("store_manager")}<br>經紀人：${value("broker_name")}　營業員：${value("agent_name")}</span></div>`,
+          <div class="sale-sign"><span>驗屋：${value("inspection_status")}</span><span>買方確認：${value("buyer_confirm")}<br>賣方確認：${value("seller_confirm")}</span><span>主管：${value("store_manager")}<br>經紀人：${value("broker_name")}　證號：${value("broker_license")}<br>營業員：${value("agent_name")}　證號：${value("agent_license")}</span></div>`,
           "sale-sheet",
         );
       }
-      function staticMapUrl(latitude, longitude, radiusMeters) {
+      function staticMapUrl(latitude, longitude, radiusMeters, imageSize = "760,1050") {
         const lat = Number(latitude), lng = Number(longitude);
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) return "";
         const latDelta = radiusMeters / 111320;
@@ -984,7 +995,7 @@
         const query = new URLSearchParams({
           bbox,
           bboxSR: "4326",
-          size: "760,1050",
+          size: imageSize,
           imageSR: "4326",
           format: "png32",
           transparent: "false",

@@ -79,7 +79,7 @@ window.DW_DISCLOSURE_SECTIONS = [
   ]},
   { id:'sale_sheet', title:'售屋資料表', groups:[
     {title:'案件與開價', fields:[
-      ['doc_no','委託書編號／編號','text'], ['case_name','案名','text'], ['commission_total','售價（萬）','text'], ['sales_floor','樓層','text'], ['layout_detail','格局','text'], ['parking_info','車位','text'], ['doorplate','地址','text']
+      ['doc_no','房屋編號（同步封面不動產說明書編號）','text'], ['case_name','案名','text'], ['commission_total','售價（萬）','text'], ['sales_floor','樓層','text'], ['layout_detail','格局','text'], ['parking_info','車位','text'], ['doorplate','地址','text']
     ]},
     {title:'權利範圍與建物狀況', fields:[
       ['registered_area','登記總面積／建物合計','text'], ['land_area','土地面積','text'], ['land_right_range','權利範圍','text'], ['land_base_area','基地面積','text'], ['main_area','主建物','text'], ['attached_area','附屬建物','text'], ['common_area','公共設施','text'], ['public_ratio','公設比','text'], ['completion_date','完成日期','text'], ['main_material','主要建材','text'], ['building_insulation','隔間材料','text'], ['floor_material','地板','text'], ['direction','座向','text']
@@ -91,7 +91,7 @@ window.DW_DISCLOSURE_SECTIONS = [
       ['water','自來水','select',['','有','無']], ['gas','天然瓦斯','select',['','有','無']], ['electricity','獨立電表','select',['','有','無']], ['management_fee','管理費','text'], ['management_unit_fee','每坪管理費（元）','text'], ['management_total_fee','管理費合計（元）','text'], ['school_zone','學區','text'], ['market','市場','text'], ['park','公園','text'], ['transportation','交通／站牌','textarea']
     ]},
     {title:'本案特色', fields:[['summary_features','本案特色','textarea']]},
-    {title:'位置圖與平面圖', fields:[['sale_location_map','位置圖','image'], ['sale_floor_plan','平面圖','image']]},
+    {title:'位置圖與平面圖', fields:[['sale_location_map','位置圖（系統優先套用週邊地圖；未填經緯度時可手動上傳）','image'], ['sale_floor_plan','平面圖','image']]},
     {title:'備註、附贈物與確認', fields:[
       ['sale_remarks','備註','textarea'], ['gift_summary','附贈物／現況','textarea'], ['inspection_status','驗屋','select',['未驗','已驗']], ['buyer_confirm','買方確認','select',['未確認','已確認']], ['seller_confirm','賣方確認','select',['未確認','已確認']], ['store_manager','主管','text'], ['broker_name','經紀人','text'], ['agent_name','營業員','text']
     ]}
