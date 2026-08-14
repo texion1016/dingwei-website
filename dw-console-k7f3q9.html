@@ -130,6 +130,37 @@ img { display:block; }
 .photo-list { display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
 .photo-chip { position:relative; width:104px; }
 .photo-chip img { width:104px; height:78px; object-fit:cover; border-radius:7px; border:1px solid var(--hairline); }
+.watermark-panel { margin-top:2px; border:1px solid var(--hairline); border-radius:10px; overflow:hidden; background:#fffdfc; }
+.watermark-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:11px 13px; background:var(--plum-tint); }
+.watermark-head strong { color:var(--plum-deep); font-size:14px; }
+.watermark-switch { display:inline-flex; align-items:center; gap:7px; color:var(--ink); font-size:13px; font-weight:700; cursor:pointer; }
+.watermark-switch input { width:16px; height:16px; accent-color:var(--sell); }
+.watermark-body { display:grid; grid-template-columns:minmax(0,1fr) 164px; gap:14px; padding:13px; }
+.watermark-body.is-off { opacity:.48; }
+.watermark-controls { display:flex; flex-direction:column; gap:11px; }
+.watermark-source { display:flex; gap:8px; }
+.watermark-source label { display:flex; align-items:center; gap:5px; padding:7px 10px; border:1px solid var(--hairline); border-radius:7px; color:var(--ink); font-size:13px; font-weight:700; cursor:pointer; }
+.watermark-source input { accent-color:var(--sell); }
+.watermark-input-row { display:flex; flex-direction:column; gap:5px; }
+.watermark-input-row > label, .watermark-range-label { color:var(--ink-soft); font-size:12px; font-weight:700; }
+.watermark-input-row input, .watermark-input-row select { width:100%; font:inherit; padding:8px 10px; border:1px solid var(--hairline); border-radius:7px; background:#fff; color:var(--ink); }
+.watermark-range { display:grid; grid-template-columns:1fr auto; gap:6px 10px; align-items:center; }
+.watermark-range input { grid-column:1 / -1; width:100%; accent-color:var(--sell); }
+.watermark-range output { color:var(--sell); font-size:12px; font-weight:900; }
+.watermark-preview { position:relative; min-height:150px; overflow:hidden; border:1px dashed #d8c9c2; border-radius:8px; background:linear-gradient(135deg,#f4efea,#e2d8d0); }
+.watermark-preview > #watermarkPreviewPhoto { display:block; width:100%; height:100%; min-height:150px; object-fit:cover; }
+.watermark-preview .preview-empty { display:grid; place-items:center; min-height:150px; padding:12px; color:var(--ink-soft); text-align:center; font-size:12px; line-height:1.6; }
+.watermark-preview-mark { position:absolute; display:none; max-width:76%; max-height:76%; pointer-events:none; color:#fff; font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; font-weight:900; line-height:1.15; text-shadow:0 1px 2px rgba(0,0,0,.8),0 0 3px rgba(0,0,0,.8); white-space:nowrap; }
+.watermark-preview-mark.image { height:auto; min-height:0; object-fit:contain; }
+.watermark-preview-mark.pos-top-left { top:4%; left:4%; }
+.watermark-preview-mark.pos-top-center { top:4%; left:50%; transform:translateX(-50%); }
+.watermark-preview-mark.pos-top-right { top:4%; right:4%; }
+.watermark-preview-mark.pos-center-left { top:50%; left:4%; transform:translateY(-50%); }
+.watermark-preview-mark.pos-center { top:50%; left:50%; transform:translate(-50%,-50%); }
+.watermark-preview-mark.pos-center-right { top:50%; right:4%; transform:translateY(-50%); }
+.watermark-preview-mark.pos-bottom-left { bottom:4%; left:4%; }
+.watermark-preview-mark.pos-bottom-center { bottom:4%; left:50%; transform:translateX(-50%); }
+.watermark-preview-mark.pos-bottom-right { bottom:4%; right:4%; }
 .video-chip video { width:104px; height:78px; object-fit:cover; border-radius:7px; border:1px solid var(--hairline); background:#231b19; }
 .video-chip span { display:block; font-size:12px; color:var(--ink-soft); margin-top:3px; }
 .photo-chip .rm { position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; border:0; background:var(--sell); color:#fff; font-weight:700; line-height:1; }
@@ -151,6 +182,9 @@ img { display:block; }
   .spec-entry:nth-child(odd) { border-right:0; }
   .geo-row { grid-template-columns:1fr; }
   .toolbar .search-input { width:100%; min-width:0; }
+  .watermark-body { grid-template-columns:1fr; }
+  .watermark-preview { min-height:120px; }
+  .watermark-preview > #watermarkPreviewPhoto, .watermark-preview .preview-empty { min-height:120px; }
 }
 </style>
 </head>
@@ -309,8 +343,48 @@ img { display:block; }
       </div>
       <div class="field full">
         <label>照片（第一張為封面，可拖入多張）</label>
+        <div class="watermark-panel">
+          <div class="watermark-head">
+            <strong>照片浮水印（僅套用於這次新上傳的照片）</strong>
+            <label class="watermark-switch"><input type="checkbox" id="f_wm_enabled"> 上傳前加入浮水印</label>
+          </div>
+          <div class="watermark-body is-off" id="watermarkBody">
+            <div class="watermark-controls">
+              <div class="watermark-source" id="watermarkSource">
+                <label><input type="radio" name="watermarkSource" value="text" checked> 文字浮水印</label>
+                <label><input type="radio" name="watermarkSource" value="image"> 圖案浮水印</label>
+              </div>
+              <div class="watermark-input-row" id="watermarkTextRow">
+                <label for="f_wm_text">浮水印文字</label>
+                <input id="f_wm_text" maxlength="48" value="鼎瑋不動產" placeholder="例：鼎瑋不動產">
+              </div>
+              <div class="watermark-input-row" id="watermarkImageRow" hidden>
+                <label for="f_wm_image">浮水印圖案（PNG／JPG）</label>
+                <input type="file" id="f_wm_image" accept="image/png,image/jpeg">
+              </div>
+              <div class="watermark-input-row">
+                <label for="f_wm_position">位置</label>
+                <select id="f_wm_position">
+                  <option value="top-left">左上</option><option value="top-center">上方置中</option><option value="top-right">右上</option>
+                  <option value="center-left">左側置中</option><option value="center">正中央</option><option value="center-right">右側置中</option>
+                  <option value="bottom-left">左下</option><option value="bottom-center">下方置中</option><option value="bottom-right" selected>右下</option>
+                </select>
+              </div>
+              <div class="watermark-range"><label class="watermark-range-label" for="f_wm_opacity">透明度</label><output id="wmOpacityValue">60%</output><input id="f_wm_opacity" type="range" min="10" max="100" value="60"></div>
+              <div class="watermark-range"><label class="watermark-range-label" for="f_wm_size">大小（相對照片寬度）</label><output id="wmSizeValue">20%</output><input id="f_wm_size" type="range" min="8" max="50" value="20"></div>
+              <div class="watermark-range"><label class="watermark-range-label" for="f_wm_margin">邊距</label><output id="wmMarginValue">4%</output><input id="f_wm_margin" type="range" min="0" max="15" value="4"></div>
+            </div>
+            <div class="watermark-preview" aria-label="浮水印預覽">
+              <div class="preview-empty" id="watermarkPreviewEmpty">選擇照片後會顯示預覽<br>實際浮水印會寫入上傳照片</div>
+              <img id="watermarkPreviewPhoto" alt="" hidden>
+              <span class="watermark-preview-mark pos-bottom-right" id="watermarkPreviewText">鼎瑋不動產</span>
+              <img class="watermark-preview-mark image pos-bottom-right" id="watermarkPreviewImage" alt="" hidden>
+            </div>
+          </div>
+        </div>
         <input type="file" id="f_photos" accept="image/*" multiple>
         <div class="photo-list" id="photoList"></div>
+        <span class="tip">啟用後，照片會在本機加上浮水印再上傳；加上浮水印的照片會以 JPEG 儲存，既有照片不會被改動。</span>
       </div>
       <div class="field full">
         <label>影片（選填，可上傳 MP4／MOV／WebM；建議單支 100MB 內）</label>
@@ -342,6 +416,8 @@ let SEARCH = '';
 let editingRow = null; // null = 新增
 let formPhotos = [];   // 表單目前的照片（檔名或網址）
 let formVideos = [];   // 表單目前的影片網址
+let watermarkLogoDataUrl = '';
+let watermarkPreviewObjectUrl = '';
 const SPEC_SECTIONS = [
   { title: '坪數與建物', fields: [
     ['建坪', '建物登記'], ['地坪', '土地坪數'], ['主建', '主建物'], ['附屬', '附屬建物'], ['公設', '公設'], ['公比', '公設比'],
@@ -616,6 +692,191 @@ async function delMsg(id) {
 /* ---------- 表單 ---------- */
 const F = id => document.getElementById(id);
 
+/* ---------- 照片浮水印（在瀏覽器端處理後才上傳） ---------- */
+function activeWatermarkSource() {
+  return document.querySelector('input[name="watermarkSource"]:checked')?.value || 'text';
+}
+function placeWatermarkPreview(el, position, margin) {
+  el.className = 'watermark-preview-mark' + (el.id === 'watermarkPreviewImage' ? ' image' : '');
+  el.style.top = el.style.right = el.style.bottom = el.style.left = '';
+  el.style.transform = '';
+  const isTop = position.startsWith('top-');
+  const isBottom = position.startsWith('bottom-');
+  const isLeft = position.endsWith('-left');
+  const isRight = position.endsWith('-right');
+  const isCenter = position === 'center';
+  const edge = margin + '%';
+  if (isTop) el.style.top = edge;
+  else if (isBottom) el.style.bottom = edge;
+  else { el.style.top = '50%'; el.style.transform = 'translateY(-50%)'; }
+  if (isLeft) el.style.left = edge;
+  else if (isRight) el.style.right = edge;
+  else {
+    el.style.left = '50%';
+    el.style.transform = isCenter ? 'translate(-50%,-50%)' : 'translateX(-50%)';
+  }
+}
+function updateWatermarkPreview() {
+  const enabled = F('f_wm_enabled').checked;
+  const source = activeWatermarkSource();
+  const textMark = F('watermarkPreviewText');
+  const imageMark = F('watermarkPreviewImage');
+  const opacity = Number(F('f_wm_opacity').value || 60) / 100;
+  const size = Number(F('f_wm_size').value || 20);
+  const margin = Number(F('f_wm_margin').value || 4);
+  F('wmOpacityValue').textContent = Math.round(opacity * 100) + '%';
+  F('wmSizeValue').textContent = size + '%';
+  F('wmMarginValue').textContent = margin + '%';
+  textMark.textContent = F('f_wm_text').value.trim() || '鼎瑋不動產';
+  textMark.style.opacity = opacity;
+  textMark.style.fontSize = Math.max(13, Math.round(size * 1.28)) + 'px';
+  imageMark.style.opacity = opacity;
+  imageMark.style.width = size + '%';
+  placeWatermarkPreview(textMark, F('f_wm_position').value, margin);
+  placeWatermarkPreview(imageMark, F('f_wm_position').value, margin);
+  textMark.style.display = enabled && source === 'text' ? 'block' : 'none';
+  const showImage = enabled && source === 'image' && watermarkLogoDataUrl;
+  imageMark.hidden = !showImage;
+  imageMark.style.display = showImage ? 'block' : 'none';
+}
+function updateWatermarkControls() {
+  const enabled = F('f_wm_enabled').checked;
+  const body = F('watermarkBody');
+  body.classList.toggle('is-off', !enabled);
+  body.querySelectorAll('input, select').forEach(control => { control.disabled = !enabled; });
+  const isText = activeWatermarkSource() === 'text';
+  F('watermarkTextRow').hidden = !isText;
+  F('watermarkImageRow').hidden = isText;
+  updateWatermarkPreview();
+}
+function resetWatermarkForm() {
+  F('f_wm_enabled').checked = false;
+  F('f_wm_text').value = '鼎瑋不動產';
+  F('f_wm_image').value = '';
+  F('f_wm_position').value = 'bottom-right';
+  F('f_wm_opacity').value = '60';
+  F('f_wm_size').value = '20';
+  F('f_wm_margin').value = '4';
+  document.querySelector('input[name="watermarkSource"][value="text"]').checked = true;
+  watermarkLogoDataUrl = '';
+  F('watermarkPreviewImage').removeAttribute('src');
+  F('watermarkPreviewImage').hidden = true;
+  F('watermarkPreviewPhoto').hidden = true;
+  F('watermarkPreviewEmpty').hidden = false;
+  if (watermarkPreviewObjectUrl) URL.revokeObjectURL(watermarkPreviewObjectUrl);
+  watermarkPreviewObjectUrl = '';
+  updateWatermarkControls();
+}
+function previewWatermarkOnPhoto(file) {
+  if (!file) return;
+  if (watermarkPreviewObjectUrl) URL.revokeObjectURL(watermarkPreviewObjectUrl);
+  watermarkPreviewObjectUrl = URL.createObjectURL(file);
+  const preview = F('watermarkPreviewPhoto');
+  preview.src = watermarkPreviewObjectUrl;
+  preview.hidden = false;
+  F('watermarkPreviewEmpty').hidden = true;
+}
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('讀取浮水印圖案失敗'));
+    reader.readAsDataURL(file);
+  });
+}
+function loadCanvasImage(src, revokeAfterLoad = false) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('無法讀取此照片，請改用 JPG 或 PNG，或暫時關閉浮水印後上傳。'));
+    image.src = src;
+  });
+}
+function watermarkCoordinates(canvasWidth, canvasHeight, markWidth, markHeight, position, marginPercent) {
+  const margin = Math.min(canvasWidth, canvasHeight) * (Number(marginPercent) || 0) / 100;
+  const col = position.endsWith('-left') ? 'left' : position.endsWith('-right') ? 'right' : 'center';
+  const row = position.startsWith('top-') ? 'top' : position.startsWith('bottom-') ? 'bottom' : 'center';
+  return {
+    x: col === 'left' ? margin : col === 'right' ? canvasWidth - markWidth - margin : (canvasWidth - markWidth) / 2,
+    y: row === 'top' ? margin : row === 'bottom' ? canvasHeight - markHeight - margin : (canvasHeight - markHeight) / 2
+  };
+}
+async function watermarkPhotoFile(file, settings) {
+  const sourceUrl = URL.createObjectURL(file);
+  try {
+    const image = await loadCanvasImage(sourceUrl);
+    const width = image.naturalWidth || image.width;
+    const height = image.naturalHeight || image.height;
+    if (!width || !height) throw new Error('照片尺寸無法讀取');
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(image, 0, 0, width, height);
+    ctx.save();
+    ctx.globalAlpha = settings.opacity / 100;
+    if (settings.source === 'image') {
+      const logo = await loadCanvasImage(settings.logo);
+      const ratio = logo.naturalWidth / logo.naturalHeight || 1;
+      let markWidth = width * settings.size / 100;
+      let markHeight = markWidth / ratio;
+      if (markHeight > height * .7) { markHeight = height * .7; markWidth = markHeight * ratio; }
+      const point = watermarkCoordinates(width, height, markWidth, markHeight, settings.position, settings.margin);
+      ctx.drawImage(logo, point.x, point.y, markWidth, markHeight);
+    } else {
+      const value = settings.text || '鼎瑋不動產';
+      const targetWidth = width * settings.size / 100;
+      ctx.font = '900 100px "Noto Sans TC", "Microsoft JhengHei", sans-serif';
+      const initial = Math.max(ctx.measureText(value).width, 1);
+      const fontSize = Math.max(18, Math.min(width * .22, 100 * targetWidth / initial));
+      ctx.font = '900 ' + fontSize + 'px "Noto Sans TC", "Microsoft JhengHei", sans-serif';
+      const markWidth = ctx.measureText(value).width;
+      const markHeight = fontSize * 1.18;
+      const point = watermarkCoordinates(width, height, markWidth, markHeight, settings.position, settings.margin);
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = Math.max(2, fontSize * .09);
+      ctx.strokeStyle = 'rgba(0,0,0,.72)';
+      ctx.strokeText(value, point.x, point.y + fontSize);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(value, point.x, point.y + fontSize);
+    }
+    ctx.restore();
+    const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('產生浮水印照片失敗')), 'image/jpeg', .93));
+    const basename = file.name.replace(/\.[^.]+$/, '') || 'photo';
+    return new File([blob], basename + '-watermarked.jpg', { type: 'image/jpeg', lastModified: file.lastModified || Date.now() });
+  } finally {
+    URL.revokeObjectURL(sourceUrl);
+  }
+}
+function getWatermarkSettings() {
+  if (!F('f_wm_enabled').checked) return null;
+  const source = activeWatermarkSource();
+  const text = F('f_wm_text').value.trim();
+  if (source === 'text' && !text) throw new Error('請輸入浮水印文字。');
+  if (source === 'image' && !watermarkLogoDataUrl) throw new Error('請先選擇 PNG 或 JPG 浮水印圖案。');
+  return {
+    source,
+    text,
+    logo: watermarkLogoDataUrl,
+    position: F('f_wm_position').value,
+    opacity: Number(F('f_wm_opacity').value || 60),
+    size: Number(F('f_wm_size').value || 20),
+    margin: Number(F('f_wm_margin').value || 4)
+  };
+}
+F('f_wm_enabled').addEventListener('change', updateWatermarkControls);
+document.querySelectorAll('input[name="watermarkSource"]').forEach(el => el.addEventListener('change', updateWatermarkControls));
+['f_wm_text', 'f_wm_position', 'f_wm_opacity', 'f_wm_size', 'f_wm_margin'].forEach(id => F(id).addEventListener('input', updateWatermarkPreview));
+F('f_wm_image').addEventListener('change', async event => {
+  const file = event.target.files?.[0];
+  watermarkLogoDataUrl = file ? await readFileAsDataUrl(file).catch(() => '') : '';
+  if (file && !watermarkLogoDataUrl) alert('浮水印圖案讀取失敗，請選擇 PNG 或 JPG 檔。');
+  F('watermarkPreviewImage').src = watermarkLogoDataUrl;
+  updateWatermarkPreview();
+});
+
 document.querySelectorAll('#dealRadio input').forEach(i => {
   i.addEventListener('change', () => {
     F('dealS').className = i.value === 'sell' && i.checked ? 'sel-s' : '';
@@ -707,6 +968,7 @@ function openForm(row) {
   renderSpecEditor(row ? row.spec || {} : {});
   F('f_photos').value = '';
   F('f_videos').value = '';
+  resetWatermarkForm();
   formPhotos = row ? (row.photos || []).slice() : [];
   formVideos = row ? (row.videos || []).slice() : [];
   renderPhotoChips();
@@ -738,14 +1000,33 @@ F('f_photos').addEventListener('change', async e => {
   const files = Array.from(e.target.files || []);
   if (!files.length) return;
   if (!_sb) { alert('尚未設定資料庫連線（assets/config.js）'); e.target.value = ''; return; }
-  F('formStatus').textContent = '照片上傳中…';
   F('saveBtn').disabled = true;
-  for (const file of files) {
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    const path = 'listing/' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
-    const { error } = await _sb.storage.from('dw-photos').upload(path, file);
-    if (error) { alert('照片上傳失敗：' + error.message); break; }
-    formPhotos.push(publicStorageUrl(path));
+  previewWatermarkOnPhoto(files[0]);
+  let settings;
+  try {
+    settings = getWatermarkSettings();
+  } catch (error) {
+    alert(error.message || '浮水印設定不完整');
+    F('saveBtn').disabled = false;
+    e.target.value = '';
+    return;
+  }
+  try {
+    for (let index = 0; index < files.length; index++) {
+      const original = files[index];
+      F('formStatus').textContent = settings
+        ? '正在加入浮水印（' + (index + 1) + '/' + files.length + '）…'
+        : '照片上傳中（' + (index + 1) + '/' + files.length + '）…';
+      const file = settings ? await watermarkPhotoFile(original, settings) : original;
+      F('formStatus').textContent = '照片上傳中（' + (index + 1) + '/' + files.length + '）…';
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const path = 'listing/' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
+      const { error } = await _sb.storage.from('dw-photos').upload(path, file, { contentType: file.type || undefined, upsert: false });
+      if (error) throw new Error('照片上傳失敗：' + error.message);
+      formPhotos.push(publicStorageUrl(path));
+    }
+  } catch (error) {
+    alert(error.message || '照片處理或上傳失敗');
   }
   renderPhotoChips();
   F('formStatus').textContent = '';
