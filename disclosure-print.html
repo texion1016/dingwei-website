@@ -366,6 +366,11 @@
       }
       .exterior-sheet .photo {
         height: 38mm;
+        border: 0;
+        background: transparent;
+      }
+      .exterior-sheet .photo img {
+        object-fit: cover;
       }
       .exterior-sheet .amenities {
         margin-top: 2mm;
@@ -636,6 +641,17 @@
         D[k]
           ? `<img src="${esc(D[k])}" alt="實景照片">`
           : "<em>未選擇照片</em>";
+      const photoPosition = (k) => {
+        const parts = String(D[`${k}_position`] || "").match(
+          /^\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*$/,
+        );
+        const clamp = (n) => Math.max(0, Math.min(100, Number(n)));
+        return parts ? `${clamp(parts[1])}% ${clamp(parts[2])}%` : "50% 50%";
+      };
+      const exteriorPhoto = (k) =>
+        D[k]
+          ? `<img src="${esc(D[k])}" alt="實景照片" style="object-position:${photoPosition(k)}">`
+          : "<em>未選擇照片</em>";
       const company = () => window.COMPANY || {};
       function b() {
         const c = company();
@@ -862,7 +878,7 @@
             .map((x) => field(...x))
             .join(
               "",
-            )}</div><div class="cell"><b>特色說明</b><div class="note">${esc(v("feature_notes", ""))}</div></div><div class="photos">${["photo_1", "photo_2", "photo_3", "photo_4"].map((k, i) => `<div><small>實景照片${["一", "二", "三", "四"][i]}</small><div class="photo">${photo(k)}</div></div>`).join("")}</div><div class="amenities"><b>週邊半徑300公尺重要環境設施：</b><br>${amenities.map((k, i) => `${i + 1}.${y(k)}${al[i]}`).join("　")}</div>`,
+            )}</div><div class="cell"><b>特色說明</b><div class="note">${esc(v("feature_notes", ""))}</div></div><div class="photos">${["photo_1", "photo_2", "photo_3", "photo_4"].map((k, i) => `<div><small>實景照片${["一", "二", "三", "四"][i]}</small><div class="photo">${exteriorPhoto(k)}</div></div>`).join("")}</div><div class="amenities"><b>週邊半徑300公尺重要環境設施：</b><br>${amenities.map((k, i) => `${i + 1}.${y(k)}${al[i]}`).join("　")}</div>`,
           "exterior-sheet",
         );
       }
