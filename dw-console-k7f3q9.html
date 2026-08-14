@@ -165,6 +165,7 @@ img { display:block; }
 .video-chip span { display:block; font-size:12px; color:var(--ink-soft); margin-top:3px; }
 .photo-chip .rm { position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; border:0; background:var(--sell); color:#fff; font-weight:700; line-height:1; }
 .photo-chip .mv { position:absolute; bottom:4px; left:4px; width:24px; height:22px; border-radius:5px; border:0; background:rgba(0,0,0,.55); color:#fff; font-size:12px; }
+.photo-chip .pending-label { position:absolute; right:3px; bottom:3px; padding:2px 5px; border-radius:4px; background:rgba(81,55,45,.78); color:#fff; font-size:10px; font-weight:700; }
 .modal .foot { display:flex; gap:12px; justify-content:flex-end; margin-top:22px; padding-top:16px; border-top:1px solid var(--hairline); }
 .modal .foot .status { margin-right:auto; color:var(--ink-soft); font-size:13.5px; align-self:center; }
 
@@ -342,7 +343,7 @@ img { display:block; }
         <span class="tip">固定項目與其他規格都只會在填入內容後顯示於前台；其他規格可自行新增任何建物專屬項目。</span>
       </div>
       <div class="field full">
-        <label>照片（第一張為封面，可拖入多張）</label>
+        <label>照片（第一張為封面，可選取多張；儲存物件時上傳）</label>
         <div class="watermark-panel">
           <div class="watermark-head">
             <strong>照片浮水印（僅套用於這次新上傳的照片）</strong>
@@ -416,6 +417,7 @@ let SEARCH = '';
 let editingRow = null; // null = 新增
 let formPhotos = [];   // 表單目前的照片（檔名或網址）
 let formVideos = [];   // 表單目前的影片網址
+let pendingPhotoFiles = []; // 尚未上傳的本機照片
 let watermarkLogoDataUrl = '';
 let watermarkPreviewObjectUrl = '';
 const SPEC_SECTIONS = [
@@ -767,6 +769,10 @@ function resetWatermarkForm() {
   watermarkPreviewObjectUrl = '';
   updateWatermarkControls();
 }
+function clearPendingPhotoFiles() {
+  pendingPhotoFiles.forEach(item => URL.revokeObjectURL(item.previewUrl));
+  pendingPhotoFiles = [];
+}
 function previewWatermarkOnPhoto(file) {
   if (!file) return;
   if (watermarkPreviewObjectUrl) URL.revokeObjectURL(watermarkPreviewObjectUrl);
@@ -968,6 +974,7 @@ function openForm(row) {
   renderSpecEditor(row ? row.spec || {} : {});
   F('f_photos').value = '';
   F('f_videos').value = '';
+  clearPendingPhotoFiles();
   resetWatermarkForm();
   formPhotos = row ? (row.photos || []).slice() : [];
   formVideos = row ? (row.videos || []).slice() : [];
@@ -976,17 +983,30 @@ function openForm(row) {
   document.getElementById('modalMask').classList.add('open');
 }
 
-function closeForm() { document.getElementById('modalMask').classList.remove('open'); }
+function closeForm() {
+  clearPendingPhotoFiles();
+  document.getElementById('modalMask').classList.remove('open');
+}
 
 function renderPhotoChips() {
-  F('photoList').innerHTML = formPhotos.map((p, i) =>
+  const uploaded = formPhotos.map((p, i) =>
     '<div class="photo-chip"><img src="' + esc(photoUrl(p)) + '" alt="">' +
     '<button type="button" class="rm" title="移除" onclick="rmPhoto(' + i + ')">✕</button>' +
     (i > 0 ? '<button type="button" class="mv" title="移到最前(設為封面)" onclick="mvPhoto(' + i + ')">↖</button>' : '') +
     '</div>').join('');
+  const pending = pendingPhotoFiles.map((item, i) =>
+    '<div class="photo-chip"><img src="' + esc(item.previewUrl) + '" alt="待上傳照片">' +
+    '<button type="button" class="rm" title="移除待上傳照片" onclick="rmPendingPhoto(' + i + ')">✕</button>' +
+    '<span class="pending-label">待儲存上傳</span></div>').join('');
+  F('photoList').innerHTML = uploaded + pending;
 }
 function rmPhoto(i) { formPhotos.splice(i, 1); renderPhotoChips(); }
 function mvPhoto(i) { formPhotos.unshift(formPhotos.splice(i, 1)[0]); renderPhotoChips(); }
+function rmPendingPhoto(i) {
+  const item = pendingPhotoFiles.splice(i, 1)[0];
+  if (item) URL.revokeObjectURL(item.previewUrl);
+  renderPhotoChips();
+}
 
 function renderVideoChips() {
   F('videoList').innerHTML = formVideos.map((url, i) =>
@@ -996,41 +1016,37 @@ function renderVideoChips() {
 }
 function rmVideo(i) { formVideos.splice(i, 1); renderVideoChips(); }
 
-F('f_photos').addEventListener('change', async e => {
-  const files = Array.from(e.target.files || []);
-  if (!files.length) return;
-  if (!_sb) { alert('尚未設定資料庫連線（assets/config.js）'); e.target.value = ''; return; }
-  F('saveBtn').disabled = true;
-  previewWatermarkOnPhoto(files[0]);
-  let settings;
-  try {
-    settings = getWatermarkSettings();
-  } catch (error) {
-    alert(error.message || '浮水印設定不完整');
-    F('saveBtn').disabled = false;
-    e.target.value = '';
-    return;
-  }
-  try {
-    for (let index = 0; index < files.length; index++) {
-      const original = files[index];
-      F('formStatus').textContent = settings
-        ? '正在加入浮水印（' + (index + 1) + '/' + files.length + '）…'
-        : '照片上傳中（' + (index + 1) + '/' + files.length + '）…';
-      const file = settings ? await watermarkPhotoFile(original, settings) : original;
-      F('formStatus').textContent = '照片上傳中（' + (index + 1) + '/' + files.length + '）…';
-      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      const path = 'listing/' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
-      const { error } = await _sb.storage.from('dw-photos').upload(path, file, { contentType: file.type || undefined, upsert: false });
-      if (error) throw new Error('照片上傳失敗：' + error.message);
-      formPhotos.push(publicStorageUrl(path));
-    }
-  } catch (error) {
-    alert(error.message || '照片處理或上傳失敗');
+async function uploadPendingPhotoFiles() {
+  if (!pendingPhotoFiles.length) return;
+  const settings = getWatermarkSettings();
+  const total = pendingPhotoFiles.length;
+  let index = 0;
+  while (pendingPhotoFiles.length) {
+    const item = pendingPhotoFiles[0];
+    index += 1;
+    F('formStatus').textContent = settings
+      ? '正在加入浮水印（' + index + '/' + total + '）…'
+      : '照片上傳中（' + index + '/' + total + '）…';
+    const file = settings ? await watermarkPhotoFile(item.file, settings) : item.file;
+    F('formStatus').textContent = '照片上傳中（' + index + '/' + total + '）…';
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = 'listing/' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
+    const { error } = await _sb.storage.from('dw-photos').upload(path, file, { contentType: file.type || undefined, upsert: false });
+    if (error) throw new Error('照片上傳失敗：' + error.message);
+    formPhotos.push(publicStorageUrl(path));
+    URL.revokeObjectURL(item.previewUrl);
+    pendingPhotoFiles.shift();
   }
   renderPhotoChips();
-  F('formStatus').textContent = '';
-  F('saveBtn').disabled = false;
+}
+
+F('f_photos').addEventListener('change', e => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  previewWatermarkOnPhoto(files[0]);
+  pendingPhotoFiles.push(...files.map(file => ({ file, previewUrl: URL.createObjectURL(file) })));
+  renderPhotoChips();
+  F('formStatus').textContent = '已選擇 ' + pendingPhotoFiles.length + ' 張待上傳照片；按「儲存」後會依目前浮水印設定處理。';
   e.target.value = '';
 });
 
@@ -1080,6 +1096,19 @@ async function saveForm() {
   const longitude = coordinate(F('f_lng').value, -180, 180);
   if ((F('f_lat').value.trim() && latitude === null) || (F('f_lng').value.trim() && longitude === null)) { alert('緯度或經度格式不正確。'); return; }
   if ((latitude === null) !== (longitude === null)) { alert('緯度與經度請一併填寫。'); return; }
+
+  if (pendingPhotoFiles.length) {
+    F('saveBtn').disabled = true;
+    try {
+      await uploadPendingPhotoFiles();
+    } catch (error) {
+      F('saveBtn').disabled = false;
+      F('formStatus').textContent = '';
+      alert(error.message || '照片處理或上傳失敗');
+      renderPhotoChips();
+      return;
+    }
+  }
 
   const row = {
     sno,
