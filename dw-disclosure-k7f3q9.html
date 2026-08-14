@@ -424,8 +424,8 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/config.js"></script>
-    <script src="assets/data.js?v=9"></script>
-    <script src="assets/disclosure-schema.js?v=2"></script>
+    <script src="assets/data.js?v=10"></script>
+    <script src="assets/disclosure-schema.js?v=3"></script>
     <script>
       const SB = window.DW_SB?.url
         ? supabase.createClient(location.origin + "/api/admin/supabase", "dw-admin-session", {
@@ -440,14 +440,14 @@
         section = "base";
       // 部分瀏覽器會延後載入資料檔；列印頁保留內建同步規則，確保案件資料不會因此失去連動。
       if (!window.DW_LISTING_SYNC) window.DW_LISTING_SYNC = (() => {
-        const aliases = [["doorplate", "building_doorplate"], ["deal", "trade_type"], ["registered_area", "house_area", "total_area"], ["land_area", "land_base_area"], ["summary_features", "feature_notes"]];
+        const aliases = [["doorplate", "building_doorplate"], ["deal", "trade_type"], ["registered_area", "total_area"], ["land_area", "land_base_area"], ["summary_features", "feature_notes"]];
         const specPairs = [["condition_status", "\u7269\u6cc1"], ["management_fee", "\u7ba1\u7406"], ["main_material", "\u5efa\u6750"], ["exterior_material", "\u5916\u7246"], ["floor_material", "\u5730\u677f"], ["building_use", "\u7528\u9014"], ["security", "\u8b66\u885b"], ["courtyard", "\u4e2d\u5ead"], ["public_ratio", "\u516c\u6bd4"], ["main_area", "\u4e3b\u5efa"], ["attached_area", "\u9644\u5c6c"], ["common_area", "\u516c\u8a2d"], ["school_zone", "\u5b78\u53401"], ["market", "\u5e02\u5834"], ["park", "\u516c\u5712"], ["transportation", "\u6377\u904b"], ["direction", "\u671d\u5411"]];
         const str = (v) => v == null ? "" : String(v), first = (...v) => v.map(str).find(x => x.trim()) || "";
         const num = (v) => { const n = Number(str(v).replace(/[^0-9.\-]/g, "")); return Number.isFinite(n) ? n : 0; };
         const getDeal = (v, fallback = "sell") => { const x = str(v); return x === "rent" || x.includes("\u79df") ? "rent" : x === "sell" || x.includes("\u8cb7") || x.includes("\u552e") ? "sell" : fallback; };
         const label = (v) => v === "rent" ? "\u79df\u8cc3" : "\u8cb7\u8ce3";
         const syncAliases = (data, source) => { aliases.forEach(group => { const value = source && group.includes(source) ? str(data[source]) : first(...group.map(k => data[k])); group.forEach(k => data[k] = value); }); return data; };
-        const applyListingToDocument = (data, l) => { const d = data || {}, s = l?.spec || {}, type = getDeal(l?.deal), features = Array.isArray(l?.pitch) ? l.pitch.filter(Boolean).join("\n") : ""; Object.assign(d, {doc_no:str(l?.sno) + (l?.name ? "/" + l.name : ""), case_name:str(l?.name), deal:label(type), trade_type:label(type), commission_total:str(l?.price), monthly_rent:type === "rent" ? str(l?.price) : "", doorplate:str(l?.address), building_doorplate:str(l?.address), property_type:str(l?.kind), registered_area:str(l?.size), house_area:str(l?.size), total_area:str(l?.size), layout_detail:str(l?.layout), sales_floor:str(l?.floor), parking_info:l?.parking ? "\u6709" : "\u7121", latitude:str(l?.lat), longitude:str(l?.lng), summary_features:features, feature_notes:features}); specPairs.forEach(([field,key]) => d[field] = str(s[key])); return syncAliases(d); };
+        const applyListingToDocument = (data, l) => { const d = data || {}, s = l?.spec || {}, type = getDeal(l?.deal), features = Array.isArray(l?.pitch) ? l.pitch.filter(Boolean).join("\n") : ""; Object.assign(d, {doc_no:str(l?.sno) + (l?.name ? "/" + l.name : ""), case_name:str(l?.name), deal:label(type), trade_type:label(type), commission_total:str(l?.price), monthly_rent:type === "rent" ? str(l?.price) : "", doorplate:str(l?.address), building_doorplate:str(l?.address), property_type:str(l?.kind), registered_area:str(l?.size), total_area:str(l?.size), layout_detail:str(l?.layout), sales_floor:str(l?.floor), parking_info:l?.parking ? "\u6709" : "\u7121", latitude:str(l?.lat), longitude:str(l?.lng), summary_features:features, feature_notes:features}); specPairs.forEach(([field,key]) => d[field] = str(s[key])); return syncAliases(d); };
         const patchListingFromDocument = (d, l) => { const type = getDeal(first(d.deal, d.trade_type), l?.deal), price = type === "rent" ? num(first(d.monthly_rent, d.commission_total)) : num(d.commission_total), size = num(first(d.registered_area, d.house_area, d.total_area)), spec = {...(l?.spec || {})}; specPairs.forEach(([field,key]) => { const value = str(d[field]).trim(); if (value) spec[key] = value; else delete spec[key]; }); const patch = {name:str(d.case_name).trim(), deal:type, price, size, address:str(first(d.doorplate, d.building_doorplate)).trim(), kind:str(d.property_type).trim(), layout:str(d.layout_detail).trim(), floor:str(d.sales_floor).trim(), parking:/^(true|1|yes|\u6709)$/i.test(str(d.parking_info).trim()), pitch:str(first(d.summary_features, d.feature_notes)).split(/\r?\n/).map(x=>x.trim()).filter(Boolean), spec, lat:str(d.latitude).trim(), lng:str(d.longitude).trim(), updated_at:new Date().toISOString()}; patch.unit = type === "sell" && size > 0 ? (price / size).toFixed(1) : ""; return patch; };
         return {syncAliases, applyListingToDocument, patchListingFromDocument};
       })();
@@ -494,7 +494,6 @@
           trade_type: listing?.deal === "rent" ? "租賃" : "買賣",
           monthly_rent: listing?.deal === "rent" ? listing.price || "" : "",
           registered_area: listing?.size || "",
-          house_area: listing?.size || "",
           layout_detail: listing?.layout || "",
           property_type: listing?.kind || "",
           sales_floor: listing?.floor || "",

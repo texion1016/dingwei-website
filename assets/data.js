@@ -2034,7 +2034,7 @@ window.DW_LISTING_SYNC = (function () {
   };
   const aliases = [
     ["doorplate", "building_doorplate"], ["deal", "trade_type"],
-    ["registered_area", "house_area", "total_area"], ["land_area", "land_base_area"],
+    ["registered_area", "total_area"], ["land_area", "land_base_area"],
     ["summary_features", "feature_notes"]
   ];
   const text = (value) => value === undefined || value === null ? "" : String(value);
@@ -2084,7 +2084,7 @@ window.DW_LISTING_SYNC = (function () {
       case_name: text(listing?.name), deal: dealLabel(listingDeal), trade_type: dealLabel(listingDeal),
       commission_total: text(listing?.price), monthly_rent: listingDeal === "rent" ? text(listing?.price) : "",
       doorplate: text(listing?.address), building_doorplate: text(listing?.address), property_type: text(listing?.kind),
-      registered_area: text(listing?.size), house_area: text(listing?.size), total_area: text(listing?.size),
+      registered_area: text(listing?.size), total_area: text(listing?.size),
       layout_detail: text(listing?.layout), sales_floor: text(listing?.floor), parking_info: listing?.parking ? "\u6709" : "\u7121",
       latitude: text(listing?.lat), longitude: text(listing?.lng), summary_features: features, feature_notes: features
     });

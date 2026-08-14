@@ -82,7 +82,7 @@ window.DW_DISCLOSURE_SECTIONS = [
       ['doc_no','房屋編號（同步封面不動產說明書編號）','text'], ['case_name','案名','text'], ['commission_total','售價（萬）','text'], ['sales_floor','樓層','text'], ['layout_detail','格局','text'], ['parking_info','車位','text'], ['doorplate','地址','text']
     ]},
     {title:'權利範圍與建物狀況', fields:[
-      ['registered_area','登記總面積／建物合計','text'], ['land_area','土地面積','text'], ['land_right_range','權利範圍','text'], ['land_base_area','基地面積','text'], ['main_area','主建物','text'], ['attached_area','附屬建物','text'], ['common_area','公共設施','text'], ['public_ratio','公設比（自動計算）','computed'], ['completion_date','完成日期','text'], ['main_material','主要建材','text'], ['building_insulation','隔間材料','text'], ['floor_material','地板','text'], ['direction','座向','text']
+      ['registered_area','登記總面積','text'], ['house_area','建物合計','text'], ['parking_area','車位坪數','text'], ['land_area','土地面積','text'], ['land_right_range','權利範圍','text'], ['land_base_area','基地面積','text'], ['main_area','主建物','text'], ['attached_area','附屬建物','text'], ['common_area','公共設施','text'], ['public_ratio','公設比（自動計算）','computed'], ['completion_date','完成日期','text'], ['main_material','主要建材','text'], ['building_insulation','隔間材料','text'], ['floor_material','地板','text'], ['direction','座向','text']
     ]},
     {title:'付款條件與貸款', fields:[
       ['payment_1_percent','簽約款（%）','text'], ['payment_2_percent','備證（%）','text'], ['payment_3_percent','完稅（%）','text'], ['payment_4_percent','尾款（%）','text'], ['loan_bank','銀行設定（萬）','text'], ['loan_actual','實際貸款約（萬）','text']
