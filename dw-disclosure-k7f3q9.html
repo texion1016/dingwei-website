@@ -311,53 +311,6 @@
       .photo-slot select {
         margin-top: 6px;
       }
-      .photo-crop-control {
-        margin: 10px 0 14px;
-        padding: 10px;
-        border: 1px solid var(--line);
-        border-radius: 9px;
-        background: #fffaf7;
-      }
-      .photo-crop-control b {
-        display: block;
-        font-size: 13px;
-      }
-      .photo-crop-control small {
-        display: block;
-        margin-top: 3px;
-        color: var(--muted);
-      }
-      .photo-crop-editor {
-        position: relative;
-        height: 150px;
-        margin-top: 8px;
-        overflow: hidden;
-        border-radius: 6px;
-        background: #ede8e2;
-        cursor: grab;
-        touch-action: none;
-      }
-      .photo-crop-editor:active { cursor: grabbing; }
-      .photo-crop-editor img {
-        width: 100%;
-        height: 100%;
-        display: block;
-        object-fit: cover;
-        pointer-events: none;
-        user-select: none;
-      }
-      .photo-crop-editor::after {
-        content: "拖曳調整列印畫面";
-        position: absolute;
-        right: 8px;
-        bottom: 7px;
-        padding: 3px 6px;
-        border-radius: 4px;
-        color: #fff;
-        background: rgba(35, 29, 29, .66);
-        font-size: 12px;
-        pointer-events: none;
-      }
       .savebar {
         position: sticky;
         bottom: 12px;
@@ -576,26 +529,14 @@
           return `<div class="field"><label>${esc(label)}</label><select data-key="${k}">${opts.map((o) => `<option ${String(v) === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></div>`;
         return `<div class="field"><label>${esc(label)}</label><input data-key="${k}" type="${type === "date" ? "date" : "text"}" value="${esc(v)}"></div>`;
       }
-      function photoCropPosition(key) {
-        const raw = String(doc[key + "_position"] || "");
-        const parts = raw.match(/^\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*$/);
-        const clamp = (n) => Math.max(0, Math.min(100, Number(n)));
-        return parts ? `${clamp(parts[1])}% ${clamp(parts[2])}%` : "50% 50%";
-      }
-      function photoCropControl(key, label) {
-        if (!doc[key]) return "";
-        const position = photoCropPosition(key);
-        return `<div class="photo-crop-control"><b>${esc(label)}列印畫面</b><small>拖曳圖片，將想保留的畫面調整到框格中心。</small><input data-key="${key}_position" type="hidden" value="${position}"><div class="photo-crop-editor" data-position-key="${key}_position"><img src="${esc(doc[key])}" alt="${esc(label)}列印預覽" style="object-position:${position}"></div></div>`;
-      }
       function photoFields(fields) {
         const photos = (listing?.photos || []).map(photoUrl);
-        const exteriorControls = section === "exterior" ? fields.map((f) => photoCropControl(f[0], f[1])).join("") : "";
-        return `<div class="group"><h3>實景照片（直接使用案件照片）</h3><div class="fields"><div class="field wide"><div class="photo-choice">${photos.map((p, i) => `<div><img src="${esc(p)}" alt="案件照片 ${i + 1}"><span>案件照片 ${i + 1}</span></div>`).join("") || "<span>此案件尚未上传照片，可先回物件管理补上。</span>"}</div></div><div class="field wide"><small>在每一个列印位置选择要使用的案件照片；同一张照片也可重复使用。</small>${fields
+        return `<div class="group"><h3>實景照片（照片不裁切，直接使用案件照片）</h3><div class="fields"><div class="field wide"><div class="photo-choice">${photos.map((p, i) => `<div><img src="${esc(p)}" alt="案件照片 ${i + 1}"><span>案件照片 ${i + 1}</span></div>`).join("") || "<span>此案件尚未上传照片，可先回物件管理补上。</span>"}</div></div><div class="field wide"><small>在每一个列印位置选择要使用的案件照片；同一张照片也可重复使用。</small>${fields
           .map((f) => {
             const [k, label] = f;
             return `<div class="photo-slot"><b>${label}</b><select data-key="${k}"><option value="">（不列印照片）</option>${photos.map((p, i) => `<option value="${esc(p)}" ${doc[k] === p ? "selected" : ""}>案件照片 ${i + 1}</option>`).join("")}</select></div>`;
           })
-          .join("")}${exteriorControls}</div></div></div>`;
+          .join("")}</div></div></div>`;
       }
       function render() {
         const s = DW_DISCLOSURE_SECTIONS.find((x) => x.id === section);
@@ -798,37 +739,6 @@
           doc[e.target.dataset.key] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
           window.DW_LISTING_SYNC?.syncAliases(doc, e.target.dataset.key);
           refreshPublicRatio();
-          if (e.target.closest(".photo-slot")) render();
-        });
-        let activeCropEditor = null;
-        const updatePhotoCropPosition = (editor, event) => {
-          const rect = editor.getBoundingClientRect();
-          const clamp = (n) => Math.max(0, Math.min(100, n));
-          const x = clamp(((event.clientX - rect.left) / rect.width) * 100).toFixed(1);
-          const y = clamp(((event.clientY - rect.top) / rect.height) * 100).toFixed(1);
-          const value = `${x}% ${y}%`;
-          const key = editor.dataset.positionKey;
-          doc[key] = value;
-          editor.querySelector("img").style.objectPosition = value;
-          const input = document.querySelector(`[data-key="${key}"]`);
-          if (input) input.value = value;
-        };
-        document.getElementById("editor").addEventListener("pointerdown", (e) => {
-          const editor = e.target.closest(".photo-crop-editor");
-          if (!editor) return;
-          activeCropEditor = editor;
-          editor.setPointerCapture?.(e.pointerId);
-          updatePhotoCropPosition(editor, e);
-        });
-        document.getElementById("editor").addEventListener("pointermove", (e) => {
-          if (!activeCropEditor) return;
-          updatePhotoCropPosition(activeCropEditor, e);
-        });
-        document.getElementById("editor").addEventListener("pointerup", () => {
-          activeCropEditor = null;
-        });
-        document.getElementById("editor").addEventListener("pointercancel", () => {
-          activeCropEditor = null;
         });
         document.getElementById("saveBtn").onclick = () => save();
         document.getElementById("allPrint").onclick = async () => {

@@ -361,16 +361,32 @@
         padding: 1.4mm;
       }
       .exterior-sheet .photos {
-        gap: 2.5mm;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(2, 41mm);
+        gap: 2.5mm 4mm;
         margin-top: 2mm;
       }
       .exterior-sheet .photo {
-        height: 38mm;
+        height: 34mm;
         border: 0;
         background: transparent;
+        justify-content: center;
       }
       .exterior-sheet .photo img {
-        object-fit: cover;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+      }
+      .exterior-sheet .photo-item {
+        min-width: 0;
+      }
+      .exterior-sheet .photo-item small {
+        display: block;
+        min-height: 5mm;
+        margin-bottom: 1.1mm;
+      }
+      .exterior-sheet .photos.mixed-photo-orientation {
+        grid-auto-flow: column;
       }
       .exterior-sheet .amenities {
         margin-top: 2mm;
@@ -641,17 +657,6 @@
         D[k]
           ? `<img src="${esc(D[k])}" alt="實景照片">`
           : "<em>未選擇照片</em>";
-      const photoPosition = (k) => {
-        const parts = String(D[`${k}_position`] || "").match(
-          /^\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*$/,
-        );
-        const clamp = (n) => Math.max(0, Math.min(100, Number(n)));
-        return parts ? `${clamp(parts[1])}% ${clamp(parts[2])}%` : "50% 50%";
-      };
-      const exteriorPhoto = (k) =>
-        D[k]
-          ? `<img src="${esc(D[k])}" alt="實景照片" style="object-position:${photoPosition(k)}">`
-          : "<em>未選擇照片</em>";
       const company = () => window.COMPANY || {};
       function b() {
         const c = company();
@@ -878,7 +883,7 @@
             .map((x) => field(...x))
             .join(
               "",
-            )}</div><div class="cell"><b>特色說明</b><div class="note">${esc(v("feature_notes", ""))}</div></div><div class="photos">${["photo_1", "photo_2", "photo_3", "photo_4"].map((k, i) => `<div><small>實景照片${["一", "二", "三", "四"][i]}</small><div class="photo">${exteriorPhoto(k)}</div></div>`).join("")}</div><div class="amenities"><b>週邊半徑300公尺重要環境設施：</b><br>${amenities.map((k, i) => `${i + 1}.${y(k)}${al[i]}`).join("　")}</div>`,
+            )}</div><div class="cell"><b>特色說明</b><div class="note">${esc(v("feature_notes", ""))}</div></div><div class="photos exterior-photos">${["photo_1", "photo_2", "photo_3", "photo_4"].map((k, i) => `<div class="photo-item"><small>實景照片${["一", "二", "三", "四"][i]}</small><div class="photo">${photo(k)}</div></div>`).join("")}</div><div class="amenities"><b>週邊半徑300公尺重要環境設施：</b><br>${amenities.map((k, i) => `${i + 1}.${y(k)}${al[i]}`).join("　")}</div>`,
           "exterior-sheet",
         );
       }
@@ -1070,6 +1075,36 @@
           .trim() || "未命名案件";
         return safeCase + "-" + (ONLY ? (PRINT_LABELS[ONLY] || "售租屋資料") : "售租屋資料");
       }
+      function waitForImage(image) {
+        return new Promise((resolve) => {
+          if (image.complete) return resolve();
+          image.addEventListener("load", resolve, { once: true });
+          image.addEventListener("error", resolve, { once: true });
+        });
+      }
+      async function arrangeExteriorPhotos() {
+        const grids = [...document.querySelectorAll(".exterior-photos")];
+        await Promise.all(
+          grids.flatMap((grid) =>
+            [...grid.querySelectorAll("img")].map(waitForImage),
+          ),
+        );
+        grids.forEach((grid) => {
+          const cards = [...grid.querySelectorAll(".photo-item")];
+          const landscape = cards.filter((card) => {
+            const image = card.querySelector("img");
+            return image && image.naturalWidth >= image.naturalHeight;
+          });
+          const portrait = cards.filter((card) => {
+            const image = card.querySelector("img");
+            return image && image.naturalWidth < image.naturalHeight;
+          });
+          if (landscape.length === 2 && portrait.length === 2) {
+            grid.classList.add("mixed-photo-orientation");
+            [...landscape, ...portrait].forEach((card) => grid.append(card));
+          }
+        });
+      }
       async function boot() {
         try {
           if (!SB || !SNO) {
@@ -1099,6 +1134,7 @@
             .filter((k) => pages[k])
             .map((k) => pages[k]())
             .join("");
+          await arrangeExteriorPhotos();
         } catch (error) {
           console.error(error);
           document.getElementById("out").innerHTML =
