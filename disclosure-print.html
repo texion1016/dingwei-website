@@ -361,13 +361,14 @@
         padding: 1.4mm;
       }
       .exterior-sheet .photos {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: repeat(2, 41mm);
-        gap: 2.5mm 4mm;
+        grid-template-columns: repeat(2, max-content);
+        grid-template-rows: repeat(2, 39mm);
+        justify-content: center;
+        gap: 2.5mm 7mm;
         margin-top: 2mm;
       }
       .exterior-sheet .photo {
-        height: 34mm;
+        height: 38mm;
         border: 0;
         background: transparent;
         justify-content: center;
@@ -379,11 +380,6 @@
       }
       .exterior-sheet .photo-item {
         min-width: 0;
-      }
-      .exterior-sheet .photo-item small {
-        display: block;
-        min-height: 5mm;
-        margin-bottom: 1.1mm;
       }
       .exterior-sheet .photos.mixed-photo-orientation {
         grid-auto-flow: column;
@@ -883,7 +879,7 @@
             .map((x) => field(...x))
             .join(
               "",
-            )}</div><div class="cell"><b>特色說明</b><div class="note">${esc(v("feature_notes", ""))}</div></div><div class="photos exterior-photos">${["photo_1", "photo_2", "photo_3", "photo_4"].map((k, i) => `<div class="photo-item"><small>實景照片${["一", "二", "三", "四"][i]}</small><div class="photo">${photo(k)}</div></div>`).join("")}</div><div class="amenities"><b>週邊半徑300公尺重要環境設施：</b><br>${amenities.map((k, i) => `${i + 1}.${y(k)}${al[i]}`).join("　")}</div>`,
+            )}</div><div class="cell"><b>特色說明</b><div class="note">${esc(v("feature_notes", ""))}</div></div><div class="photos exterior-photos">${["photo_1", "photo_2", "photo_3", "photo_4"].map((k) => `<div class="photo-item"><div class="photo">${photo(k)}</div></div>`).join("")}</div><div class="amenities"><b>週邊半徑300公尺重要環境設施：</b><br>${amenities.map((k, i) => `${i + 1}.${y(k)}${al[i]}`).join("　")}</div>`,
           "exterior-sheet",
         );
       }
