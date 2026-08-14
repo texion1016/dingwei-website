@@ -329,7 +329,7 @@ img { display:block; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/config.js?v=6"></script>
-<script src="assets/data.js?v=8"></script>
+<script src="assets/data.js?v=9"></script>
 <script>
 const _SB_CFG = window.DW_SB || { url: '', key: '' };
 const _sb = _SB_CFG.url ? supabase.createClient(location.origin + '/api/admin/supabase', 'dw-admin-session', {
@@ -363,11 +363,27 @@ function customSpecRow(key = '', value = '') {
 function addCustomSpec(key = '', value = '') {
   F('customSpecRows').insertAdjacentHTML('beforeend', customSpecRow(key, value));
 }
+function calculatedPublicRatioFromSpec() {
+  return window.DW_LISTING_SYNC?.calculatePublicRatio?.({
+    main_area: F('spec_主建')?.value,
+    attached_area: F('spec_附屬')?.value,
+    common_area: F('spec_公設')?.value
+  }) || '';
+}
+function refreshSpecPublicRatio() {
+  const input = F('spec_公比');
+  if (input) input.value = calculatedPublicRatioFromSpec();
+}
 function renderSpecEditor(spec = {}) {
-  F('specPresetFields').innerHTML = SPEC_SECTIONS.map(section => '<section class="spec-section"><h3 class="spec-section-title">' + section.title + '</h3><div class="spec-inputs">' + section.fields.map(([key, label]) => '<div class="spec-entry"><label for="spec_' + key + '">' + label + '</label><input id="spec_' + key + '" data-spec-key="' + key + '" value="' + esc(spec[key] || '') + '" placeholder="請填寫"></div>').join('') + '</div></section>').join('');
+  const calculatedRatio = window.DW_LISTING_SYNC?.calculatePublicRatio?.({ main_area: spec.主建, attached_area: spec.附屬, common_area: spec.公設 }) || '';
+  if (calculatedRatio) spec = { ...spec, 公比: calculatedRatio };
+  F('specPresetFields').innerHTML = SPEC_SECTIONS.map(section => '<section class="spec-section"><h3 class="spec-section-title">' + section.title + '</h3><div class="spec-inputs">' + section.fields.map(([key, label]) => '<div class="spec-entry"><label for="spec_' + key + '">' + label + (key === '公比' ? '（自動計算）' : '') + '</label><input id="spec_' + key + '" data-spec-key="' + key + '" value="' + esc(spec[key] || '') + '" placeholder="' + (key === '公比' ? '由主建、附屬、公設自動計算' : '請填寫') + '"' + (key === '公比' ? ' readonly aria-readonly="true"' : '') + '></div>').join('') + '</div></section>').join('');
   const custom = Object.entries(spec).filter(([key, value]) => !SPEC_PRESET_KEYS.has(key) && String(value || '').trim());
   F('customSpecRows').innerHTML = custom.map(([key, value]) => customSpecRow(key, value)).join('');
 }
+document.addEventListener('input', (event) => {
+  if (['spec_主建', 'spec_附屬', 'spec_公設'].includes(event.target.id)) refreshSpecPublicRatio();
+});
 // 上傳要經過受保護的後台代理；公開展示則必須使用 Supabase 公開 bucket 的網址。
 // 不可用 _sb.getPublicUrl()，因為 _sb 的 base URL 是本網站的登入代理。
 function publicStorageUrl(path) {
@@ -768,6 +784,7 @@ async function saveForm() {
   if (ALL.some(item => String(item.sno) === sno && item.id !== editingRow?.id)) { alert('這個案件編號已存在，請換一個編號。'); return; }
   if (!(price > 0)) { alert('請填寫價格'); return; }
 
+  refreshSpecPublicRatio();
   const spec = {};
   document.querySelectorAll('[data-spec-key]').forEach(input => {
     const value = input.value.trim();

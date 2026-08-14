@@ -424,7 +424,7 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/config.js"></script>
-    <script src="assets/data.js?v=8"></script>
+    <script src="assets/data.js?v=9"></script>
     <script src="assets/disclosure-schema.js?v=2"></script>
     <script>
       const SB = window.DW_SB?.url
@@ -524,6 +524,8 @@
           return `<div class="field check"><input data-key="${k}" id="${k}" type="checkbox" ${v ? "checked" : ""}><label for="${k}">${esc(label)}</label></div>`;
         if (type === "textarea")
           return `<div class="field wide"><label>${esc(label)}</label><textarea data-key="${k}">${esc(v)}</textarea></div>`;
+        if (type === "computed")
+          return `<div class="field"><label>${esc(label)}</label><input data-key="${k}" type="text" value="${esc(v)}" readonly aria-readonly="true"><small>由主建物、附屬建物與公共設施自動計算</small></div>`;
         if (type === "select")
           return `<div class="field"><label>${esc(label)}</label><select data-key="${k}">${opts.map((o) => `<option ${String(v) === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></div>`;
         return `<div class="field"><label>${esc(label)}</label><input data-key="${k}" type="${type === "date" ? "date" : "text"}" value="${esc(v)}"></div>`;
@@ -591,6 +593,11 @@
       }
       function syncSharedFields(sourceKey) {
         window.DW_LISTING_SYNC?.syncAliases(doc, sourceKey);
+      }
+      function refreshPublicRatio() {
+        window.DW_LISTING_SYNC?.syncComputedFields?.(doc);
+        const input = document.querySelector('[data-key="public_ratio"]');
+        if (input) input.value = doc.public_ratio || "";
       }
       function publicStorageUrl(path) {
         const base = String(window.DW_SB?.url || "").replace(/\/$/, "");
@@ -726,11 +733,13 @@
           if (!e.target.dataset.key) return;
           doc[e.target.dataset.key] = e.target.value;
           window.DW_LISTING_SYNC?.syncAliases(doc, e.target.dataset.key);
+          refreshPublicRatio();
         });
         document.getElementById("editor").addEventListener("change", (e) => {
           if (!e.target.dataset.key) return;
           doc[e.target.dataset.key] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
           window.DW_LISTING_SYNC?.syncAliases(doc, e.target.dataset.key);
+          refreshPublicRatio();
         });
         document.getElementById("saveBtn").onclick = () => save();
         document.getElementById("allPrint").onclick = async () => {

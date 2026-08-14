@@ -26,7 +26,7 @@ window.DW_DISCLOSURE_SECTIONS = [
       ['land_location','座落／段小段','text'], ['land_lot','地號','text'], ['land_base_area','基地面積（坪）','text'], ['land_right_range','權利範圍','text'], ['land_category','地目','text'], ['land_zoning','使用分區','text'], ['land_total_area','面積共計（坪／平方公尺）','text']
     ]},
     {title:'建物標示', fields:[
-      ['building_location','建物座落／區段','text'], ['building_no','建號','text'], ['building_doorplate','門牌','text'], ['main_area','主建物面積（坪）','text'], ['attached_purpose','附屬建物用途','text'], ['attached_area','附屬建物面積（坪）','text'], ['common_no','共有部分建號','text'], ['common_area','共有部分面積（坪）','text'], ['common_share','共有部分持分','text'], ['total_area','面積共計（坪／平方公尺）','text'], ['public_ratio','公設比','text'], ['completion_date','建物完成日','text'], ['building_use','用途','text']
+      ['building_location','建物座落／區段','text'], ['building_no','建號','text'], ['building_doorplate','門牌','text'], ['main_area','主建物面積（坪）','text'], ['attached_purpose','附屬建物用途','text'], ['attached_area','附屬建物面積（坪）','text'], ['common_no','共有部分建號','text'], ['common_area','共有部分面積（坪）','text'], ['common_share','共有部分持分','text'], ['total_area','面積共計（坪／平方公尺）','text'], ['public_ratio','公設比（自動計算）','computed'], ['completion_date','建物完成日','text'], ['building_use','用途','text']
     ]},
     {title:'權利登記與限制', fields:[
       ['building_other_rights','建物他項權利登記（每行：權利種類｜順位｜登記日期｜設定金額｜權利人）','textarea'], ['land_other_rights','土地他項權利登記（每行：權利種類｜順位｜登記日期｜設定金額｜權利人）','textarea'], ['restriction_notice','預告登記','check'], ['restriction_seizure','查封','check'], ['restriction_fake_mortgage','假扣押／假處分','check'], ['restriction_other','其他限制登記','text'], ['restriction_note','處理方式說明','textarea']
@@ -82,7 +82,7 @@ window.DW_DISCLOSURE_SECTIONS = [
       ['doc_no','房屋編號（同步封面不動產說明書編號）','text'], ['case_name','案名','text'], ['commission_total','售價（萬）','text'], ['sales_floor','樓層','text'], ['layout_detail','格局','text'], ['parking_info','車位','text'], ['doorplate','地址','text']
     ]},
     {title:'權利範圍與建物狀況', fields:[
-      ['registered_area','登記總面積／建物合計','text'], ['land_area','土地面積','text'], ['land_right_range','權利範圍','text'], ['land_base_area','基地面積','text'], ['main_area','主建物','text'], ['attached_area','附屬建物','text'], ['common_area','公共設施','text'], ['public_ratio','公設比','text'], ['completion_date','完成日期','text'], ['main_material','主要建材','text'], ['building_insulation','隔間材料','text'], ['floor_material','地板','text'], ['direction','座向','text']
+      ['registered_area','登記總面積／建物合計','text'], ['land_area','土地面積','text'], ['land_right_range','權利範圍','text'], ['land_base_area','基地面積','text'], ['main_area','主建物','text'], ['attached_area','附屬建物','text'], ['common_area','公共設施','text'], ['public_ratio','公設比（自動計算）','computed'], ['completion_date','完成日期','text'], ['main_material','主要建材','text'], ['building_insulation','隔間材料','text'], ['floor_material','地板','text'], ['direction','座向','text']
     ]},
     {title:'付款條件與貸款', fields:[
       ['payment_1_percent','簽約款（%）','text'], ['payment_2_percent','備證（%）','text'], ['payment_3_percent','完稅（%）','text'], ['payment_4_percent','尾款（%）','text'], ['loan_bank','銀行設定（萬）','text'], ['loan_actual','實際貸款約（萬）','text']

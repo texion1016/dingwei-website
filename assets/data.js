@@ -2043,6 +2043,21 @@ window.DW_LISTING_SYNC = (function () {
     const parsed = Number(String(value ?? "").replace(/[^0-9.\-]/g, ""));
     return Number.isFinite(parsed) ? parsed : 0;
   };
+  // 公設比為公共設施佔建物總面積（主建＋附屬＋公設）的比例；
+  // 從三個面積欄位直接推算，避免每張表重複輸入而產生不一致。
+  const calculatePublicRatio = (data) => {
+    const main = number(data?.main_area);
+    const attached = number(data?.attached_area);
+    const common = number(data?.common_area);
+    const total = main + attached + common;
+    return total > 0 && common >= 0 ? (common / total * 100).toFixed(2) + "%" : "";
+  };
+  const syncComputedFields = (doc) => {
+    const ratio = calculatePublicRatio(doc);
+    if (ratio) doc.public_ratio = ratio;
+    else delete doc.public_ratio;
+    return doc;
+  };
   const deal = (value, fallback = "sell") => {
     const raw = text(value);
     if (raw === "rent" || raw.indexOf("\u79df") >= 0) return "rent";
@@ -2058,7 +2073,7 @@ window.DW_LISTING_SYNC = (function () {
         ? text(doc[sourceKey]) : first(...group.map((key) => doc[key]));
       group.forEach((key) => { doc[key] = value; });
     });
-    return doc;
+    return syncComputedFields(doc);
   }
 
   function applyListingToDocument(doc, listing) {
@@ -2096,5 +2111,5 @@ window.DW_LISTING_SYNC = (function () {
     patch.unit = listingDeal === "sell" && size > 0 ? (price / size).toFixed(1) : "";
     return patch;
   }
-  return { syncAliases, applyListingToDocument, patchListingFromDocument };
+  return { syncAliases, syncComputedFields, calculatePublicRatio, applyListingToDocument, patchListingFromDocument };
 })();
