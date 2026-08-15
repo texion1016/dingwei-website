@@ -2065,7 +2065,10 @@ window.DW_LISTING_SYNC = (function () {
     if (raw === "sell" || raw.indexOf("\u8cb7") >= 0 || raw.indexOf("\u552e") >= 0) return "sell";
     return fallback === "rent" ? "rent" : "sell";
   };
-  const yes = (value) => /^(true|1|yes|\u6709)$/i.test(text(value).trim());
+  const yes = (value) => {
+    const parkingInfo = text(value).trim();
+    return Boolean(parkingInfo) && !/^(false|0|no|\u7121|\u65e0|\u5426)$/i.test(parkingInfo);
+  };
   const dealLabel = (value) => value === "rent" ? "\u79df\u8cc3" : "\u8cb7\u8ce3";
 
   function syncAliases(doc, sourceKey) {
@@ -2080,13 +2083,14 @@ window.DW_LISTING_SYNC = (function () {
   function applyListingToDocument(doc, listing) {
     const data = doc || {}, spec = listing?.spec || {}, listingDeal = deal(listing?.deal);
     const features = Array.isArray(listing?.pitch) ? listing.pitch.filter(Boolean).join("\n") : "";
+    const parkingInfo = text(data.parking_info).trim() || (listing?.parking ? "\u6709" : "\u7121");
     Object.assign(data, {
       doc_no: text(listing?.sno) + (listing?.name ? "/" + listing.name : ""),
       case_name: text(listing?.name), deal: dealLabel(listingDeal), trade_type: dealLabel(listingDeal),
       commission_total: text(listing?.price), monthly_rent: listingDeal === "rent" ? text(listing?.price) : "",
       doorplate: text(listing?.address), building_doorplate: text(listing?.address), property_type: text(listing?.kind),
       registered_area: text(listing?.size), total_area: text(listing?.size),
-      layout_detail: text(listing?.layout), sales_floor: text(listing?.floor), parking_info: listing?.parking ? "\u6709" : "\u7121",
+      layout_detail: text(listing?.layout), sales_floor: text(listing?.floor), parking_info: parkingInfo,
       latitude: text(listing?.lat), longitude: text(listing?.lng), summary_features: features, feature_notes: features
     });
     Object.entries(specToDoc).forEach(([specKey, docKey]) => { data[docKey] = text(spec[specKey]); });

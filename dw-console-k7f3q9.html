@@ -404,7 +404,7 @@ img { display:block; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/config.js?v=6"></script>
-<script src="assets/data.js?v=10"></script>
+<script src="assets/data.js?v=11"></script>
 <script>
 const _SB_CFG = window.DW_SB || { url: '', key: '' };
 const _sb = _SB_CFG.url ? supabase.createClient(location.origin + '/api/admin/supabase', 'dw-admin-session', {
@@ -925,7 +925,7 @@ if (!window.DW_LISTING_SYNC) window.DW_LISTING_SYNC = (() => {
   const specPairs = [["condition_status", "\u7269\u6cc1"], ["management_fee", "\u7ba1\u7406"], ["main_material", "\u5efa\u6750"], ["exterior_material", "\u5916\u7246"], ["floor_material", "\u5730\u677f"], ["building_use", "\u7528\u9014"], ["security", "\u8b66\u885b"], ["courtyard", "\u4e2d\u5ead"], ["public_ratio", "\u516c\u6bd4"], ["main_area", "\u4e3b\u5efa"], ["attached_area", "\u9644\u5c6c"], ["common_area", "\u516c\u8a2d"], ["school_zone", "\u5b78\u53401"], ["market", "\u5e02\u5834"], ["park", "\u516c\u5712"], ["transportation", "\u6377\u904b"], ["direction", "\u671d\u5411"]];
   const text = (v) => v == null ? '' : String(v);
   const syncAliases = (data) => { [["doorplate", "building_doorplate"], ["deal", "trade_type"], ["registered_area", "total_area"], ["land_area", "land_base_area"], ["summary_features", "feature_notes"]].forEach(group => { const value = group.map(key => text(data[key])).find(value => value.trim()) || ''; group.forEach(key => data[key] = value); }); return data; };
-  const applyListingToDocument = (data, l) => { const d = data || {}, s = l?.spec || {}, rent = l?.deal === 'rent', features = Array.isArray(l?.pitch) ? l.pitch.filter(Boolean).join('\n') : ''; Object.assign(d, {doc_no:text(l?.sno) + (l?.name ? '/' + l.name : ''), case_name:text(l?.name), deal:rent ? '\u79df\u8cc3' : '\u8cb7\u8ce3', trade_type:rent ? '\u79df\u8cc3' : '\u8cb7\u8ce3', commission_total:text(l?.price), monthly_rent:rent ? text(l?.price) : '', doorplate:text(l?.address), building_doorplate:text(l?.address), property_type:text(l?.kind), registered_area:text(l?.size), total_area:text(l?.size), layout_detail:text(l?.layout), sales_floor:text(l?.floor), parking_info:l?.parking ? '\u6709' : '\u7121', latitude:text(l?.lat), longitude:text(l?.lng), summary_features:features, feature_notes:features}); specPairs.forEach(([field,key]) => d[field] = text(s[key])); return syncAliases(d); };
+  const applyListingToDocument = (data, l) => { const d = data || {}, s = l?.spec || {}, rent = l?.deal === 'rent', features = Array.isArray(l?.pitch) ? l.pitch.filter(Boolean).join('\n') : '', parkingInfo = text(d.parking_info).trim() || (l?.parking ? '\u6709' : '\u7121'); Object.assign(d, {doc_no:text(l?.sno) + (l?.name ? '/' + l.name : ''), case_name:text(l?.name), deal:rent ? '\u79df\u8cc3' : '\u8cb7\u8ce3', trade_type:rent ? '\u79df\u8cc3' : '\u8cb7\u8ce3', commission_total:text(l?.price), monthly_rent:rent ? text(l?.price) : '', doorplate:text(l?.address), building_doorplate:text(l?.address), property_type:text(l?.kind), registered_area:text(l?.size), total_area:text(l?.size), layout_detail:text(l?.layout), sales_floor:text(l?.floor), parking_info:parkingInfo, latitude:text(l?.lat), longitude:text(l?.lng), summary_features:features, feature_notes:features}); specPairs.forEach(([field,key]) => d[field] = text(s[key])); return syncAliases(d); };
   return {applyListingToDocument, syncAliases};
 })();
 
