@@ -1325,6 +1325,13 @@ body:has(.management-page) .theme-picker { display:none; }
   .listing-search input { flex:1; width:auto; }
   .hero-search { display:grid; grid-template-columns:auto 1fr auto; }
   .gallery-thumbs { grid-template-columns: repeat(4, 1fr); }
+
+  /* 詳情頁原本用 padding shorthand 覆寫了 .wrap 的左右留白；
+     手機上讓照片、資訊卡與文字保留一致的安全邊距。 */
+  .detail-top {
+    padding: 28px max(18px, env(safe-area-inset-right)) 0 max(18px, env(safe-area-inset-left));
+  }
+  .detail-grid { gap: 28px; }
 }
 
 @media (max-width: 720px) {
