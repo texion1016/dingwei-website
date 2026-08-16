@@ -404,7 +404,7 @@ img { display:block; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/config.js?v=6"></script>
-<script src="assets/data.js?v=11"></script>
+<script src="assets/data.js?v=12"></script>
 <script>
 const _SB_CFG = window.DW_SB || { url: '', key: '' };
 const _sb = _SB_CFG.url ? supabase.createClient(location.origin + '/api/admin/supabase', 'dw-admin-session', {
@@ -422,7 +422,7 @@ let watermarkLogoDataUrl = '';
 let watermarkPreviewObjectUrl = '';
 const SPEC_SECTIONS = [
   { title: '坪數與建物', fields: [
-    ['建坪', '建物登記'], ['地坪', '土地坪數'], ['主建', '主建物'], ['附屬', '附屬建物'], ['公設', '公設'], ['公比', '公設比'],
+    ['建坪', '建物登記'], ['地坪', '土地坪數'], ['主建', '主建物'], ['附屬', '附屬建物'], ['公設', '公設'], ['車位坪數', '車位坪數'], ['公比', '公設比'],
     ['建材', '建築結構'], ['外牆', '外牆建材'], ['地板', '室內地板'], ['用途', '登記用途'], ['地下', '地下樓層']
   ] },
   { title: '管理與環境', fields: [

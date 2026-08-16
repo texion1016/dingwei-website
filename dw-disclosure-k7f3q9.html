@@ -424,8 +424,8 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/config.js"></script>
-    <script src="assets/data.js?v=11"></script>
-    <script src="assets/disclosure-schema.js?v=3"></script>
+    <script src="assets/data.js?v=12"></script>
+    <script src="assets/disclosure-schema.js?v=4"></script>
     <script>
       const SB = window.DW_SB?.url
         ? supabase.createClient(location.origin + "/api/admin/supabase", "dw-admin-session", {
@@ -440,8 +440,8 @@
         section = "base";
       // 部分瀏覽器會延後載入資料檔；列印頁保留內建同步規則，確保案件資料不會因此失去連動。
       if (!window.DW_LISTING_SYNC) window.DW_LISTING_SYNC = (() => {
-        const aliases = [["doorplate", "building_doorplate"], ["deal", "trade_type"], ["registered_area", "total_area"], ["land_area", "land_base_area"], ["summary_features", "feature_notes"]];
-        const specPairs = [["condition_status", "\u7269\u6cc1"], ["management_fee", "\u7ba1\u7406"], ["main_material", "\u5efa\u6750"], ["exterior_material", "\u5916\u7246"], ["floor_material", "\u5730\u677f"], ["building_use", "\u7528\u9014"], ["security", "\u8b66\u885b"], ["courtyard", "\u4e2d\u5ead"], ["public_ratio", "\u516c\u6bd4"], ["main_area", "\u4e3b\u5efa"], ["attached_area", "\u9644\u5c6c"], ["common_area", "\u516c\u8a2d"], ["school_zone", "\u5b78\u53401"], ["market", "\u5e02\u5834"], ["park", "\u516c\u5712"], ["transportation", "\u6377\u904b"], ["direction", "\u671d\u5411"]];
+        const aliases = [["doorplate", "building_doorplate"], ["deal", "trade_type"], ["registered_area", "total_area"], ["land_area", "land_base_area"], ["parking_area", "parking_count"], ["summary_features", "feature_notes"]];
+        const specPairs = [["condition_status", "\u7269\u6cc1"], ["management_fee", "\u7ba1\u7406"], ["main_material", "\u5efa\u6750"], ["exterior_material", "\u5916\u7246"], ["floor_material", "\u5730\u677f"], ["building_use", "\u7528\u9014"], ["security", "\u8b66\u885b"], ["courtyard", "\u4e2d\u5ead"], ["public_ratio", "\u516c\u6bd4"], ["main_area", "\u4e3b\u5efa"], ["attached_area", "\u9644\u5c6c"], ["common_area", "\u516c\u8a2d"], ["parking_area", "\u8eca\u4f4d\u576a\u6578"], ["school_zone", "\u5b78\u53401"], ["market", "\u5e02\u5834"], ["park", "\u516c\u5712"], ["transportation", "\u6377\u904b"], ["direction", "\u671d\u5411"]];
         const str = (v) => v == null ? "" : String(v), first = (...v) => v.map(str).find(x => x.trim()) || "";
         const num = (v) => { const n = Number(str(v).replace(/[^0-9.\-]/g, "")); return Number.isFinite(n) ? n : 0; };
         const getDeal = (v, fallback = "sell") => { const x = str(v); return x === "rent" || x.includes("\u79df") ? "rent" : x === "sell" || x.includes("\u8cb7") || x.includes("\u552e") ? "sell" : fallback; };
@@ -486,6 +486,7 @@
           main_area: spec("主建"),
           attached_area: spec("附屬"),
           common_area: spec("公設"),
+          parking_area: spec("車位坪數"),
           public_ratio: spec("公比"),
           building_use: spec("用途"),
           total_area: listing?.size ? listing.size + " 坪" : "",

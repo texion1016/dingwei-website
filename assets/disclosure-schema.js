@@ -70,7 +70,7 @@ window.DW_DISCLOSURE_SECTIONS = [
   ]},
   { id:'summary', title:'建物調查表', groups:[
     {title:'內部調查表資料', fields:[
-      ['assigned','承辦／店長','text'], ['developer','建商','text'], ['households','戶數','text'], ['unit_price','單價（萬）','text'], ['monthly_rent','委託月租（萬）','text'], ['deposit','押金','text'], ['registered_area','登記坪數','text'], ['land_area','土地面積','text'], ['house_area','房屋坪數','text'], ['parking_count','車位坪數（含）','text'], ['sales_floor','銷售樓層','text'], ['viewing_method','帶看方式','text'], ['bus_stop','公車站名','text'], ['market','市場','text'], ['school_zone','學區','text'], ['park','公園','text'], ['front_road','面前巷道（米）','text'], ['agent_note','經紀人／證號','text']
+      ['assigned','承辦／店長','text'], ['developer','建商','text'], ['households','戶數','text'], ['unit_price','單價（萬）','text'], ['monthly_rent','委託月租（萬）','text'], ['deposit','押金','text'], ['registered_area','登記坪數','text'], ['land_area','土地面積','text'], ['house_area','房屋坪數','text'], ['parking_area','車位坪數','text'], ['sales_floor','銷售樓層','text'], ['viewing_method','帶看方式','text'], ['bus_stop','公車站名','text'], ['market','市場','text'], ['school_zone','學區','text'], ['park','公園','text'], ['front_road','面前巷道（米）','text'], ['agent_note','經紀人／證號','text']
     ]},
     {title:'重點說明', fields:[['summary_features','重點說明（每行一項）','textarea']]}
   ]},

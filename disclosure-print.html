@@ -628,8 +628,8 @@
     <main id="out"><div class="loading">正在整理列印資料…</div></main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/config.js"></script>
-    <script src="assets/data.js"></script>
-    <script src="assets/disclosure-schema.js?v=2"></script>
+    <script src="assets/data.js?v=12"></script>
+    <script src="assets/disclosure-schema.js?v=4"></script>
     <script>
       const SB = window.DW_SB?.url
           ? supabase.createClient(location.origin + "/api/admin/supabase", "dw-admin-session", {
@@ -969,6 +969,7 @@
             ["公設比", "public_ratio"],
             ["房屋坪數", "house_area"],
             ["車位", "parking_info"],
+            ["車位坪數", "parking_area"],
             ["案址", "doorplate"],
             ["地目", "land_category"],
             ["使用分區", "land_zoning"],

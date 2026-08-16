@@ -2029,13 +2029,13 @@ window.DW_LISTING_SYNC = (function () {
     "\u7269\u6cc1": "condition_status", "\u7ba1\u7406": "management_fee", "\u5efa\u6750": "main_material",
     "\u5916\u7246": "exterior_material", "\u5730\u677f": "floor_material", "\u7528\u9014": "building_use",
     "\u8b66\u885b": "security", "\u4e2d\u5ead": "courtyard", "\u516c\u6bd4": "public_ratio",
-    "\u4e3b\u5efa": "main_area", "\u9644\u5c6c": "attached_area", "\u516c\u8a2d": "common_area",
+    "\u4e3b\u5efa": "main_area", "\u9644\u5c6c": "attached_area", "\u516c\u8a2d": "common_area", "\u8eca\u4f4d\u576a\u6578": "parking_area",
     "\u5b78\u53401": "school_zone", "\u5e02\u5834": "market", "\u516c\u5712": "park",
     "\u6377\u904b": "transportation", "\u671d\u5411": "direction"
   };
   const aliases = [
     ["doorplate", "building_doorplate"], ["deal", "trade_type"],
-    ["registered_area", "total_area"], ["land_area", "land_base_area"],
+    ["registered_area", "total_area"], ["land_area", "land_base_area"], ["parking_area", "parking_count"],
     ["summary_features", "feature_notes"]
   ];
   const text = (value) => value === undefined || value === null ? "" : String(value);
