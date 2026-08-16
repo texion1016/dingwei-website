@@ -691,6 +691,11 @@
           return;
         }
         listing = r.data;
+        // 出租案件只使用專屬的建物資料表；售屋案件才保留既有九張說明書。
+        if (listing.deal === "rent") {
+          location.replace("rental-sheet.html?sno=" + encodeURIComponent(SNO));
+          return;
+        }
         let d = await SB.from("dw_property_files")
           .select("*")
           .eq("listing_id", listing.id)

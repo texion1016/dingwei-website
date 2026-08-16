@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>出租屋資料｜鼎瑋後台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
+    <style>
+      :root { --wine:#b73524; --ink:#261f20; --muted:#766d6d; --paper:#fffdfb; --wash:#f5efea; --line:#e4d9d3; --blue:#1d5b9e; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--ink); background:var(--wash); font-family:"Noto Sans TC",sans-serif; }
+      .top { min-height:66px; display:flex; align-items:center; gap:13px; padding:12px clamp(18px,4vw,58px); color:#fff; background:#b73524; }
+      .seal { display:grid; place-items:center; width:38px; height:38px; flex:0 0 auto; color:var(--wine); background:#fff; border-radius:10px; font-family:"Noto Serif TC",serif; font-weight:900; font-size:23px; }
+      .top h1 { margin:0; font:900 21px/1 "Noto Serif TC",serif; letter-spacing:.04em; }
+      .top .hint { color:#fde9e6; font-size:14px; }
+      .top a { margin-left:auto; color:#fff; font-weight:700; text-underline-offset:4px; }
+      .shell { max-width:1260px; margin:32px auto; padding:0 24px 44px; }
+      .notice { padding:28px; border:1px solid var(--line); border-radius:18px; background:#fff; color:var(--muted); }
+      .intro { display:flex; justify-content:space-between; gap:24px; align-items:end; margin:0 0 22px; }
+      h2 { margin:0; font:900 clamp(28px,4vw,42px)/1.2 "Noto Serif TC",serif; }
+      .intro p { margin:9px 0 0; color:var(--muted); }
+      .case { min-width:235px; padding:13px 16px; border-radius:13px; background:#f2e5df; color:#63352e; text-align:right; }
+      .case b { display:block; font-size:17px; }.case small { color:#8b665e; }
+      form { display:grid; gap:18px; }
+      .group { overflow:hidden; border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 8px 23px rgba(67,35,28,.05); }
+      .group h3 { margin:0; padding:13px 20px; color:#552d29; background:#f5eee9; font:900 19px/1.3 "Noto Serif TC",serif; }
+      .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; padding:20px; }
+      .field { min-width:0; }.field.wide { grid-column:1/-1; }.field label, .checks-title { display:block; margin:0 0 7px; color:#675e5e; font-weight:800; font-size:14px; }
+      input, select, textarea { width:100%; min-height:46px; border:1px solid #ded4cf; border-radius:12px; padding:10px 12px; background:#fff; color:var(--ink); font:400 17px/1.4 "Noto Sans TC",sans-serif; outline:none; }
+      textarea { min-height:102px; resize:vertical; }.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--wine); box-shadow:0 0 0 3px rgba(183,53,36,.12)}
+      .two, .three { display:grid; gap:10px; }.two {grid-template-columns:repeat(2,minmax(0,1fr));}.three{grid-template-columns:repeat(3,minmax(0,1fr));}
+      .choice-list { display:flex; flex-wrap:wrap; gap:9px 14px; min-height:46px; padding:9px 0; }.choice-list label { display:flex; align-items:center; gap:5px; margin:0; color:var(--ink); font-weight:500; cursor:pointer; }.choice-list input { width:18px; min-height:18px; accent-color:var(--wine); }
+      .help { display:block; margin-top:5px; color:var(--muted); font-size:12px; }.calc { color:var(--blue); font-weight:900; }
+      .savebar { position:sticky; bottom:16px; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; border:1px solid var(--line); border-radius:16px; background:rgba(255,253,251,.96); box-shadow:0 12px 28px rgba(67,35,28,.12); }
+      .savebar span { color:var(--muted); }.btn { border:1px solid var(--wine); border-radius:11px; padding:11px 17px; background:#fff; color:var(--wine); font:800 16px/1 "Noto Sans TC",sans-serif; cursor:pointer; }.btn.primary { background:var(--wine); color:#fff; }.btn:disabled{opacity:.65;cursor:wait}.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+      @media (max-width:720px){.top{align-items:flex-start;flex-wrap:wrap}.top h1{font-size:18px}.top .hint{display:none}.top a{margin-left:auto;font-size:14px}.shell{margin:20px auto;padding:0 14px 30px}.intro{display:block}.case{margin-top:14px;text-align:left}.fields{grid-template-columns:1fr;padding:16px;gap:14px}.field.wide{grid-column:auto}.two,.three{grid-template-columns:1fr}.savebar{align-items:stretch;flex-direction:column}.actions{justify-content:stretch}.actions .btn{flex:1}.choice-list{gap:7px 12px}}
+    </style>
+  </head>
+  <body>
+    <!-- THESIS: 租屋資料以一張可填、可列印的建物工作表完成，不混入售屋的九頁流程。 OWN-WORLD: 延續鼎瑋後台的酒紅、暖白與清楚分組欄位。 STORY: 同仁開啟出租案件、填完建物資訊、儲存並列印。 FIRST VIEWPORT: 案件名稱與一張表的工作入口並列，主要動作固定在底部。 FORM: established-operate; existing visual system extension. FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+    <header class="top"><span class="seal">鼎</span><h1>出租屋資料</h1><span class="hint">一案一份建物資料表</span><a href="dw-console-k7f3q9.html">← 返回物件管理</a></header>
+    <main class="shell">
+      <div id="loading" class="notice">正在讀取出租案件資料…</div>
+      <div id="app" hidden>
+        <div class="intro"><div><h2>建物資料表</h2><p>此表僅供出租案件使用；填寫後可直接列印一張 A4 建物資料表。</p></div><div class="case"><b id="caseName">—</b><small id="caseMeta">—</small></div></div>
+        <form id="editor"></form>
+        <div class="savebar"><span id="saveStatus">尚未儲存</span><div class="actions"><button class="btn" id="printBtn" type="button">列印建物資料表</button><button class="btn primary" id="saveBtn" type="button">儲存資料</button></div></div>
+      </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/config.js"></script>
+    <script src="assets/data.js?v=12"></script>
+    <script>
+      const SB = window.DW_SB?.url ? supabase.createClient(location.origin + '/api/admin/supabase', 'dw-admin-session', { auth:{persistSession:false,autoRefreshToken:false} }) : null;
+      const SNO = new URLSearchParams(location.search).get('sno');
+      let listing = null, file = null, doc = {};
+      const esc = s => String(s ?? '').replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const value = key => doc[key] ?? '';
+      const text = (key,label,wide=false,help='') => `<div class="field ${wide?'wide':''}"><label for="${key}">${label}</label><input id="${key}" data-key="${key}" value="${esc(value(key))}">${help?`<small class="help">${help}</small>`:''}</div>`;
+      const textarea = (key,label,wide=true) => `<div class="field ${wide?'wide':''}"><label for="${key}">${label}</label><textarea id="${key}" data-key="${key}">${esc(value(key))}</textarea></div>`;
+      const area = (key,label) => `<div class="field"><label for="${key}">${label}</label><input id="${key}" data-key="${key}" inputmode="decimal" value="${esc(value(key))}"></div>`;
+      const select = (key,label,opts) => `<div class="field"><label for="${key}">${label}</label><select id="${key}" data-key="${key}">${opts.map(x=>`<option value="${esc(x)}" ${value(key)===x?'selected':''}>${esc(x||'請選擇')}</option>`).join('')}</select></div>`;
+      const check = (key,label) => `<label><input type="checkbox" data-key="${key}" ${value(key)?'checked':''}>${label}</label>`;
+      const checks = (title,items,wide=false) => `<div class="field ${wide?'wide':''}"><span class="checks-title">${title}</span><div class="choice-list">${items.map(([k,l])=>check(k,l)).join('')}</div></div>`;
+      function defaults() {
+        const c=window.COMPANY||{}, spec=listing?.spec||{}, rent=listing?.deal==='rent';
+        const on=(source,label)=>{ const text=String(source||''); return /^[A-Z]+$/.test(label) ? new RegExp('(?:^|[^A-Z])'+label+'(?:$|[^A-Z])').test(text) : text.includes(label); };
+        return { form_type:'rental_building_sheet', prepared_date:new Date().toISOString().slice(0,10), case_name:listing?.name||'', doc_no:listing?.sno||'', agent_no:'', handler:c.printName||'', commission_type:'', doorplate:listing?.address||'', property_type:listing?.kind||'', direction:spec['朝向']||'', deal:rent?'租賃':'買賣', condition_status:spec['物況']||'空屋', registered_area:listing?.size||'', total_area:listing?.size||'', land_area:spec['地坪']||'', main_area:spec['主建']||'', attached_area:spec['附屬']||'', common_area:spec['公設']||'', parking_area:spec['車位坪數']||'', public_ratio:spec['公比']||'', completion_date:'', age:listing?.age||'', main_material:spec['建材']||'', layout_detail:listing?.layout||'', parking_info:listing?.parking?'有':'無', parking_location:'', monthly_rent:rent?listing?.price||'':'', deposit:'', total_floors:'', sales_floor:listing?.floor||'', basement:spec['地下']||'', management_fee:spec['管理']||'', school_zone:spec['學區1']||'', school_zone_2:'', park:spec['公園']||'', market:spec['市場']||'', transportation:spec['捷運']||'', station_name:spec['站名']||'', bus:'', bus_stop:'', feature_notes:Array.isArray(listing?.pitch)?listing.pitch.join('\n'):'', owner_name:'', owner_id:'', client_name:'', client_gender:'', client_tel:'', client_mobile:'', client_email:'', contract_start:'', contract_end:'', service_fee:'', service_fee_months:'1', company_name:c.name||'鼎瑋不動產經紀有限公司', company_address:c.address||'', company_contact:c.printPhone||'', company_fax:'03-3122196', company_site:'https://dingwei-realty.com', preparer:'', store_manager:'', mat_sc:on(spec['建材'],'SC'), mat_src:on(spec['建材'],'SRC'), mat_rc:on(spec['建材'],'RC'), mat_brick:on(spec['建材'],'加強磚造'), mat_other:on(spec['建材'],'其它'), ext_tile:on(spec['外牆'],'二丁掛'), ext_block:on(spec['外牆'],'方塊磚'), ext_mosaic:on(spec['外牆'],'馬賽克'), ext_other:on(spec['外牆'],'其它'), ext_wash:on(spec['外牆'],'洗石子'), ext_marble:on(spec['外牆'],'大理石'), ext_glass:on(spec['外牆'],'玻璃帷幕'), floor_wood:on(spec['地板'],'木板'), floor_terrazzo:on(spec['地板'],'磨石子'), floor_quartz:on(spec['地板'],'拋光石英磚'), floor_tile:on(spec['地板'],'磁磚'), floor_marble:on(spec['地板'],'大理石'), floor_other:on(spec['地板'],'其它'), security_yes:on(spec['警衛'],'有'), security_no:on(spec['警衛'],'無'), courtyard_yes:on(spec['中庭'],'有'), courtyard_no:on(spec['中庭'],'無') };
+      }
+      function render() {
+        const material=[['mat_sc','SC'],['mat_src','SRC'],['mat_rc','RC'],['mat_brick','加強磚造'],['mat_other','其它']];
+        const exterior=[['ext_tile','二丁掛'],['ext_block','方塊磚'],['ext_mosaic','馬賽克'],['ext_other','其它'],['ext_wash','洗石子'],['ext_marble','大理石'],['ext_glass','玻璃帷幕']];
+        const floor=[['floor_wood','木板'],['floor_terrazzo','磨石子'],['floor_quartz','拋光石英磚'],['floor_tile','磁磚'],['floor_marble','大理石'],['floor_other','其它']];
+        const show=[['show_key','key'],['show_owner','聯絡屋主'],['show_developer','聯絡開發'],['show_guard','警衛取鑰'],['show_onsite','現場'],['show_pre_sale','預售'],['show_staff','聯絡專員']];
+        const equipment=[['equip_ac','冷氣'],['equip_tub','浴缸'],['equip_shower','淋浴'],['equip_heater','熱水器'],['equip_hood','排油煙'],['equip_stove','瓦斯爐'],['equip_sink','流理台'],['equip_gas','天然氣']];
+        document.getElementById('editor').innerHTML = `
+          <section class="group"><h3>案件與委託資料</h3><div class="fields">
+            ${text('case_name','案名')} ${text('doc_no','SNo／案件編號')} ${text('agent_no','IT／內部編號')} ${text('handler','承辦')}
+            ${select('commission_type','委託類別',['','專任','一般'])} ${text('doorplate','地址（路段）')} ${text('property_type','種類')} ${text('direction','朝向')}
+            ${select('deal','租售',['租賃','買賣'])} ${checks('物件狀態',[['status_new','新成'],['status_existing','成屋'],['status_auction','法拍'],['status_presale','預售']])}
+          </div></section>
+          <section class="group"><h3>權狀、面積與基本資料</h3><div class="fields">
+            ${area('registered_area','登記總面積（坪）')} ${area('total_area','建物合計（坪）')} ${area('land_area','土地面積／地坪（坪）')} ${text('rights_scope','權利範圍')}
+            ${area('main_area','主建物（坪）')} ${area('attached_area','附屬建物（坪）')} ${area('common_area','公共設施（坪）')} ${area('parking_area','車位坪數')}
+            <div class="field"><label>公設比</label><input class="calc" id="public_ratio" readonly value="${esc(value('public_ratio'))}"><small class="help">由公共設施 ÷ 建物合計自動計算</small></div>
+            ${text('completion_date','竣工日期（民國年／月／日）')} ${text('age','屋齡')} ${checks('建材',material)}
+            ${text('layout_detail','格局')} ${text('condition_status','現況')} ${text('monthly_rent','租金（元／月）')} ${text('deposit','押金')}
+            ${select('parking_info','車位',['無','有'])} ${text('parking_location','車位位置')} ${text('total_floors','總樓高')} ${text('sales_floor','出租樓層')}
+            ${text('basement','地下層')} ${text('builder','建商')} ${text('households','總戶數')} ${text('management_fee','管理費')}
+          </div></section>
+          <section class="group"><h3>社區、周邊與管理</h3><div class="fields">
+            ${text('school_zone','學區 1')} ${text('school_zone_2','學區 2')} ${text('park','公園')} ${text('market','鄰近市場')}
+            ${text('transportation','捷運')} ${text('station_name','站名')} ${text('bus','客運')} ${text('bus_stop','公車站牌')}
+            ${checks('外牆外飾',exterior)} ${checks('地板',floor)}
+            ${checks('管理與環境',[['security_yes','警衛 有'],['security_no','警衛 無'],['courtyard_yes','中庭花園 有'],['courtyard_no','中庭花園 無']])} ${text('front_road','面前巷道（米）')} ${text('shop_frontage','店面面寬（米）')}
+          </div></section>
+          <section class="group"><h3>帶看、特色與設備</h3><div class="fields">
+            ${checks('帶看方式',show,true)} ${textarea('feature_notes','特色')} ${checks('現有設備',equipment,true)} ${textarea('special_terms','特約條件')}
+          </div></section>
+          <section class="group"><h3>委託人與公司資料</h3><div class="fields">
+            ${text('contract_start','委託起始日')} ${text('contract_end','委託終止日')} ${text('service_fee','本案同意服務費（元）')} ${text('service_fee_months','服務費（月數）')}
+            ${text('owner_name','所有權人')} ${text('owner_id','身份證字號')} ${text('client_name','委託人（務必親自簽名）')} ${select('client_gender','性別',['','男','女'])}
+            ${text('client_tel','電話')} ${text('client_mobile','行動')} ${text('client_email','Email')} ${text('preparer','制表')}
+            ${text('company_name','公司名稱',true)} ${text('company_address','公司地址',true)} ${text('company_contact','公司聯絡電話')} ${text('company_fax','傳真')}
+            ${text('company_site','網站')} ${text('handler','承辦')} ${text('store_manager','店長')}
+          </div></section>`;
+        refreshRatio();
+      }
+      function checkedLabels(pairs) { return pairs.filter(([key])=>doc[key]).map(([,label])=>label).join('、'); }
+      function collect() { document.querySelectorAll('[data-key]').forEach(el=>doc[el.dataset.key]=el.type==='checkbox'?el.checked:el.value); doc.main_material=checkedLabels([['mat_sc','SC'],['mat_src','SRC'],['mat_rc','RC'],['mat_brick','加強磚造'],['mat_other','其它']]); doc.exterior_material=checkedLabels([['ext_tile','二丁掛'],['ext_block','方塊磚'],['ext_mosaic','馬賽克'],['ext_other','其它'],['ext_wash','洗石子'],['ext_marble','大理石'],['ext_glass','玻璃帷幕']]); doc.floor_material=checkedLabels([['floor_wood','木板'],['floor_terrazzo','磨石子'],['floor_quartz','拋光石英磚'],['floor_tile','磁磚'],['floor_marble','大理石'],['floor_other','其它']]); doc.security=doc.security_yes?'有':doc.security_no?'無':''; doc.courtyard=doc.courtyard_yes?'有':doc.courtyard_no?'無':''; refreshRatio(); }
+      function refreshRatio() { const total=Number(String(doc.total_area||'').replace(/[^0-9.]/g,'')); const common=Number(String(doc.common_area||'').replace(/[^0-9.]/g,'')); doc.public_ratio=total>0&&common>=0?(common/total*100).toFixed(2)+'%':''; const el=document.getElementById('public_ratio'); if(el) el.value=doc.public_ratio; }
+      function listingPatch() {
+        const spec={...(listing.spec||{})}; const put=(k,v)=>{ if(String(v||'').trim()) spec[k]=String(v).trim(); else delete spec[k]; };
+        put('主建',doc.main_area);put('附屬',doc.attached_area);put('公設',doc.common_area);put('車位坪數',doc.parking_area);put('公比',doc.public_ratio);put('地坪',doc.land_area);put('建材',doc.main_material);put('外牆',doc.exterior_material);put('地板',doc.floor_material);put('警衛',doc.security);put('中庭',doc.courtyard);put('管理',doc.management_fee);put('物況',doc.condition_status);put('朝向',doc.direction);put('學區1',doc.school_zone);put('公園',doc.park);put('市場',doc.market);put('捷運',doc.transportation);put('站名',doc.station_name);put('地下',doc.basement);
+        const size=Number(String(doc.total_area||doc.registered_area||'').replace(/[^0-9.]/g,''))||0;
+        return { name:String(doc.case_name||'').trim(), address:String(doc.doorplate||'').trim(), kind:String(doc.property_type||'').trim(), layout:String(doc.layout_detail||'').trim(), floor:String(doc.sales_floor||'').trim(), price:Number(String(doc.monthly_rent||'').replace(/[^0-9.]/g,''))||0, size, parking:doc.parking_info==='有', deal:'rent', pitch:String(doc.feature_notes||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean), spec, updated_at:new Date().toISOString() };
+      }
+      async function save(silent=false) {
+        collect(); const button=document.getElementById('saveBtn'); button.disabled=true; document.getElementById('saveStatus').textContent='儲存中…';
+        const result=await SB.from('dw_listings').update(listingPatch()).eq('id',listing.id).select().single();
+        if(result.error){button.disabled=false;document.getElementById('saveStatus').textContent='儲存失敗';if(!silent)alert('案件資料同步失敗：'+result.error.message);return false;}
+        listing=result.data; const payload={listing_id:listing.id,sno:String(listing.sno),title:doc.case_name||listing.name||'',data:doc};
+        const saved=await SB.from('dw_property_files').upsert(payload,{onConflict:'listing_id'}).select().single(); button.disabled=false;
+        if(saved.error){document.getElementById('saveStatus').textContent='儲存失敗';if(!silent)alert('儲存失敗：'+saved.error.message+'\n\n請確認已執行 dw_property_files.sql。');return false;}
+        file=saved.data;document.getElementById('saveStatus').textContent='已儲存 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});return true;
+      }
+      async function printSheet(){ const popup=window.open('','_blank');if(!popup){alert('瀏覽器封鎖了列印視窗，請允許此網站開啟彈出式視窗。');return;}popup.document.write('<title>正在儲存列印資料…</title><p style="font-family:sans-serif;padding:24px">正在儲存目前內容並開啟列印頁…</p>');if(await save(true))popup.location.replace('rental-sheet-print.html?sno='+encodeURIComponent(SNO));else popup.close(); }
+      async function boot(){
+        if(!SNO||!SB){document.getElementById('loading').textContent='缺少案件編號或資料庫連線設定。';return;}
+        const row=await SB.from('dw_listings').select('*').eq('sno',SNO).maybeSingle();if(row.error||!row.data){document.getElementById('loading').textContent='找不到案件：'+esc(row.error?.message||SNO);return;}listing=row.data;
+        if(listing.deal!=='rent'){document.getElementById('loading').innerHTML='此案件是出售案件，請使用 <a href="dw-disclosure-k7f3q9.html?sno='+encodeURIComponent(SNO)+'">售屋資料</a> 的九張表。';return;}
+        const saved=await SB.from('dw_property_files').select('*').eq('listing_id',listing.id).maybeSingle();if(saved.error&&saved.error.code!=='PGRST116'){document.getElementById('loading').textContent='無法讀取出租資料：'+saved.error.message;return;}file=saved.data;doc={...defaults(),...(file?.data||{})};doc.form_type='rental_building_sheet';
+        document.getElementById('caseName').textContent=listing.name;document.getElementById('caseMeta').textContent='編號 '+listing.sno+'・出租案件';render();
+        document.getElementById('editor').addEventListener('input',e=>{if(!e.target.dataset.key)return;doc[e.target.dataset.key]=e.target.value;refreshRatio();});document.getElementById('editor').addEventListener('change',e=>{if(!e.target.dataset.key)return;doc[e.target.dataset.key]=e.target.type==='checkbox'?e.target.checked:e.target.value;refreshRatio();});
+        document.getElementById('saveBtn').onclick=()=>save();document.getElementById('printBtn').onclick=printSheet;document.getElementById('loading').hidden=true;document.getElementById('app').hidden=false;
+      } boot();
+    </script>
+  </body>
+</html>

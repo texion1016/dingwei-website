@@ -556,7 +556,7 @@ function render() {
       '<button class="btn btn-ghost btn-sm" onclick="openFormById(\'' + r.id + '\')">編輯</button>' +
       '<button class="btn btn-ghost btn-sm" onclick="toggleStatus(\'' + r.id + '\')">' + (active ? '下架' : '重新上架') + '</button>' +
       '<button class="btn btn-danger btn-sm" onclick="delRow(\'' + r.id + '\')">刪除</button>' +
-      '<button class="btn btn-ghost btn-sm" onclick="openDisclosure(\'' + esc(r.sno) + '\')">出租屋資料</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="openDisclosure(\'' + esc(r.sno) + '\', \'' + esc(r.deal) + '\')">' + (r.deal === 'rent' ? '出租屋資料' : '售屋資料') + '</button>' +
       '</div></div>';
   }).join('');
 }
@@ -895,7 +895,10 @@ document.querySelectorAll('#dealRadio input').forEach(i => {
 });
 
 function openFormById(id) { openForm(ALL.find(x => x.id === id) || null); }
-function openDisclosure(sno) { window.open('dw-disclosure-k7f3q9.html?sno=' + encodeURIComponent(sno), '_blank'); }
+function openDisclosure(sno, deal) {
+  const page = deal === 'rent' ? 'rental-sheet.html' : 'dw-disclosure-k7f3q9.html';
+  window.open(page + '?sno=' + encodeURIComponent(sno), '_blank');
+}
 
 function cleanFloorUnit(value) {
   return String(value || '').trim().replace(/[樓楼]\s*$/u, '').trim();
