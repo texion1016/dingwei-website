@@ -10,11 +10,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
     <style>
       @page { size:A4 portrait; margin:0; }
-      * { box-sizing:border-box; } body { margin:0; background:#ddd; font-family:"Noto Sans TC",sans-serif; color:#111; }
-      .toolbar { position:sticky; top:0; z-index:3; display:flex; justify-content:flex-end; gap:10px; padding:10px 18px; background:#f6f0ed; border-bottom:1px solid #d9ccc6; }.toolbar button{border:0;border-radius:7px;padding:9px 16px;background:#a42e21;color:#fff;font:700 15px "Noto Sans TC",sans-serif;cursor:pointer}
-      .sheet { width:210mm; min-height:297mm; margin:14px auto; padding:8.5mm 8.5mm 7mm; background:#fff; overflow:hidden; }
-      .brand { display:grid; grid-template-columns:29mm 1fr 30mm; align-items:center; border-bottom:1.2px solid #283746; padding-bottom:2.2mm; min-height:16mm; }.brand img{max-width:27mm;max-height:14mm;object-fit:contain}.brand h1{margin:0;font:900 16pt/1.1 "Noto Serif TC",serif;text-align:center;letter-spacing:.04em}.brand small{text-align:right;font-size:8pt}
-      .title { display:flex; justify-content:space-between; align-items:end; padding:2.2mm 1mm 1.6mm; }.title h2{margin:0;font:900 13pt/1.1 "Noto Serif TC",serif}.title span{font-size:8.5pt}.sheet table{width:100%;border-collapse:collapse;table-layout:fixed}.sheet td,.sheet th{border:.45pt solid #262626;padding:1.15mm 1.5mm;vertical-align:middle;font-size:8.1pt;line-height:1.22}.sheet th,.label{background:#dce8ef;font-weight:900;text-align:center}.data{color:#18569a;font-weight:700}.money{color:#a72420;font-weight:900}.tiny{font-size:7.2pt!important}.blank{height:8mm}.subhead{font:900 9pt "Noto Serif TC",serif;letter-spacing:.1em;text-align:center;background:#eff4f6}.checkbox{display:inline-grid;place-items:center;width:3.3mm;height:3.3mm;margin-right:.7mm;border:.45pt solid #111;font-size:8pt;line-height:1;vertical-align:-.5mm}.checkbox.on::after{content:'✓';font-weight:900}.compact{display:flex;flex-wrap:wrap;gap:1mm 3mm;line-height:1.35}.section-title{width:100%;margin:1.4mm 0 0;padding:1.1mm 1.8mm;background:#dce8ef;border:.45pt solid #262626;border-bottom:0;font:900 9pt "Noto Serif TC",serif}.feature{min-height:14mm;white-space:pre-wrap}.terms{min-height:9mm;white-space:pre-wrap}.company td{background:#dce8ef}.footer{margin-top:1.8mm;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}.footer div{border:.45pt solid #262626;border-right:0;padding:1.3mm;font-size:8pt}.footer div:last-child{border-right:.45pt solid #262626}.muted{color:#777}.print-note{margin-top:1mm;font-size:6.8pt;color:#555;text-align:center}
+      * { box-sizing:border-box; }
+      body { margin:0; background:#111; font-family:"Noto Sans TC",sans-serif; color:#111; }
+      .toolbar { position:sticky; top:0; z-index:3; display:flex; justify-content:flex-end; gap:10px; padding:10px 18px; background:#f6f0ed; border-bottom:1px solid #d9ccc6; }
+      .toolbar button{border:0;border-radius:7px;padding:9px 16px;background:#a42e21;color:#fff;font:700 15px "Noto Sans TC",sans-serif;cursor:pointer}
+      .sheet { width:210mm; min-height:297mm; margin:14px auto; padding:4.8mm; background:#fff; overflow:hidden; border:1.15pt solid #111; }
+      .paper-head { display:grid; grid-template-columns:31mm 1fr 42mm; min-height:22mm; align-items:center; }
+      .paper-head img{max-width:29mm;max-height:20mm;object-fit:contain;margin-left:1.5mm}
+      .paper-head h1{margin:0;font:900 15.5pt/1.1 "Noto Serif TC",serif;text-align:center;letter-spacing:.025em}
+      .paper-head .form-title{font:700 10pt/1.2 "Noto Serif TC",serif;text-align:center;}
+      .sheet table{width:100%;border-collapse:collapse;table-layout:fixed}
+      .sheet td,.sheet th{border:.45pt solid #303030;padding:1.45mm 1.45mm;vertical-align:middle;font-size:7.85pt;line-height:1.2;overflow-wrap:break-word}
+      .label{background:#dcecf3;font-weight:900;text-align:center;white-space:nowrap}
+      .data{color:#175797;font-weight:700}
+      .money{color:#a82420;font-weight:900}
+      .muted{color:#777}
+      .checkbox{display:inline-grid;place-items:center;width:3mm;height:3mm;margin-right:.65mm;border:.45pt solid #111;font-size:6pt;line-height:1;vertical-align:-.45mm}
+      .checkbox.on::after{content:'■';font-size:5.8pt;color:#111}
+      .compact{display:flex;flex-wrap:wrap;gap:1.1mm 2.6mm;line-height:1.32}
+      .tall{min-height:10.5mm}
+      .feature{min-height:14mm;white-space:pre-wrap}
+      .terms{min-height:9mm;white-space:pre-wrap}
+      .signature{height:12mm;text-align:center}
+      .full-line{min-height:8mm}
+      .note{font-size:6.5pt;color:#4f4f4f;text-align:center;margin-top:1mm}
       @media print { body{background:#fff}.toolbar{display:none}.sheet{margin:0;box-shadow:none} }
       @media screen and (max-width:220mm){.sheet{transform-origin:top left;transform:scale(calc(100vw / 210mm));margin:0}.toolbar{position:relative}}
     </style>
@@ -40,43 +59,49 @@
         const company=window.COMPANY||{}; const logo='assets/brand/logo_old.gif';
         const cName=d.company_name||company.name||'鼎瑋不動產經紀有限公司';
         const prepared=d.prepared_date||new Date().toLocaleDateString('zh-TW');
+        const area=(key,fall='—')=>blue(d,key,fall);
+        const build=opt(d,[['mat_sc','SC'],['mat_src','SRC'],['mat_rc','RC'],['mat_brick','加強磚造'],['mat_other','其它']]);
+        const exterior=opt(d,[['ext_tile','二丁掛'],['ext_block','方塊磚'],['ext_mosaic','馬賽克'],['ext_other','其它'],['ext_wash','洗石子'],['ext_marble','大理石'],['ext_glass','玻璃帷幕']]);
+        const floor=opt(d,[['floor_wood','木板'],['floor_terrazzo','磨石子'],['floor_quartz','拋光石英磚'],['floor_tile','磁磚'],['floor_marble','大理石'],['floor_other','其它']]);
+        const show=opt(d,[['show_key','key'],['show_owner','聯絡屋主'],['show_developer','聯絡開發'],['show_guard','警衛取鑰'],['show_onsite','現場'],['show_pre_sale','預售'],['show_staff','聯絡專員']]);
+        const equipment=opt(d,[['equip_ac','冷氣'],['equip_tub','浴缸'],['equip_shower','淋浴'],['equip_heater','熱水器'],['equip_hood','排油煙'],['equip_stove','瓦斯爐'],['equip_sink','流理台'],['equip_gas','天然氣']]);
         return `
-          <div class="brand"><img src="${logo}" onerror="this.style.display='none'" alt="鼎瑋不動產"><h1>${esc(cName)}（建物）資料表</h1><small>${esc(prepared)}</small></div>
-          <div class="title"><h2>出租建物資料</h2><span>編號：<b class="data">${val(d,'doc_no',l.sno||'—')}</b>　IT：<b class="data">${val(d,'agent_no')}</b>　承辦：<b class="data">${val(d,'handler')}</b></span></div>
-          <table><colgroup><col style="width:11%"><col style="width:31%"><col style="width:11%"><col style="width:21%"><col style="width:10%"><col style="width:16%"></colgroup>
-            <tr>${label('案名')}<td colspan="3" class="data">${val(d,'case_name',l.name)}</td>${label('租售')}<td class="money">${val(d,'deal','租賃')}</td></tr>
-            <tr>${label('委託類別')}<td><div class="compact">${selected(d,'commission_type','專任')}${selected(d,'commission_type','一般')}</div></td>${label('種類')}<td class="data">${val(d,'property_type',l.kind)}</td>${label('朝向')}<td class="data">${val(d,'direction')}</td></tr>
-            <tr>${label('地址')}<td colspan="5" class="data">${val(d,'doorplate',l.address)}</td></tr>
-            <tr>${label('物件狀態')}<td colspan="5">${opt(d,[['status_new','新成'],['status_existing','成屋'],['status_auction','法拍'],['status_presale','預售']])}</td></tr>
+          <header class="paper-head"><img src="${logo}" onerror="this.style.display='none'" alt="鼎瑋不動產"><h1>${esc(cName)}</h1><div class="form-title">（建物）資料表<br><small>${esc(prepared)}</small></div></header>
+          <table><colgroup><col style="width:10%"><col style="width:34%"><col style="width:9%"><col style="width:25%"><col style="width:10%"><col style="width:12%"></colgroup>
+            <tr>${label('案名')}<td colspan="2" class="data">${val(d,'case_name',l.name)}</td><td colspan="3">SNo：<b class="data">${val(d,'doc_no',l.sno)}</b>　｜ IT：<b class="data">${val(d,'agent_no')}</b>　｜ 承辦：<b class="data">${val(d,'handler')}</b></td></tr>
+            <tr>${label('委託類別')}<td colspan="2"><div class="compact">${selected(d,'commission_type','專任')}${selected(d,'commission_type','一般')}</div></td>${label('地址（路段）')}<td colspan="3" class="data">${val(d,'doorplate',l.address)}</td></tr>
+            <tr>${label('種類')}<td colspan="2" class="data">${val(d,'property_type',l.kind)}</td>${label('朝向')}<td colspan="3" class="data">${val(d,'direction')}</td></tr>
+            <tr>${label('租售')}<td colspan="2" class="money">${val(d,'deal','租賃')}</td><td colspan="3">${opt(d,[['status_new','新成'],['status_existing','成屋'],['status_auction','法拍'],['status_presale','預售']])}</td></tr>
+            <tr>${label('權狀')}<td colspan="5">總建坪：${area('total_area')}　｜　地坪：${area('land_area')}</td></tr>
+            <tr>${label('主建')}<td colspan="5">${area('main_area')}　　附屬：${area('attached_area')}　　公設：${area('common_area')}　　車坪：${area('parking_area')}　　公設比：${area('public_ratio')}</td></tr>
+            <tr>${label('竣工日期<br>屋齡')}<td colspan="2">${val(d,'completion_date')}　　${area('age')}</td>${label('建材')}<td colspan="3">${build}</td></tr>
+            <tr>${label('格局')}<td colspan="5" class="data">${val(d,'layout_detail',l.layout)}</td></tr>
+            <tr>${label('現況')}<td colspan="2" class="data">${val(d,'condition_status')}</td>${label('車位')}<td colspan="3">${blue(d,'parking_info')}　位置：${blue(d,'parking_location')}　管理費：${blue(d,'management_fee')}</td></tr>
+            <tr>${label('租金')}<td colspan="2" class="money">${val(d,'monthly_rent')} 元</td>${label('押金')}<td colspan="3" class="data">${val(d,'deposit')}</td></tr>
+            <tr>${label('總樓高')}<td colspan="2" class="data">${val(d,'total_floors')}</td>${label('建商')}<td class="data">${val(d,'builder')}</td>${label('總戶數')}<td class="data">${val(d,'households')}</td></tr>
+            <tr>${label('出租樓層')}<td colspan="2" class="data">${val(d,'sales_floor',l.floor)}</td>${label('地下')}<td colspan="3" class="data">${val(d,'basement')}</td></tr>
+            <tr>${label('學區 1')}<td colspan="2" class="data">${val(d,'school_zone')}</td>${label('外牆外飾')}<td colspan="3" rowspan="2" class="tall">${exterior}</td></tr>
+            <tr>${label('學區 2')}<td colspan="2" class="data">${val(d,'school_zone_2')}</td></tr>
+            <tr>${label('公園')}<td colspan="2" class="data">${val(d,'park')}</td>${label('地板')}<td colspan="3" rowspan="2" class="tall">${floor}</td></tr>
+            <tr>${label('鄰近市場')}<td colspan="2" class="data">${val(d,'market')}</td></tr>
+            <tr>${label('捷運')}<td colspan="2" class="data">${val(d,'transportation')}</td>${label('管理')}<td colspan="3">${opt(d,[['security_yes','警衛 有'],['security_no','警衛 無'],['courtyard_yes','中庭花園 有'],['courtyard_no','中庭花園 無']])}</td></tr>
+            <tr>${label('站名')}<td colspan="2" class="data">${val(d,'station_name')}</td>${label('管理費')}<td colspan="3" class="data">${val(d,'management_fee')}</td></tr>
+            <tr>${label('客運')}<td colspan="2" class="data">${val(d,'bus')}</td>${label('中庭花園')}<td colspan="3">${opt(d,[['courtyard_yes','有'],['courtyard_no','無']])}</td></tr>
+            <tr>${label('公車站牌')}<td colspan="2" class="data">${val(d,'bus_stop')}</td>${label('面前巷道')}<td colspan="3" class="data">${val(d,'front_road')} 米</td></tr>
+            <tr>${label('…')}<td colspan="2"></td>${label('店面面寬')}<td colspan="3" class="data">${val(d,'shop_frontage')} 米</td></tr>
+            <tr>${label('帶看')}<td colspan="5">${show}</td></tr>
+            <tr>${label('特色')}<td colspan="5" class="feature data">${val(d,'feature_notes','')}</td></tr>
+            <tr>${label('現有設備')}<td colspan="5">${equipment}</td></tr>
+            <tr>${label('特約條件')}<td colspan="5" class="terms data">${val(d,'special_terms','')}</td></tr>
+            <tr>${label('委託日')}<td colspan="2">起始日：<span class="data">${val(d,'contract_start')}</span><br>終止日：<span class="data">${val(d,'contract_end')}</span></td><td colspan="3">本案同意服務費為租金　<span class="money">${val(d,'service_fee_months')}</span> 個月　／　<span class="money">${val(d,'service_fee')}</span> 元，簽約時以現金交付。</td></tr>
+            <tr>${label('所有權人')}<td colspan="2" class="data">${val(d,'owner_name')}</td>${label('身分證字號')}<td colspan="3" class="data">${val(d,'owner_id')}</td></tr>
+            <tr>${label('委託人')}<td colspan="5" class="signature">（務必親自簽名）　<span class="data">${val(d,'client_name')}</span>　　性別：${selected(d,'client_gender','男')}${selected(d,'client_gender','女')}</td></tr>
+            <tr>${label('連絡')}<td colspan="5">電話：<span class="data">${val(d,'client_tel')}</span>　　行動：<span class="data">${val(d,'client_mobile')}</span>　　email：<span class="data">${val(d,'client_email')}</span></td></tr>
+            <tr>${label('公司名稱')}<td colspan="2" class="data">${esc(cName)}</td>${label('連絡')}<td colspan="3" class="data">${val(d,'company_contact',company.printPhone||'')}　　傳真：${val(d,'company_fax')}</td></tr>
+            <tr>${label('公司地址')}<td colspan="2" class="data">${val(d,'company_address',company.address||'')}</td>${label('網址')}<td colspan="3" class="data">${val(d,'company_site')}</td></tr>
+            <tr><td colspan="6" class="full-line">制表：<span class="data">${val(d,'preparer')}</span>　　　　　　　　　承辦：<span class="data">${val(d,'handler')}</span>　　　　　　　　　店長：<span class="data">${val(d,'store_manager')}</span></td></tr>
           </table>
-          <div class="section-title">權狀、面積、基本資料</div>
-          <table><colgroup><col style="width:17%"><col style="width:16%"><col style="width:17%"><col style="width:16%"><col style="width:17%"><col style="width:17%"></colgroup>
-            <tr>${label('登記總面積')}<td>${blue(d,'registered_area')}</td>${label('建物合計')}<td>${blue(d,'total_area')}</td>${label('土地面積')}<td>${blue(d,'land_area')}</td></tr>
-            <tr>${label('主建物')}<td>${blue(d,'main_area')}</td>${label('附屬建物')}<td>${blue(d,'attached_area')}</td>${label('公共設施')}<td>${blue(d,'common_area')}</td></tr>
-            <tr>${label('車位坪數')}<td>${blue(d,'parking_area')}</td>${label('公設比')}<td>${blue(d,'public_ratio')}</td>${label('權利範圍')}<td>${blue(d,'rights_scope')}</td></tr>
-            <tr>${label('竣工日期')}<td>${blue(d,'completion_date')}</td>${label('屋齡')}<td>${blue(d,'age')}</td>${label('建材')}<td colspan="3">${opt(d,[['mat_sc','SC'],['mat_src','SRC'],['mat_rc','RC'],['mat_brick','加強磚造'],['mat_other','其它']])}</td></tr>
-            <tr>${label('格局')}<td class="data">${val(d,'layout_detail',l.layout)}</td>${label('現況')}<td class="data">${val(d,'condition_status')}</td>${label('租金')}<td colspan="3" class="money">${val(d,'monthly_rent')} 元／月　　押金：<span class="data">${val(d,'deposit')}</span></td></tr>
-            <tr>${label('車位')}<td class="data">${val(d,'parking_info')}</td>${label('位置')}<td class="data">${val(d,'parking_location')}</td>${label('管理費')}<td class="data">${val(d,'management_fee')}</td>${label('地下層')}<td class="data">${val(d,'basement')}</td></tr>
-            <tr>${label('總樓高')}<td class="data">${val(d,'total_floors')}</td>${label('出租樓層')}<td class="data">${val(d,'sales_floor',l.floor)}</td>${label('建商')}<td class="data">${val(d,'builder')}</td>${label('總戶數')}<td class="data">${val(d,'households')}</td></tr>
-          </table>
-          <div class="section-title">周邊設施、建材與管理</div>
-          <table><colgroup><col style="width:13%"><col style="width:20%"><col style="width:13%"><col style="width:20%"><col style="width:13%"><col style="width:21%"></colgroup>
-            <tr>${label('學區 1')}<td class="data">${val(d,'school_zone')}</td>${label('學區 2')}<td class="data">${val(d,'school_zone_2')}</td>${label('公園')}<td class="data">${val(d,'park')}</td></tr>
-            <tr>${label('鄰近市場')}<td class="data">${val(d,'market')}</td>${label('捷運／站名')}<td class="data">${val(d,'transportation')}／${val(d,'station_name')}</td>${label('客運／公車')}<td class="data">${val(d,'bus')}／${val(d,'bus_stop')}</td></tr>
-            <tr>${label('外牆外飾')}<td colspan="5">${opt(d,[['ext_tile','二丁掛'],['ext_block','方塊磚'],['ext_mosaic','馬賽克'],['ext_other','其它'],['ext_wash','洗石子'],['ext_marble','大理石'],['ext_glass','玻璃帷幕']])}</td></tr>
-            <tr>${label('地板')}<td colspan="2">${opt(d,[['floor_wood','木板'],['floor_terrazzo','磨石子'],['floor_quartz','拋光石英磚'],['floor_tile','磁磚'],['floor_marble','大理石'],['floor_other','其它']])}</td>${label('管理')}<td colspan="2">${opt(d,[['security_yes','警衛 有'],['security_no','警衛 無'],['courtyard_yes','中庭花園 有'],['courtyard_no','中庭花園 無']])}</td></tr>
-            <tr>${label('面前巷道')}<td class="data">${val(d,'front_road')} 米</td>${label('店面面寬')}<td class="data">${val(d,'shop_frontage')} 米</td>${label('帶看方式')}<td colspan="3">${opt(d,[['show_key','key'],['show_owner','聯絡屋主'],['show_developer','聯絡開發'],['show_guard','警衛取鑰'],['show_onsite','現場'],['show_pre_sale','預售'],['show_staff','聯絡專員']])}</td></tr>
-          </table>
-          <table><tr><td class="label" style="width:13%">特色</td><td class="feature data">${val(d,'feature_notes','')}</td></tr><tr><td class="label">現有設備</td><td>${opt(d,[['equip_ac','冷氣'],['equip_tub','浴缸'],['equip_shower','淋浴'],['equip_heater','熱水器'],['equip_hood','排油煙'],['equip_stove','瓦斯爐'],['equip_sink','流理台'],['equip_gas','天然氣']])}</td></tr><tr><td class="label">特約條件</td><td class="terms data">${val(d,'special_terms','')}</td></tr></table>
-          <div class="section-title">委託人資料</div>
-          <table><colgroup><col style="width:13%"><col style="width:37%"><col style="width:13%"><col style="width:37%"></colgroup>
-            <tr>${label('委託日')}<td>起始：<span class="data">${val(d,'contract_start')}</span>　終止：<span class="data">${val(d,'contract_end')}</span></td>${label('服務費')}<td>本案同意服務費為租金 <span class="money">${val(d,'service_fee_months')}</span> 個月　<span class="money">${val(d,'service_fee')}</span> 元</td></tr>
-            <tr>${label('所有權人')}<td class="data">${val(d,'owner_name')}</td>${label('身份證字號')}<td class="data">${val(d,'owner_id')}</td></tr>
-            <tr>${label('委託人')}<td class="data">${val(d,'client_name')}　性別：${val(d,'client_gender')}</td>${label('連絡')}<td>電話：<span class="data">${val(d,'client_tel')}</span>　行動：<span class="data">${val(d,'client_mobile')}</span>　Email：<span class="data">${val(d,'client_email')}</span></td></tr>
-          </table>
-          <table class="company"><tr><td style="width:13%" class="label">公司名稱</td><td style="width:37%" class="data">${val({company_name:cName},'company_name')}</td><td style="width:13%" class="label">公司聯絡</td><td class="data">${val(d,'company_contact',company.printPhone||'')}</td></tr><tr><td class="label">公司地址</td><td class="data">${val(d,'company_address',company.address||'')}</td><td class="label">傳真／網站</td><td class="data">${val(d,'company_fax')}　${val(d,'company_site')}</td></tr></table>
-          <div class="footer"><div>制表：<span class="data">${val(d,'preparer')}</span></div><div>承辦：<span class="data">${val(d,'handler')}</span></div><div>店長：<span class="data">${val(d,'store_manager')}</span></div></div>
-          <div class="print-note">本資料僅供出租建物作業參考，詳細內容以雙方簽訂文件為準。</div>`;
+          <div class="note">本資料僅供出租建物作業參考，詳細內容以雙方簽訂文件為準。</div>`;
       }
       async function boot(){
         if(!SB||!SNO){document.getElementById('loading').textContent='缺少案件編號或資料庫連線設定。';return;}
