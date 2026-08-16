@@ -31,6 +31,7 @@
       const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       const yes=(d,key)=>Boolean(d[key]);
       const check=(d,key,label)=>`<span><i class="checkbox ${yes(d,key)?'on':''}"></i>${esc(label)}</span>`;
+      const selected=(d,key,label)=>`<span><i class="checkbox ${String(d[key]||'')===label?'on':''}"></i>${esc(label)}</span>`;
       const val=(d,key,fallback='—')=>{const x=String(d[key]??'').trim();return x?esc(x):`<span class="muted">${fallback}</span>`};
       const blue=(d,key,fallback='—')=>`<span class="data">${val(d,key,fallback)}</span>`;
       const label=(s)=>`<td class="label">${s}</td>`;
@@ -44,7 +45,7 @@
           <div class="title"><h2>出租建物資料</h2><span>編號：<b class="data">${val(d,'doc_no',l.sno||'—')}</b>　IT：<b class="data">${val(d,'agent_no')}</b>　承辦：<b class="data">${val(d,'handler')}</b></span></div>
           <table><colgroup><col style="width:11%"><col style="width:31%"><col style="width:11%"><col style="width:21%"><col style="width:10%"><col style="width:16%"></colgroup>
             <tr>${label('案名')}<td colspan="3" class="data">${val(d,'case_name',l.name)}</td>${label('租售')}<td class="money">${val(d,'deal','租賃')}</td></tr>
-            <tr>${label('委託類別')}<td>${opt(d,[['commission_exclusive','專任'],['commission_general','一般']])}</td>${label('種類')}<td class="data">${val(d,'property_type',l.kind)}</td>${label('朝向')}<td class="data">${val(d,'direction')}</td></tr>
+            <tr>${label('委託類別')}<td><div class="compact">${selected(d,'commission_type','專任')}${selected(d,'commission_type','一般')}</div></td>${label('種類')}<td class="data">${val(d,'property_type',l.kind)}</td>${label('朝向')}<td class="data">${val(d,'direction')}</td></tr>
             <tr>${label('地址')}<td colspan="5" class="data">${val(d,'doorplate',l.address)}</td></tr>
             <tr>${label('物件狀態')}<td colspan="5">${opt(d,[['status_new','新成'],['status_existing','成屋'],['status_auction','法拍'],['status_presale','預售']])}</td></tr>
           </table>
